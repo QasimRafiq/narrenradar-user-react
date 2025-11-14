@@ -1,0 +1,28 @@
+{
+  "name": "RNExitApp",
+  "version": "2.0.0",
+  "description": "Exit,close,kill,shutdown app completely for React Native on iOS and Android.",
+  "homepage": "https://github.com/wumke/react-native-exit-app",
+  "summary": "Exit,close,kill,shutdown app completely for React Native",
+  "license": "MIT",
+  "authors": "Wumke",
+  "source": {
+    "git": "https://github.com/wumke/react-native-exit-app",
+    "tag": "2.0.0"
+  },
+  "platforms": {
+    "ios": "9.0",
+    "tvos": "11.0"
+  },
+  "preserve_paths": [
+    "README.md",
+    "package.json",
+    "*.js"
+  ],
+  "source_files": "ios/RNExitApp/**/*.{h,m,mm}",
+  "dependencies": {
+    "React-Core": [
+
+    ]
+  }
+}

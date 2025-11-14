@@ -1,0 +1,511 @@
+import {
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  ImageBackground,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React from 'react';
+import {IMAGES} from '../../assets/images';
+import {GlobalStyleSheet} from '../../shared/constants/GlobalStyleSheet';
+import CustomHeader from '../../shared/components/customHeader/CusstomHeader';
+import {COLORS} from '../../shared/constants/theme';
+import TextField from '../../shared/components/customText/TextField';
+import {Fonts} from '../../assets/fonts/fonts';
+import de from '../../shared/constants/de.json';
+import {
+  contactInfo,
+  formatTimestamp,
+  itemData,
+} from '../../shared/constants/dummyData';
+import CustomGradientButton from '../../shared/components/customButton/CustomGradientButton';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import ROUTE_NAMES from '../../routes/routesName';
+
+const {width} = Dimensions.get('window');
+
+const ClubProfileScreen = () => {
+  const navigation = useNavigation<any>();
+  const routes = useRoute<any>();
+  const {clubData, regionDetail} = routes?.params;
+  const handleWeb = async () => {
+    await Linking.openURL(clubData?.websiteUrl);
+  };
+  const routeLink = async () => {
+    await Linking.openURL(clubData?.locationUrl);
+  };
+  const clubLink = async url => {
+    try {
+      if (!url) {
+        Alert.alert('Fehler', 'Keine Website-URL angegeben');
+        return;
+      }
+
+      // ensure proper format
+      const validUrl = url.startsWith('http') ? url : `https://${url}`;
+
+      const supported = await Linking.canOpenURL(validUrl);
+      if (supported) {
+        await Linking.openURL(validUrl);
+      } else {
+        Alert.alert('Fehler', 'Dieser Link konnte nicht geöffnet werden');
+      }
+    } catch (err) {
+      console.error('Error opening link:', err);
+      Alert.alert('Fehler', 'Beim Öffnen des Links ist ein Fehler aufgetreten');
+    }
+  };
+  const InfoItemRow = ({label, value}) => {
+    const isArray = Array.isArray(value);
+
+    return (
+      <View style={{marginBottom: isArray ? 10 : 6}}>
+        {isArray ? (
+          <View>
+            <TextField
+              text={label}
+              color={COLORS.green}
+              fontFamily={Fonts.comfortaaBold}
+              fontSize={18}
+              marginBottom={6}
+            />
+            {value.map((item, index) => (
+              <View key={index} style={{marginLeft: 12, marginBottom: 6}}>
+                <TextField
+                  text={`${item.title} (seit ${
+                    item.foundingYear ? item.foundingYear : ''
+                  })`}
+                  color={COLORS.green}
+                  fontFamily={Fonts.comfortaaMedium}
+                  fontSize={18}
+                />
+                {item.narrenruf ? (
+                  <TextField
+                    text={`"${item.narrenruf}"`}
+                    color={COLORS.green}
+                    fontFamily={Fonts.comfortaaRegular}
+                    fontSize={18}
+                  />
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View>
+            <TextField
+              text={`${label}: `}
+              color={COLORS.green}
+              fontFamily={Fonts.comfortaaBold}
+              fontSize={18}
+            />
+            <TextField
+              text={value}
+              color={COLORS.green}
+              fontFamily={Fonts.comfortaaRegular}
+              fontSize={18}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const ItemCard = ({item}) => (
+    <View style={styles.card}>
+      {item.title && (
+        <TextField
+          text={item.title}
+          fontSize={18}
+          fontFamily={Fonts.comfortaaMedium}
+          color={COLORS.green}
+          marginBottom={8}
+        />
+      )}
+      {item.imageUrl && (
+        <Image
+          source={{uri: item.imageUrl}}
+          resizeMode="cover"
+          style={{
+            height: 280,
+            borderRadius: 16,
+            width: '80%',
+            marginBottom: 10,
+          }}
+        />
+      )}
+      {item.narrenruf && (
+        <TextField
+          text={item.narrenruf}
+          fontSize={18}
+          color={COLORS.green}
+          fontFamily={Fonts.comfortaaMedium}
+          marginTop={16}
+          lineHeight={22}
+        />
+      )}
+      {item.foundingYear && (
+        <TextField
+          text={'Erscheinungsjahr: ' + item.foundingYear}
+          fontSize={18}
+          color={COLORS.green}
+          fontFamily={Fonts.comfortaaMedium}
+          marginTop={16}
+          lineHeight={22}
+        />
+      )}
+      {item.description && (
+        <TextField
+          text={item?.description}
+          fontSize={18}
+          color={COLORS.green}
+          fontFamily={Fonts.comfortaaMedium}
+          marginTop={16}
+          lineHeight={22}
+        />
+      )}
+    </View>
+  );
+
+  const profileData = [
+    {label: 'Vereinsname', value: clubData?.clubName},
+    {label: 'Gründungsjahr', value: clubData?.grundungsjahr},
+    {label: 'Mitgliederzahl', value: clubData?.mitgliederzahl},
+    {
+      label: 'Mitgliederzahl Stand (Datum)',
+      value: formatTimestamp(clubData?.createdAt),
+    },
+    {
+      label: 'Narrenfiguren mit Narrenruf',
+      value: clubData?.characters, // array
+    },
+    {
+      label: 'Verbände',
+      value: regionDetail?.regionTitles || regionDetail?.name,
+    },
+  ];
+  return (
+    <ImageBackground
+      source={IMAGES.backgroundImg}
+      resizeMode="cover"
+      style={GlobalStyleSheet.bgImage}>
+      <CustomHeader />
+      <ScrollView
+        contentContainerStyle={{paddingBottom: 60}} // add bottom padding for spacing
+        showsVerticalScrollIndicator={false}>
+        <Image
+          resizeMode="cover"
+          source={{uri: clubData?.clubCoverUrl}}
+          style={styles.image}
+        />
+        <View style={styles.bottomContainer}>
+          <Image
+            resizeMode="contain"
+            source={{uri: clubData?.clubImageUrl}}
+            style={{height: 120, width: 120}}
+          />
+          <TextField
+            text={de.profile}
+            color={COLORS.green}
+            fontSize={22}
+            fontFamily={Fonts.heading}
+            marginTop={10}
+            letterSpacing={1.5}
+            uppercase={true}
+          />
+          {/* Profile Info List */}
+          <View style={{marginTop: 16}}>
+            {profileData.map((item, index) => (
+              <InfoItemRow key={index} label={item.label} value={item.value} />
+            ))}
+          </View>
+          <View
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              marginTop: 10,
+            }}>
+            <TextField
+              text={`Website:`}
+              color={COLORS.green}
+              fontFamily={Fonts.comfortaaBold}
+              fontSize={18}
+            />
+            <CustomGradientButton
+              text={clubData.clubName}
+              onPress={() => clubLink(clubData.websiteUrl)}
+            />
+
+            {/* <TextField
+              textAlign="center"
+              text={clubData?.websiteName}
+              color={COLORS.green}
+              fontFamily={Fonts.comfortaaBold}
+              fontSize={14}
+              textDecorationLine="underline"
+            /> */}
+          </View>
+
+          <TextField
+            text={'KONTAKT (VEREINSSITZ)'}
+            color={COLORS.green}
+            fontSize={22}
+            fontFamily={Fonts.heading}
+            marginTop={10}
+            marginBottom={10}
+            letterSpacing={1.5}
+            uppercase={true}
+          />
+          {/* Contact Info Section */}
+          <View>
+            {[
+              {label: 'Straße', value: clubData?.masterAddress},
+              {label: 'Hausnummer', value: clubData?.houseNo},
+              {label: 'Postleitzahl', value: clubData?.postcode},
+              {label: 'Ort', value: clubData?.ort},
+              {label: 'E-Mail', value: clubData?.masterEmail},
+              {label: 'Telefonnummer', value: clubData?.masterPhone},
+            ].map((item, index) =>
+              item.value ? (
+                <View key={index} style={{marginBottom: 12}}>
+                  <TextField
+                    text={`${item.label}:`}
+                    color={COLORS.green}
+                    fontFamily={Fonts.comfortaaBold}
+                    fontSize={18}
+                  />
+                  <TextField
+                    text={item.value}
+                    color={COLORS.green}
+                    fontFamily={Fonts.comfortaaMedium}
+                    fontSize={18}
+                  />
+                </View>
+              ) : null,
+            )}
+          </View>
+          {/* <Image
+            resizeMode="contain"
+            source={{uri: clubData?.locationImageUrl}}
+            style={{
+              height: 250,
+              alignSelf: 'center',
+              borderRadius: 16,
+              width: 250,
+            }}
+          /> */}
+
+          <CustomGradientButton text={de.route} onPress={routeLink} />
+
+          {clubData?.foundingHistory && (
+            <>
+              <TextField
+                uppercase={true}
+                text={'GRÜNDUNGSGESCHICHTE'}
+                color={COLORS.green}
+                fontSize={22}
+                fontFamily={Fonts.heading}
+                marginTop={10}
+                marginBottom={10}
+                letterSpacing={1.5}
+              />
+              <TextField
+                text={clubData?.foundingHistory}
+                color={COLORS.green}
+                fontSize={18}
+                fontFamily={Fonts.comfortaaMedium}
+              />
+            </>
+          )}
+
+          {/* <Image
+            resizeMode="contain"
+            source={{uri: clubData?.masterImageUrl}}
+            style={{
+              height: 250,
+              alignSelf: 'center',
+              borderRadius: 16,
+              width: 250,
+            }}
+          /> */}
+
+          <TextField
+            uppercase={true}
+            text={de.narrenfiguren}
+            color={COLORS.green}
+            fontSize={21}
+            fontFamily={Fonts.heading}
+            marginTop={10}
+            // marginBottom={10}
+            letterSpacing={1.5}
+          />
+
+          <FlatList
+            data={clubData?.characters}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({item}) => <ItemCard item={item} />}
+          />
+
+          {/* FUNKTIONÄRE SECTION */}
+          {/* FUNKTIONÄRE SECTION */}
+          {(clubData?.vorstandMembers?.length > 0 ||
+            clubData?.funktionaereMembers?.length > 0) && (
+            <>
+              <TextField
+                uppercase={true}
+                text={'FUNKTIONÄRE'}
+                color={COLORS.green}
+                fontSize={22}
+                fontFamily={Fonts.heading}
+                marginTop={10}
+                letterSpacing={1.5}
+              />
+
+              {/* Vorstand Members */}
+              {clubData?.vorstandMembers?.length > 0 && (
+                <>
+                  {clubData.vorstandMembers.map((member, index) => (
+                    <View key={`vorstand-${index}`} style={{marginBottom: 20}}>
+                      {/* 🔢 Index number */}
+                      <TextField
+                        text={`${index + 1}. Vorstand`}
+                        color={COLORS.green}
+                        fontFamily={Fonts.comfortaaMedium}
+                        fontSize={18}
+                        marginBottom={8}
+                      />
+
+                      {member.imageUrl ? (
+                        <Image
+                          source={{uri: member.imageUrl}}
+                          style={{
+                            height: 250,
+                            width: width * 0.8,
+                            borderRadius: 16,
+                            backgroundColor: '#fff',
+                          }}
+                          resizeMode="cover"
+                          onError={e =>
+                            console.log(
+                              'Vorstand image load error:',
+                              e.nativeEvent.error,
+                            )
+                          }
+                        />
+                      ) : (
+                        <TextField
+                          text="Kein Bild verfügbar"
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaRegular}
+                          fontSize={14}
+                          marginBottom={10}
+                        />
+                      )}
+
+                      {member.name ? (
+                        <TextField
+                          text={member.name}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                          marginTop={8}
+                        />
+                      ) : null}
+                      {member.email ? (
+                        <TextField
+                          text={member.email}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
+                      ) : null}
+                    </View>
+                  ))}
+                </>
+              )}
+
+              {/* Funktionaere Members */}
+              {clubData?.funktionaereMembers?.length > 0 && (
+                <>
+                  {clubData.funktionaereMembers.map((member, index) => (
+                    <View
+                      key={`funktionaere-${index}`}
+                      style={{marginBottom: 20}}>
+                      {member.imageUrl ? (
+                        <Image
+                          source={{uri: member.imageUrl}}
+                          style={{
+                            height: 250,
+                            width: width * 0.8,
+                            borderRadius: 16,
+                            backgroundColor: '#fff',
+                          }}
+                          resizeMode="cover"
+                          onError={e =>
+                            console.log(
+                              'Funktionaere image load error:',
+                              e.nativeEvent.error,
+                            )
+                          }
+                        />
+                      ) : null}
+                      {member.functionInClub ? (
+                        <TextField
+                          text={member.functionInClub}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
+                      ) : null}
+
+                      {member.name ? (
+                        <TextField
+                          text={member.name}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
+                      ) : null}
+
+                      {member.email ? (
+                        <TextField
+                          text={member.email}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
+                      ) : null}
+                    </View>
+                  ))}
+                </>
+              )}
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </ImageBackground>
+  );
+};
+
+export default ClubProfileScreen;
+
+const styles = StyleSheet.create({
+  image: {
+    height: 200,
+    width: '100%',
+  },
+  bottomContainer: {
+    marginTop: 20,
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  card: {
+    paddingTop: 16,
+    flex: 1,
+  },
+});

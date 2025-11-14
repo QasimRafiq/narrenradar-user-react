@@ -1,0 +1,85 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Catamaran-Black.ttf",
+      "sha1": "4ad09a4cf4eb96ec2541632954fd8f92d2e6aa64"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-Bold.ttf",
+      "sha1": "db14db2830428dbcdf0c6865c4fe98009e3f286b"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-ExtraBold.ttf",
+      "sha1": "ffbeb65f35183b1198b96b45785905c9eab1a043"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-ExtraLight.ttf",
+      "sha1": "fc2053e9450a8ccf65c6d8e5e5d404adf34c7ea3"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-Light.ttf",
+      "sha1": "30aba10e8de12bedfe3f4a3de25fb10984d704bf"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-Medium.ttf",
+      "sha1": "434089ee4217609f445b506b661f183b6d132fd7"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-Regular.ttf",
+      "sha1": "0d37eab0c00d9898587d0c67a8da8a92ea8fed3c"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-SemiBold.ttf",
+      "sha1": "5fa06e68453f93c0fd0040ba35f805c06a061358"
+    },
+    {
+      "path": "src/assets/fonts/Catamaran-Thin.ttf",
+      "sha1": "e8ec6228f202e3ee71d2ec1aabf88e1de3971ecc"
+    },
+    {
+      "path": "src/assets/fonts/Comfortaa-Bold.ttf",
+      "sha1": "160e0e5a1010cd45ea124f08a894156e02236551"
+    },
+    {
+      "path": "src/assets/fonts/Comfortaa-Light.ttf",
+      "sha1": "ed0ebd5d2d4f12b0b8ad23bfee5c5ef692c713c7"
+    },
+    {
+      "path": "src/assets/fonts/Comfortaa-Medium.ttf",
+      "sha1": "fda057b8b92cfb9c4c65b8151cee56a089390526"
+    },
+    {
+      "path": "src/assets/fonts/Comfortaa-Regular.ttf",
+      "sha1": "fb5a258452921a7f710d1913777ae6f48a0b6089"
+    },
+    {
+      "path": "src/assets/fonts/Comfortaa-SemiBold.ttf",
+      "sha1": "48890a29aafcb54748ace8dadff63a2dc261fe6c"
+    },
+    {
+      "path": "src/assets/fonts/FugazOne-Regular.ttf",
+      "sha1": "09d64ef3d7f00e5fea947f889388396b1bed7bc6"
+    },
+    {
+      "path": "src/assets/fonts/PTSans-Bold.ttf",
+      "sha1": "356c8987ef7a8752108cf7b7a86d1f1bf0c60999"
+    },
+    {
+      "path": "src/assets/fonts/PTSans-BoldItalic.ttf",
+      "sha1": "8909d6fd6c65904e10ae48052fb49a29a3294ea3"
+    },
+    {
+      "path": "src/assets/fonts/PTSans-Italic.ttf",
+      "sha1": "fb0639634daaf32b25aa4284fc91256fef10855a"
+    },
+    {
+      "path": "src/assets/fonts/PTSans-Regular.ttf",
+      "sha1": "641626d5d6a625a1e46e09ceb806cf33d1c1867e"
+    },
+    {
+      "path": "src/assets/fonts/fonts.ts",
+      "sha1": "e87b0df380b916f1572f50b169f9cf8a4e31f1d1"
+    }
+  ]
+}

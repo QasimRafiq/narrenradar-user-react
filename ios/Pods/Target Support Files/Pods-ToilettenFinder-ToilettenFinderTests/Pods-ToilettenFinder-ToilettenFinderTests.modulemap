@@ -1,0 +1,6 @@
+module Pods_ToilettenFinder_ToilettenFinderTests {
+  umbrella header "Pods-ToilettenFinder-ToilettenFinderTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

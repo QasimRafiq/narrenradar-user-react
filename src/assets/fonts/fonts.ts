@@ -1,0 +1,17 @@
+export const Fonts = {
+  heading: 'FugazOne-Regular',
+  bold: 'PTSans-Bold',
+  boldItalic: 'PTSans-BoldItalic',
+  italic: 'PTSans-Italic',
+  regular: 'PTSans-Regular',
+  // comfortaaBold:'Comfortaa-Bold',
+  // comfortaaLight:'Comfortaa-Light',
+  // comfortaaMedium:'Comfortaa-Medium',
+  // comfortaaRegular:'Comfortaa-Regular',
+  // comfortaaSemiBold:'Comfortaa-SemiBold',
+  comfortaaBold: 'Catamaran-Bold',
+  comfortaaLight: 'Catamaran-Light',
+  comfortaaMedium: 'Catamaran-Medium',
+  comfortaaRegular: 'Catamaran-Regular',
+  comfortaaSemiBold: 'Catamaran-SemiBold',
+};
