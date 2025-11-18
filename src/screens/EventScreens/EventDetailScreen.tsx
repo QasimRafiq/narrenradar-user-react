@@ -19,6 +19,7 @@ import TextField from "../../shared/components/customText/TextField";
 import { COLORS } from "../../shared/constants/theme";
 import { Fonts } from "../../assets/fonts/fonts";
 import LinearGradient from "react-native-linear-gradient";
+import CustomGradientButton from "../../shared/components/customButton/CustomGradientButton";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -131,7 +132,7 @@ const EventDetailScreen = () => {
     icon: string;
   }) => (
     <LinearGradient
-      colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
+      colors={["#004200", "#8dc63f"]} // 🌈 Gradient: dark to light green
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{
@@ -318,29 +319,14 @@ const EventDetailScreen = () => {
                 uppercase={true}
                 letterSpacing={1.5}
               />
-              <LinearGradient
-                colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientContainer}
-              >
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() =>
-                    navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                      pdfDocument: eventDetails?.lineUp?.url,
-                    })
-                  }
-                >
-                  <TextField
-                    text={"AUFSTELLUNG ANSEHEN"}
-                    color={COLORS.white}
-                    fontSize={14}
-                    fontFamily={Fonts.heading}
-                    letterSpacing={1}
-                  />
-                </TouchableOpacity>
-              </LinearGradient>
+              <CustomGradientButton
+                text={"AUFSTELLUNG ANSEHEN"}
+                onPress={() =>
+                  navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                    pdfDocument: eventDetails?.lineUp?.url,
+                  })
+                }
+              />
             </>
           )}
 
@@ -356,29 +342,14 @@ const EventDetailScreen = () => {
                 letterSpacing={1.5}
                 uppercase={true}
               />
-              <LinearGradient
-                colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientContainer}
-              >
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() =>
-                    navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                      imgDocument: eventDetails?.groundPlan?.url,
-                    })
-                  }
-                >
-                  <TextField
-                    text={"PLAN ANSEHEN"}
-                    color={COLORS.white}
-                    fontSize={14}
-                    fontFamily={Fonts.heading}
-                    letterSpacing={1}
-                  />
-                </TouchableOpacity>
-              </LinearGradient>
+              <CustomGradientButton
+                text={"PLAN ANSEHEN"}
+                onPress={() =>
+                  navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                    imgDocument: eventDetails?.groundPlan?.url,
+                  })
+                }
+              />
             </>
           )}
 
@@ -488,36 +459,21 @@ const EventDetailScreen = () => {
                 letterSpacing={1.5}
               />
               {eventDetails.documents?.map((doc: any, index: number) => (
-                <LinearGradient
+                <CustomGradientButton
                   key={index}
-                  colors={["#008243", "#8dc63f"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.gradientContainer}
-                >
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      if (doc.type === "pdf") {
-                        navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                          pdfDocument: doc?.url,
-                        });
-                      } else {
-                        navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                          imgDocument: doc?.url,
-                        });
-                      }
-                    }}
-                  >
-                    <TextField
-                      text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
-                      color={COLORS.white}
-                      fontSize={14}
-                      fontFamily={Fonts.heading}
-                      letterSpacing={1}
-                    />
-                  </TouchableOpacity>
-                </LinearGradient>
+                  text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
+                  onPress={() => {
+                    if (doc.type === "pdf") {
+                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                        pdfDocument: doc?.url,
+                      });
+                    } else {
+                      navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                        imgDocument: doc?.url,
+                      });
+                    }
+                  }}
+                />
               ))}
             </>
           )}
@@ -565,7 +521,7 @@ const EventDetailScreen = () => {
           />
 
           <LinearGradient
-            colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
+            colors={["#004200", "#8dc63f"]} // 🌈 Gradient: dark to light green
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.weatherGradientContainer}
