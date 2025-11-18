@@ -6,66 +6,89 @@ import {
   ImageBackground,
   Linking,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import React from 'react';
-import {IMAGES} from '../../assets/images';
-import {GlobalStyleSheet} from '../../shared/constants/GlobalStyleSheet';
-import CustomHeader from '../../shared/components/customHeader/CusstomHeader';
-import {COLORS} from '../../shared/constants/theme';
-import TextField from '../../shared/components/customText/TextField';
-import {Fonts} from '../../assets/fonts/fonts';
-import de from '../../shared/constants/de.json';
+} from "react-native";
+import React from "react";
+import { IMAGES } from "../../assets/images";
+import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
+import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
+import { COLORS } from "../../shared/constants/theme";
+import TextField from "../../shared/components/customText/TextField";
+import { Fonts } from "../../assets/fonts/fonts";
+import de from "../../shared/constants/de.json";
 import {
   contactInfo,
   formatTimestamp,
   itemData,
-} from '../../shared/constants/dummyData';
-import CustomGradientButton from '../../shared/components/customButton/CustomGradientButton';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import ROUTE_NAMES from '../../routes/routesName';
+} from "../../shared/constants/dummyData";
+import CustomGradientButton from "../../shared/components/customButton/CustomGradientButton";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import ROUTE_NAMES from "../../routes/routesName";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const ClubProfileScreen = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
-  const {clubData, regionDetail} = routes?.params;
+  const { clubData, regionDetail } = routes?.params;
   const handleWeb = async () => {
     await Linking.openURL(clubData?.websiteUrl);
   };
   const routeLink = async () => {
     await Linking.openURL(clubData?.locationUrl);
   };
-  const clubLink = async url => {
+  const clubLink = async (url) => {
     try {
       if (!url) {
-        Alert.alert('Fehler', 'Keine Website-URL angegeben');
+        Alert.alert("Fehler", "Keine Website-URL angegeben");
         return;
       }
 
       // ensure proper format
-      const validUrl = url.startsWith('http') ? url : `https://${url}`;
+      const validUrl = url.startsWith("http") ? url : `https://${url}`;
 
       const supported = await Linking.canOpenURL(validUrl);
       if (supported) {
         await Linking.openURL(validUrl);
       } else {
-        Alert.alert('Fehler', 'Dieser Link konnte nicht geöffnet werden');
+        Alert.alert("Fehler", "Dieser Link konnte nicht geöffnet werden");
       }
     } catch (err) {
-      console.error('Error opening link:', err);
-      Alert.alert('Fehler', 'Beim Öffnen des Links ist ein Fehler aufgetreten');
+      console.error("Error opening link:", err);
+      Alert.alert("Fehler", "Beim Öffnen des Links ist ein Fehler aufgetreten");
     }
   };
-  const InfoItemRow = ({label, value}) => {
+
+  const shareClub = async () => {
+    if (!clubData || !clubData.id) {
+      return;
+    }
+
+    const shareUrl = `https://go.narrenradar.de/vereine/club/profile?clubId=${clubData.id}`;
+
+    const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${
+      clubData.foundingHistory || ""
+    }\n\n${shareUrl}`;
+
+    try {
+      const result = await Share.share({
+        message: shareText,
+        title: clubData.clubName,
+      });
+    } catch (error) {
+      console.log("Error sharing club:", error);
+    }
+  };
+  const InfoItemRow = ({ label, value }) => {
     const isArray = Array.isArray(value);
 
     return (
-      <View style={{marginBottom: isArray ? 10 : 6}}>
+      <View style={{ marginBottom: isArray ? 10 : 6 }}>
         {isArray ? (
           <View>
             <TextField
@@ -76,10 +99,10 @@ const ClubProfileScreen = () => {
               marginBottom={6}
             />
             {value.map((item, index) => (
-              <View key={index} style={{marginLeft: 12, marginBottom: 6}}>
+              <View key={index} style={{ marginLeft: 12, marginBottom: 6 }}>
                 <TextField
                   text={`${item.title} (seit ${
-                    item.foundingYear ? item.foundingYear : ''
+                    item.foundingYear ? item.foundingYear : ""
                   })`}
                   color={COLORS.green}
                   fontFamily={Fonts.comfortaaMedium}
@@ -116,7 +139,7 @@ const ClubProfileScreen = () => {
     );
   };
 
-  const ItemCard = ({item}) => (
+  const ItemCard = ({ item }) => (
     <View style={styles.card}>
       {item.title && (
         <TextField
@@ -129,12 +152,12 @@ const ClubProfileScreen = () => {
       )}
       {item.imageUrl && (
         <Image
-          source={{uri: item.imageUrl}}
+          source={{ uri: item.imageUrl }}
           resizeMode="cover"
           style={{
             height: 280,
             borderRadius: 16,
-            width: '80%',
+            width: "80%",
             marginBottom: 10,
           }}
         />
@@ -151,7 +174,7 @@ const ClubProfileScreen = () => {
       )}
       {item.foundingYear && (
         <TextField
-          text={'Erscheinungsjahr: ' + item.foundingYear}
+          text={"Erscheinungsjahr: " + item.foundingYear}
           fontSize={18}
           color={COLORS.green}
           fontFamily={Fonts.comfortaaMedium}
@@ -173,19 +196,19 @@ const ClubProfileScreen = () => {
   );
 
   const profileData = [
-    {label: 'Vereinsname', value: clubData?.clubName},
-    {label: 'Gründungsjahr', value: clubData?.grundungsjahr},
-    {label: 'Mitgliederzahl', value: clubData?.mitgliederzahl},
+    { label: "Vereinsname", value: clubData?.clubName },
+    { label: "Gründungsjahr", value: clubData?.grundungsjahr },
+    { label: "Mitgliederzahl", value: clubData?.mitgliederzahl },
     {
-      label: 'Mitgliederzahl Stand (Datum)',
+      label: "Mitgliederzahl Stand (Datum)",
       value: formatTimestamp(clubData?.createdAt),
     },
     {
-      label: 'Narrenfiguren mit Narrenruf',
+      label: "Narrenfiguren mit Narrenruf",
       value: clubData?.characters, // array
     },
     {
-      label: 'Verbände',
+      label: "Verbände",
       value: regionDetail?.regionTitles || regionDetail?.name,
     },
   ];
@@ -193,22 +216,36 @@ const ClubProfileScreen = () => {
     <ImageBackground
       source={IMAGES.backgroundImg}
       resizeMode="cover"
-      style={GlobalStyleSheet.bgImage}>
+      style={GlobalStyleSheet.bgImage}
+    >
       <CustomHeader />
       <ScrollView
-        contentContainerStyle={{paddingBottom: 60}} // add bottom padding for spacing
-        showsVerticalScrollIndicator={false}>
+        contentContainerStyle={{ paddingBottom: 60 }} // add bottom padding for spacing
+        showsVerticalScrollIndicator={false}
+      >
         <Image
           resizeMode="cover"
-          source={{uri: clubData?.clubCoverUrl}}
+          source={{ uri: clubData?.clubCoverUrl }}
           style={styles.image}
         />
         <View style={styles.bottomContainer}>
-          <Image
-            resizeMode="contain"
-            source={{uri: clubData?.clubImageUrl}}
-            style={{height: 120, width: 120}}
-          />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <Image
+              resizeMode="contain"
+              source={{ uri: clubData?.clubImageUrl }}
+              style={{ height: 120, width: 120 }}
+            />
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity onPress={shareClub}>
+              <AntDesign name="sharealt" size={24} color={COLORS.green} />
+            </TouchableOpacity>
+          </View>
           <TextField
             text={de.profile}
             color={COLORS.green}
@@ -219,17 +256,18 @@ const ClubProfileScreen = () => {
             uppercase={true}
           />
           {/* Profile Info List */}
-          <View style={{marginTop: 16}}>
+          <View style={{ marginTop: 16 }}>
             {profileData.map((item, index) => (
               <InfoItemRow key={index} label={item.label} value={item.value} />
             ))}
           </View>
           <View
             style={{
-              width: '100%',
-              justifyContent: 'center',
+              width: "100%",
+              justifyContent: "center",
               marginTop: 10,
-            }}>
+            }}
+          >
             <TextField
               text={`Website:`}
               color={COLORS.green}
@@ -252,7 +290,7 @@ const ClubProfileScreen = () => {
           </View>
 
           <TextField
-            text={'KONTAKT (VEREINSSITZ)'}
+            text={"KONTAKT (VEREINSSITZ)"}
             color={COLORS.green}
             fontSize={22}
             fontFamily={Fonts.heading}
@@ -264,15 +302,15 @@ const ClubProfileScreen = () => {
           {/* Contact Info Section */}
           <View>
             {[
-              {label: 'Straße', value: clubData?.masterAddress},
-              {label: 'Hausnummer', value: clubData?.houseNo},
-              {label: 'Postleitzahl', value: clubData?.postcode},
-              {label: 'Ort', value: clubData?.ort},
-              {label: 'E-Mail', value: clubData?.masterEmail},
-              {label: 'Telefonnummer', value: clubData?.masterPhone},
+              { label: "Straße", value: clubData?.masterAddress },
+              { label: "Hausnummer", value: clubData?.houseNo },
+              { label: "Postleitzahl", value: clubData?.postcode },
+              { label: "Ort", value: clubData?.ort },
+              { label: "E-Mail", value: clubData?.masterEmail },
+              { label: "Telefonnummer", value: clubData?.masterPhone },
             ].map((item, index) =>
               item.value ? (
-                <View key={index} style={{marginBottom: 12}}>
+                <View key={index} style={{ marginBottom: 12 }}>
                   <TextField
                     text={`${item.label}:`}
                     color={COLORS.green}
@@ -286,7 +324,7 @@ const ClubProfileScreen = () => {
                     fontSize={18}
                   />
                 </View>
-              ) : null,
+              ) : null
             )}
           </View>
           {/* <Image
@@ -306,7 +344,7 @@ const ClubProfileScreen = () => {
             <>
               <TextField
                 uppercase={true}
-                text={'GRÜNDUNGSGESCHICHTE'}
+                text={"GRÜNDUNGSGESCHICHTE"}
                 color={COLORS.green}
                 fontSize={22}
                 fontFamily={Fonts.heading}
@@ -348,7 +386,7 @@ const ClubProfileScreen = () => {
           <FlatList
             data={clubData?.characters}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({item}) => <ItemCard item={item} />}
+            renderItem={({ item }) => <ItemCard item={item} />}
           />
 
           {/* FUNKTIONÄRE SECTION */}
@@ -358,7 +396,7 @@ const ClubProfileScreen = () => {
             <>
               <TextField
                 uppercase={true}
-                text={'FUNKTIONÄRE'}
+                text={"FUNKTIONÄRE"}
                 color={COLORS.green}
                 fontSize={22}
                 fontFamily={Fonts.heading}
@@ -370,7 +408,10 @@ const ClubProfileScreen = () => {
               {clubData?.vorstandMembers?.length > 0 && (
                 <>
                   {clubData.vorstandMembers.map((member, index) => (
-                    <View key={`vorstand-${index}`} style={{marginBottom: 20}}>
+                    <View
+                      key={`vorstand-${index}`}
+                      style={{ marginBottom: 20 }}
+                    >
                       {/* 🔢 Index number */}
                       <TextField
                         text={`${index + 1}. Vorstand`}
@@ -382,18 +423,18 @@ const ClubProfileScreen = () => {
 
                       {member.imageUrl ? (
                         <Image
-                          source={{uri: member.imageUrl}}
+                          source={{ uri: member.imageUrl }}
                           style={{
                             height: 250,
                             width: width * 0.8,
                             borderRadius: 16,
-                            backgroundColor: '#fff',
+                            backgroundColor: "#fff",
                           }}
                           resizeMode="cover"
-                          onError={e =>
+                          onError={(e) =>
                             console.log(
-                              'Vorstand image load error:',
-                              e.nativeEvent.error,
+                              "Vorstand image load error:",
+                              e.nativeEvent.error
                             )
                           }
                         />
@@ -435,21 +476,22 @@ const ClubProfileScreen = () => {
                   {clubData.funktionaereMembers.map((member, index) => (
                     <View
                       key={`funktionaere-${index}`}
-                      style={{marginBottom: 20}}>
+                      style={{ marginBottom: 20 }}
+                    >
                       {member.imageUrl ? (
                         <Image
-                          source={{uri: member.imageUrl}}
+                          source={{ uri: member.imageUrl }}
                           style={{
                             height: 250,
                             width: width * 0.8,
                             borderRadius: 16,
-                            backgroundColor: '#fff',
+                            backgroundColor: "#fff",
                           }}
                           resizeMode="cover"
-                          onError={e =>
+                          onError={(e) =>
                             console.log(
-                              'Funktionaere image load error:',
-                              e.nativeEvent.error,
+                              "Funktionaere image load error:",
+                              e.nativeEvent.error
                             )
                           }
                         />
@@ -497,7 +539,7 @@ export default ClubProfileScreen;
 const styles = StyleSheet.create({
   image: {
     height: 200,
-    width: '100%',
+    width: "100%",
   },
   bottomContainer: {
     marginTop: 20,

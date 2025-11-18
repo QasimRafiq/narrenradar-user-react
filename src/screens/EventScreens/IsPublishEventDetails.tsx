@@ -4,63 +4,99 @@ import {
   ImageBackground,
   Linking,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {IMAGES} from '../../assets/images';
-import {GlobalStyleSheet} from '../../shared/constants/GlobalStyleSheet';
-import CustomHeader from '../../shared/components/customHeader/CusstomHeader';
-import CustomFooter from '../../shared/customFooter/CustomFooter';
-import TextField from '../../shared/components/customText/TextField';
-import {COLORS} from '../../shared/constants/theme';
-import {Fonts} from '../../assets/fonts/fonts';
-import LinearGradient from 'react-native-linear-gradient';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import ROUTE_NAMES from '../../routes/routesName';
-import {formatTimestamp, locationsData} from '../../shared/constants/dummyData';
-import de from '../../shared/constants/de.json';
-import Bullet from '../../shared/components/customText/Bullet';
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { IMAGES } from "../../assets/images";
+import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
+import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
+import CustomFooter from "../../shared/customFooter/CustomFooter";
+import TextField from "../../shared/components/customText/TextField";
+import { COLORS } from "../../shared/constants/theme";
+import { Fonts } from "../../assets/fonts/fonts";
+import LinearGradient from "react-native-linear-gradient";
+import Fontisto from "react-native-vector-icons/Fontisto";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import ROUTE_NAMES from "../../routes/routesName";
+import {
+  formatTimestamp,
+  locationsData,
+} from "../../shared/constants/dummyData";
+import de from "../../shared/constants/de.json";
+import Bullet from "../../shared/components/customText/Bullet";
 
 const IsPublishEventDetails = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
-  const {eventDetails} = routes?.params || {};
+  const { eventDetails } = routes?.params || {};
 
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [currentWeather, setCurrentWeather] = useState<any>(null);
   const [forecastDay, setForecastDay] = useState<any>(null);
   const [checkPress, setCheckPress] = useState(false);
 
+  const shareEvent = async () => {
+    if (!eventDetails || !eventDetails.id || !eventDetails.clubId) {
+      return;
+    }
+
+    // Extract clubId if it's an object
+    const clubId =
+      typeof eventDetails.clubId === "object"
+        ? eventDetails.clubId?.id || eventDetails.clubId?.value
+        : eventDetails.clubId;
+
+    const shareUrl = `https://go.narrenradar.de/vereine/club/events/detail?clubId=${clubId}&eventId=${eventDetails.id}`;
+
+    const shareText = `Schau dir diese Veranstaltung an: ${
+      eventDetails.name
+    }\n\n${eventDetails.description || ""}\n\n${shareUrl}`;
+
+    try {
+      const result = await Share.share({
+        message: shareText,
+        title: eventDetails.name,
+      });
+    } catch (error) {
+      console.log("Error sharing event:", error);
+    }
+  };
+
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
       resizeMode="cover"
-      style={GlobalStyleSheet.bgImage}>
+      style={GlobalStyleSheet.bgImage}
+    >
       <CustomHeader />
       <ScrollView contentContainerStyle={styles.container}>
         {eventDetails?.sponsorLogo && (
-          <CustomFooter sponsorImg={eventDetails?.sponsorLogo?.url} />
+          <CustomFooter
+            sponsorImg={eventDetails?.sponsorLogo?.url}
+            eventLink={eventDetails?.sponsorLink}
+          />
         )}
-        <View style={{flex: 1, paddingHorizontal: 20}}>
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
           <View
             style={{
-              flexDirection: 'row',
-              alignSelf: 'flex-end',
+              flexDirection: "row",
+              alignSelf: "flex-end",
               marginTop: 16,
-            }}>
+            }}
+          >
             <TouchableOpacity onPress={() => setCheckPress(!checkPress)}>
               <Image
                 source={IMAGES.exclamation}
-                style={{width: 24, height: 24}}
+                style={{ width: 24, height: 24 }}
                 resizeMode="cover"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={{marginLeft: 10}}>
+            <TouchableOpacity style={{ marginLeft: 10 }} onPress={shareEvent}>
               <AntDesign name="sharealt" size={24} color={COLORS.green} />
             </TouchableOpacity>
           </View>
@@ -68,15 +104,16 @@ const IsPublishEventDetails = () => {
             <View
               style={{
                 backgroundColor: COLORS.light_green,
-                justifyContent: 'center',
+                justifyContent: "center",
                 padding: 16,
                 marginTop: 16,
                 borderRadius: 8,
-              }}>
+              }}
+            >
               <TextField
                 fontSize={18}
                 text={
-                  'Diese Dummy-Veranstaltung wurde vom Gastverein erstellt.'
+                  "Diese Dummy-Veranstaltung wurde vom Gastverein erstellt."
                 }
                 color={COLORS.black}
                 fontFamily={Fonts.comfortaaMedium}
@@ -96,11 +133,11 @@ const IsPublishEventDetails = () => {
           />
           {eventDetails?.eventImage?.url && (
             <Image
-              source={{uri: eventDetails?.eventImage?.url}}
+              source={{ uri: eventDetails?.eventImage?.url }}
               style={{
-                width: '90%',
+                width: "90%",
                 height: 280,
-                alignSelf: 'center',
+                alignSelf: "center",
                 marginBottom: 10,
                 borderRadius: 24,
               }}
@@ -115,7 +152,8 @@ const IsPublishEventDetails = () => {
               borderColor: COLORS.green,
               borderRadius: 8,
               marginTop: 10,
-            }}>
+            }}
+          >
             <TextField
               lineHeight={22}
               fontSize={18}
@@ -155,11 +193,11 @@ const IsPublishEventDetails = () => {
 
           {/* Location and postal code - show after event card box */}
           {eventDetails?.locations && eventDetails.locations.length > 0 && (
-            <View style={{marginBottom: 10, paddingHorizontal: 20}}>
+            <View style={{ marginBottom: 10, paddingHorizontal: 20 }}>
               <TextField
                 textAlign="left"
                 fontSize={16}
-                text={eventDetails.locations[0]?.name || ''}
+                text={eventDetails.locations[0]?.name || ""}
                 color={COLORS.green}
                 fontFamily={Fonts.comfortaaBold}
                 marginBottom={4}
@@ -179,12 +217,12 @@ const IsPublishEventDetails = () => {
                   {(() => {
                     const addressMatch =
                       eventDetails.locations[0].address.match(/\b\d{5}\b/);
-                    const postalCode = addressMatch ? addressMatch[0] : '';
+                    const postalCode = addressMatch ? addressMatch[0] : "";
                     const cityMatch =
                       eventDetails.locations[0].address.match(
-                        /\d{5}\s+([^,]+)/,
+                        /\d{5}\s+([^,]+)/
                       );
-                    const city = cityMatch ? cityMatch[1].trim() : '';
+                    const city = cityMatch ? cityMatch[1].trim() : "";
                     return postalCode && city ? (
                       <TextField
                         textAlign="left"
@@ -225,19 +263,21 @@ const IsPublishEventDetails = () => {
                 letterSpacing={1.5}
               />
               <LinearGradient
-                colors={['#008243', '#8dc63f']} // 🌈 Gradient: light to dark green
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                style={styles.gradientContainer}>
+                colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradientContainer}
+              >
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() =>
                     navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                       pdfDocument: eventDetails?.lineUp?.url,
                     })
-                  }>
+                  }
+                >
                   <TextField
-                    text={'AUFSTELLUNG ANSEHEN'}
+                    text={"AUFSTELLUNG ANSEHEN"}
                     color={COLORS.white}
                     fontSize={14}
                     fontFamily={Fonts.heading}
@@ -262,19 +302,21 @@ const IsPublishEventDetails = () => {
                 uppercase={true}
               />
               <LinearGradient
-                colors={['#008243', '#8dc63f']} // 🌈 Gradient: light to dark green
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                style={styles.gradientContainer}>
+                colors={["#008243", "#8dc63f"]} // 🌈 Gradient: light to dark green
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradientContainer}
+              >
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() =>
                     navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
                       imgDocument: eventDetails?.groundPlan?.url,
                     })
-                  }>
+                  }
+                >
                   <TextField
-                    text={'PLAN ANSEHEN'}
+                    text={"PLAN ANSEHEN"}
                     color={COLORS.white}
                     fontSize={14}
                     fontFamily={Fonts.heading}
@@ -289,7 +331,7 @@ const IsPublishEventDetails = () => {
             <>
               <TextField
                 textAlign="center"
-                text={'LOCATIONS'}
+                text={"LOCATIONS"}
                 color={COLORS.green}
                 fontSize={22}
                 fontFamily={Fonts.heading}
@@ -301,9 +343,9 @@ const IsPublishEventDetails = () => {
               <FlatList
                 data={eventDetails.locations}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({item}) => (
-                  <View style={{marginBottom: 10}}>
-                    <View style={{flexDirection: 'row'}}>
+                renderItem={({ item }) => (
+                  <View style={{ marginBottom: 10 }}>
+                    <View style={{ flexDirection: "row" }}>
                       <TextField
                         fontSize={16}
                         text={`${item?.name}`}
@@ -314,34 +356,36 @@ const IsPublishEventDetails = () => {
                       />
                     </View>
 
-                    <View style={{flexDirection: 'row', paddingLeft: 24}}>
+                    <View style={{ flexDirection: "row", paddingLeft: 24 }}>
                       <TextField
                         fontSize={15}
                         text={`${item.address}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaRegular}
                         marginBottom={10}
-                        width={'90%'}
+                        width={"90%"}
                       />
                     </View>
                     {/* ICONS */}
                     <View
                       style={{
-                        flexDirection: 'row',
+                        flexDirection: "row",
                         marginLeft: 10,
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        alignItems: "center",
+                        justifyContent: "center",
                         paddingVertical: 10,
-                      }}>
+                      }}
+                    >
                       <TouchableOpacity
                         onPress={() => {
                           if (item.link) {
                             Linking.openURL(item.link);
                           }
-                        }}>
+                        }}
+                      >
                         <Image
                           source={IMAGES.location_icon}
-                          style={{width: 32, height: 32, marginRight: 20}}
+                          style={{ width: 32, height: 32, marginRight: 20 }}
                           tintColor={COLORS.green}
                           resizeMode="contain"
                         />
@@ -355,14 +399,15 @@ const IsPublishEventDetails = () => {
                                 ROUTE_NAMES.Ground_VIEWER_SCREEN,
                                 {
                                   imgDocument: item?.flyer?.url,
-                                },
+                                }
                               );
                             } else {
                             }
-                          }}>
+                          }}
+                        >
                           <Image
                             source={IMAGES.flyer_icon}
-                            style={{width: 32, height: 32}}
+                            style={{ width: 32, height: 32 }}
                             tintColor={COLORS.green}
                             resizeMode="contain"
                           />
@@ -373,7 +418,7 @@ const IsPublishEventDetails = () => {
                 )}
               />
               {eventDetails?.startTime && (
-                <View style={{marginTop: 10, paddingHorizontal: 10}}>
+                <View style={{ marginTop: 10, paddingHorizontal: 10 }}>
                   <TextField
                     textAlign="left"
                     lineHeight={22}
@@ -404,14 +449,15 @@ const IsPublishEventDetails = () => {
               {eventDetails.documents?.map((doc: any, index: number) => (
                 <LinearGradient
                   key={index}
-                  colors={['#008243', '#8dc63f']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                  style={styles.gradientContainer}>
+                  colors={["#008243", "#8dc63f"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gradientContainer}
+                >
                   <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                      if (doc.type === 'pdf') {
+                      if (doc.type === "pdf") {
                         navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                           pdfDocument: doc?.url,
                         });
@@ -420,7 +466,8 @@ const IsPublishEventDetails = () => {
                           imgDocument: doc?.url,
                         });
                       }
-                    }}>
+                    }}
+                  >
                     <TextField
                       text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
                       color={COLORS.white}
@@ -447,24 +494,24 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 10,
-    width: '100%',
-    alignItems: 'center',
-    alignSelf: 'center',
+    width: "100%",
+    alignItems: "center",
+    alignSelf: "center",
   },
   gradientContainer: {
     borderRadius: 20, // Optional: add rounded corners
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '60%',
-    alignSelf: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "60%",
+    alignSelf: "center",
     marginBottom: 6,
   },
   weatherGradientContainer: {
     borderRadius: 20, // Optional: add rounded corners
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    alignSelf: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    alignSelf: "center",
   },
   bullet: {
     fontSize: 14,
