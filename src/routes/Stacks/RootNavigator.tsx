@@ -1,4 +1,5 @@
 import React, {FC} from 'react';
+import {Platform} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ROUTE_NAMES from '../routesName';
 import Welcome from '../../screens/Welcome';
@@ -118,6 +119,7 @@ const RootNavigator: React.FC = () => {
       drawerContent={props => <CustomDrawerContent />}
       screenOptions={{
         headerShown: false,
+        swipeEnabled: Platform.OS !== 'ios',
       }}>
       {/* <Stack.Navigator
       screenOptions={{
