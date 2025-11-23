@@ -101,9 +101,11 @@ const ClubProfileScreen = () => {
             {value.map((item, index) => (
               <View key={index} style={{ marginLeft: 12, marginBottom: 6 }}>
                 <TextField
-                  text={`${item.title} (seit ${
-                    item.foundingYear ? item.foundingYear : ""
-                  })`}
+                  text={
+                    item.foundingYear
+                      ? `${item.title} (seit ${item.foundingYear})`
+                      : item.title
+                  }
                   color={COLORS.green}
                   fontFamily={Fonts.comfortaaMedium}
                   fontSize={18}
