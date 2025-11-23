@@ -413,7 +413,7 @@ const AwayDateScreen = () => {
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.green} />
           <TextField
-            text="Daten abrufen..."
+            text="DATEN ABRUFEN..."
             color={COLORS.green}
             fontSize={16}
             textAlign="center"

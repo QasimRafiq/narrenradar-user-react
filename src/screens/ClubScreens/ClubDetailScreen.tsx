@@ -121,7 +121,7 @@ const ClubDetailScreen = () => {
 
         {/* Clubs Section */}
         {loading ? (
-          <CustomLoader message="Daten abrufen..." />
+          <CustomLoader message="DATEN ABRUFEN..." />
         ) : clubUsers.length > 0 ? (
           <ClubUserList data={clubUsers} regionDetail={regionData} />
         ) : (

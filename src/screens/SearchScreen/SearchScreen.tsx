@@ -159,7 +159,7 @@ const SearchScreen = () => {
       {activeFilter === de.event && (
         <>
           {eventsLoading ? (
-            <CustomLoader message="Daten abrufen..." />
+            <CustomLoader message="DATEN ABRUFEN..." />
           ) : filteredEvents && filteredEvents.length > 0 ? (
             <FlatList
               data={filteredEvents}
@@ -207,7 +207,7 @@ const SearchScreen = () => {
       {activeFilter === 'Verband' && (
         <View style={GlobalStyleSheet.componentContainer}>
           {regionsLoading ? (
-            <CustomLoader message="Daten abrufen..." />
+            <CustomLoader message="DATEN ABRUFEN..." />
           ) : filteredRegion && filteredRegion.length > 0 ? (
             <CustomRegionGrid
               data={filteredRegion}
@@ -235,7 +235,7 @@ const SearchScreen = () => {
       {activeFilter === 'Verein' && (
         <View style={{paddingHorizontal: 15}}>
           {loading ? (
-            <CustomLoader message="Daten abrufen..." />
+            <CustomLoader message="DATEN ABRUFEN..." />
           ) : filteredClubUsers && filteredClubUsers.length > 0 ? (
             <ClubUserList data={filteredClubUsers} regionDetail={null} />
           ) : (
