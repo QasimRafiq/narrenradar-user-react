@@ -20,7 +20,11 @@ const CustomHeader = () => {
       </TouchableOpacity>
 
       {/* Title */}
-      <Text style={styles.title}>{de.app_name}</Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate(ROUTE_NAMES.WELCOME_SCREEN)}
+        activeOpacity={0.7}>
+        <Text style={styles.title}>{de.app_name}</Text>
+      </TouchableOpacity>
 
       {/* Search Icon */}
       <TouchableOpacity
