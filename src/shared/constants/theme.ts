@@ -14,7 +14,7 @@ export const COLORS = {
   white: '#fff',
   dark: '#2f2f2f',
   light: '#E6E6E6',
-  green: '#008243',
+  green: '#004200',
   light_green: '#e2f0d9',
   // Buttons Gradient: #008243 to #8dc63f
 
