@@ -32,17 +32,21 @@ const CustomRegionGrid: React.FC<CustomRegionGridProps> = ({
   numColumns = 2,
   columnGap = 20,
 }) => {
-  // Move "Keinem Verband angehörig" to the top if it exists
+  // Move "Keinem Verband angehörig" to the top if it exists, sort rest alphabetically
   const sortedData = React.useMemo(() => {
     if (!data) return [];
     const special = data.find(
       item => item?.[titleKey] === 'Keinem Verband angehörig',
     );
-    const others = data.filter(
-      item => item?.[titleKey] !== 'Keinem Verband angehörig',
-    );
+    const others = data
+      .filter(item => item?.[titleKey] !== 'Keinem Verband angehörig')
+      .sort((a, b) => {
+        const nameA = (a?.[titleKey] || '').toLowerCase();
+        const nameB = (b?.[titleKey] || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
     return special ? [special, ...others] : others;
-  }, [data]);
+  }, [data, titleKey]);
 
   const GridItem = ({item}: {item: any}) => (
     <TouchableOpacity style={styles.card} onPress={() => onPress?.(item)}>
