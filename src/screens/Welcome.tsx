@@ -23,25 +23,44 @@ import database from '@react-native-firebase/database';
 const Welcome = () => {
   const navigation = useNavigation<any>();
   const [sponsors, setSponsors] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const sponsorRef = database().ref('footersponsor');
-    sponsorRef.once('value').then(snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        // Ensure order: sponsor_0 → sponsor_1 → sponsor_2
-        const orderedSponsors = Object.keys(data)
-          .sort((a, b) => {
-            const numA = parseInt(a.split('_')[1]);
-            const numB = parseInt(b.split('_')[1]);
-            return numA - numB;
-          })
-          .map(key => data[key])
-          .filter(s => s?.imageUrl && s?.websiteUrl);
+    sponsorRef
+      .once('value')
+      .then(snapshot => {
+        try {
+          const data = snapshot.val();
+          const sponsorsList: any[] = [];
 
-        setSponsors(orderedSponsors);
-      }
-    });
+          // Load sponsors in order: sponsor_0, sponsor_1, sponsor_2
+          // Always maintain exactly 3 positions (including empty ones)
+          for (let i = 0; i < 3; i++) {
+            const sponsorKey = `sponsor_${i}`;
+            const sponsor = data?.[sponsorKey] || null;
+            sponsorsList.push(sponsor || {}); // Add empty sponsor if not found
+          }
+
+          setSponsors(sponsorsList);
+          setIsLoading(false);
+          setHasError(false);
+        } catch (error) {
+          console.error('Error loading footer sponsors:', error);
+          // Initialize with 3 empty sponsors to maintain structure
+          setSponsors([{}, {}, {}]);
+          setIsLoading(false);
+          setHasError(true);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading footer sponsors:', error);
+        // Initialize with 3 empty sponsors to maintain structure
+        setSponsors([{}, {}, {}]);
+        setIsLoading(false);
+        setHasError(true);
+      });
   }, []);
 
   return (
@@ -93,8 +112,8 @@ const Welcome = () => {
       <View
         style={{
           backgroundColor: COLORS.light_green,
-
           paddingTop: 10,
+          paddingBottom: 8,
         }}>
         <TextField
           textAlign="center"
@@ -111,34 +130,64 @@ const Welcome = () => {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-evenly',
             paddingHorizontal: 4,
           }}>
-          {[0, 1, 2].map(index => {
-            const sponsor = sponsors[index];
-            return (
-              <TouchableOpacity
+          {isLoading ? (
+            // Loading state - show placeholder boxes
+            [0, 1, 2].map(index => (
+              <View
                 key={index}
-                style={styles.sponsorContainer}
-                onPress={() => {
-                  if (sponsor?.websiteUrl) {
-                    Linking.openURL(
-                      sponsor.websiteUrl.startsWith('http')
-                        ? sponsor.websiteUrl
-                        : `https://${sponsor.websiteUrl}`,
-                    );
-                  }
-                }}
-                disabled={!sponsor}>
-                {sponsor?.imageUrl && (
-                  <Image
-                    source={{uri: sponsor.imageUrl}}
-                    resizeMode="contain"
-                    style={styles.homeLogo}
-                  />
-                )}
-              </TouchableOpacity>
-            );
-          })}
+                style={[
+                  styles.sponsorContainer,
+                  {
+                    backgroundColor: 'rgba(128, 128, 128, 0.3)',
+                    borderRadius: 8,
+                    height: 80,
+                  },
+                ]}
+              />
+            ))
+          ) : (
+            // Show all 3 sponsor positions (always exactly 3)
+            sponsors.slice(0, 3).map((sponsor, index) => {
+              if (sponsor?.imageUrl) {
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.sponsorContainer}
+                    onPress={() => {
+                      if (sponsor?.websiteUrl) {
+                        const rawUrl = sponsor.websiteUrl.trim();
+                        if (rawUrl) {
+                          const normalizedUrl =
+                            rawUrl.startsWith('http://') ||
+                            rawUrl.startsWith('https://')
+                              ? rawUrl
+                              : `http://${rawUrl}`;
+                          Linking.openURL(normalizedUrl).catch(err => {
+                            console.error('Failed to open URL:', err);
+                          });
+                        }
+                      }
+                    }}
+                    disabled={!sponsor?.websiteUrl}
+                    activeOpacity={0.7}>
+                    <Image
+                      source={{uri: sponsor.imageUrl}}
+                      resizeMode="contain"
+                      style={styles.homeLogo}
+                    />
+                  </TouchableOpacity>
+                );
+              } else {
+                // Empty sponsor slot - maintain position
+                return (
+                  <View key={index} style={styles.sponsorContainer} />
+                );
+              }
+            })
+          )}
         </View>
       </View>
     </ImageBackground>
@@ -152,6 +201,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 12,
+    height: 80,
   },
   homeLogo: {
     height: 80,
