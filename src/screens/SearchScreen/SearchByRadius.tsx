@@ -1,24 +1,24 @@
-import React, {useState} from 'react';
-import {View, TouchableOpacity, StyleSheet} from 'react-native';
-import MapView, {Marker, Circle} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import Slider from '@react-native-community/slider';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useState } from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import MapView, { Marker, Circle } from "react-native-maps";
+import Geolocation from "@react-native-community/geolocation";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import Slider from "@react-native-community/slider";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
-import {Fonts} from '../../assets/fonts/fonts';
-import {COLORS} from '../../shared/constants/theme';
-import TextField from '../../shared/components/customText/TextField';
-import {useNavigation} from '@react-navigation/native';
-import {map_api_key} from '../../shared/constants/api';
-import {useCurrentLocation} from '../../shared/utills/firebaseUtils';
-import ROUTE_NAMES from '../../routes/routesName';
+import { Fonts } from "../../assets/fonts/fonts";
+import { COLORS } from "../../shared/constants/theme";
+import TextField from "../../shared/components/customText/TextField";
+import { useNavigation } from "@react-navigation/native";
+import { map_api_key } from "../../shared/constants/api";
+import { useCurrentLocation } from "../../shared/utills/firebaseUtils";
+import ROUTE_NAMES from "../../routes/routesName";
 
 const SLIDER_CONFIG = {
   min: 1000,
   max: 100000,
   step: 1000,
-  labels: ['1 km', '25 km', '50 km', '100 km'],
+  labels: ["1 km", "25 km", "50 km", "100 km"],
 };
 
 const SearchByRadius = () => {
@@ -26,7 +26,7 @@ const SearchByRadius = () => {
 
   // const [region, setRegion] = useState(DEFAULT_REGION);
   const [radius, setRadius] = useState(1000); // 10 km
-  const [selectedAddress, setSelectedAddress] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
   // const mapRef = useRef<MapView>(null);
@@ -35,7 +35,7 @@ const SearchByRadius = () => {
   const fetchAddress = async (lat: number, lng: number) => {
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${map_api_key}&language=de`,
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${map_api_key}&language=de`
       );
       const data = await res.json();
       if (data.results?.length > 0) {
@@ -44,7 +44,6 @@ const SearchByRadius = () => {
         setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
       }
     } catch (error) {
-      console.log('Geocoding error:', error);
       setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     }
   };
@@ -64,14 +63,14 @@ const SearchByRadius = () => {
 
   // 🔹 Map tap
   const handleMapPress = (event: any) => {
-    const {latitude, longitude} = event.nativeEvent.coordinate;
+    const { latitude, longitude } = event.nativeEvent.coordinate;
     updateRegion(latitude, longitude);
   };
 
   const reverseGeocode = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${map_api_key}&language=de`,
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${map_api_key}&language=de`
       );
       const data = await response.json();
       if (data.results && data.results.length > 0) {
@@ -80,22 +79,22 @@ const SearchByRadius = () => {
         setSelectedAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
       }
     } catch (error) {
-      console.log('Geocoding error:', error);
       setSelectedAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
     }
   };
 
-  const {region, setRegion, mapRef, getCurrentLocation} =
+  const { region, setRegion, mapRef, getCurrentLocation } =
     useCurrentLocation(reverseGeocode);
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       {/* 🔹 Top Search Card */}
       <View style={styles.topCard}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            style={styles.backButton}>
+            style={styles.backButton}
+          >
             <Icon name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <TextField
@@ -108,17 +107,35 @@ const SearchByRadius = () => {
 
         <GooglePlacesAutocomplete
           placeholder="Standort eingeben"
-          fetchDetails
+          fetchDetails={true}
           onPress={(data, details = null) => {
-            if (details?.geometry?.location) {
-              updateRegion(
-                details.geometry.location.lat,
-                details.geometry.location.lng,
-              );
-              setSelectedAddress(data.description);
+            try {
+              if (details?.geometry?.location) {
+                updateRegion(
+                  details.geometry.location.lat,
+                  details.geometry.location.lng
+                );
+                setSelectedAddress(data.description);
+              } else if (data?.description) {
+                // Fallback: use description if details are not available
+                setSelectedAddress(data.description);
+              }
+            } catch (error) {
+              // Error handling place selection - handled silently
             }
           }}
-          query={{key: map_api_key, language: 'de'}}
+          onFail={(error) => {
+            // GooglePlacesAutocomplete error - handled silently
+          }}
+          query={{
+            key: map_api_key,
+            language: "de",
+            components: "country:de", // Optional: restrict to Germany
+          }}
+          debounce={300}
+          minLength={2}
+          enablePoweredByContainer={false}
+          keepResultsAfterBlur={false}
           textInputProps={{
             onFocus: () => setIsFocused(true),
             onBlur: () => setIsFocused(false),
@@ -128,21 +145,21 @@ const SearchByRadius = () => {
               styles.searchInput,
               {
                 borderWidth: 1,
-                borderColor: isFocused ? 'green' : '#ccc',
+                borderColor: isFocused ? "green" : "#ccc",
                 borderRadius: 12,
               },
             ],
-            container: {flex: 0, marginBottom: 20},
+            container: { flex: 0, marginBottom: 20 },
             listView: {
-              backgroundColor: '#fff',
+              backgroundColor: "#fff",
               marginTop: 4,
               borderWidth: 0.5,
               borderRadius: 16,
-              borderColor: '#999',
+              borderColor: "#999",
               padding: 10,
             },
             poweredContainer: {
-              display: 'none',
+              display: "none",
             },
           }}
           renderLeftButton={() => (
@@ -209,10 +226,11 @@ const SearchByRadius = () => {
       {/* 🔹 Map */}
       <MapView
         ref={mapRef}
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         region={region}
         mapType="satellite"
-        onPress={handleMapPress}>
+        onPress={handleMapPress}
+      >
         <Marker coordinate={region}>
           <Icon name="location-on" size={40} color="#E53935" />
         </Marker>
@@ -228,7 +246,8 @@ const SearchByRadius = () => {
       {/* 🔹 Floating Location Button */}
       <TouchableOpacity
         style={styles.locationButton}
-        onPress={getCurrentLocation}>
+        onPress={getCurrentLocation}
+      >
         <Icon name="my-location" size={30} color={COLORS.green} />
       </TouchableOpacity>
 
@@ -266,7 +285,8 @@ const SearchByRadius = () => {
               selectedRadius: radius / 1000, // convert to km
             });
           }}
-          style={styles.confirmBtn}>
+          style={styles.confirmBtn}
+        >
           <TextField
             text="Standort bestätigen"
             color="#fff"
@@ -283,25 +303,25 @@ export default SearchByRadius;
 
 const styles = StyleSheet.create({
   topCard: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    width: '92%',
-    backgroundColor: '#fff',
+    width: "92%",
+    backgroundColor: "#fff",
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 30,
     marginTop: 20,
     zIndex: 1,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   backButton: {
@@ -315,16 +335,16 @@ const styles = StyleSheet.create({
     height: 55,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     paddingHorizontal: 40,
     fontSize: 14,
-    backgroundColor: '#fff',
-    color: '#000',
+    backgroundColor: "#fff",
+    color: "#000",
     fontFamily: Fonts.comfortaaRegular,
-    alignItems: 'center',
+    alignItems: "center",
   },
   searchIcon: {
-    position: 'absolute',
+    position: "absolute",
     left: 12,
     top: 18,
     zIndex: 1,
@@ -333,68 +353,68 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sliderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   radiusBadge: {
-    backgroundColor: 'rgba(0, 200, 0, 0.1)',
+    backgroundColor: "rgba(0, 200, 0, 0.1)",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
   },
   slider: {
-    width: '100%',
+    width: "100%",
     height: 40,
   },
   sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 0,
   },
   locationButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
     bottom: 200,
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
   bottomCard: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 10,
-    width: '92%',
-    backgroundColor: '#fff',
+    width: "92%",
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -2},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   locationBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   locationIconWrapper: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#E8F5E9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#E8F5E9",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   locationInfo: {
@@ -404,6 +424,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.green,
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });

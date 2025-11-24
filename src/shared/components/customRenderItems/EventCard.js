@@ -1,21 +1,21 @@
-import React from 'react';
+import React from "react";
 import {
   Dimensions,
   Image,
   StyleSheet,
   TouchableOpacity,
   View,
-} from 'react-native';
-import TextField from '../customText/TextField';
-import {COLORS} from '../../constants/theme';
-import ROUTE_NAMES from '../../../routes/routesName';
-import {Fonts} from '../../../assets/fonts/fonts';
-import CustomFooter from '../../customFooter/CustomFooter';
-import {formatTimestamp} from '../../constants/dummyData';
-import FastImage from 'react-native-fast-image';
+} from "react-native";
+import TextField from "../customText/TextField";
+import { COLORS } from "../../constants/theme";
+import ROUTE_NAMES from "../../../routes/routesName";
+import { Fonts } from "../../../assets/fonts/fonts";
+import CustomFooter from "../../customFooter/CustomFooter";
+import { formatTimestamp } from "../../constants/dummyData";
+import FastImage from "react-native-fast-image";
 
-const {width} = Dimensions.get('window');
-const EventCard = ({item, navigation}) => {
+const { width } = Dimensions.get("window");
+const EventCard = ({ item, navigation }) => {
   return (
     <>
       <View style={styles.card}>
@@ -33,7 +33,8 @@ const EventCard = ({item, navigation}) => {
             navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
               eventDetails: item,
             })
-          }>
+          }
+        >
           <FastImage
             style={{
               height: 280,
@@ -42,7 +43,7 @@ const EventCard = ({item, navigation}) => {
             }}
             source={{
               uri: item?.eventImage?.url,
-              headers: {Authorization: 'someAuthToken'},
+              headers: { Authorization: "someAuthToken" },
               priority: FastImage.priority.normal,
             }}
             resizeMode={FastImage.resizeMode.cover}
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   card: {
     width: width,
     // paddingVertical: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 16,
   },
   image: {

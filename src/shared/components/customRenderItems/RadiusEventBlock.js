@@ -1,15 +1,13 @@
-import React from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import TextField from '../customText/TextField';
-import {COLORS} from '../../constants/theme';
-import {Fonts} from '../../../assets/fonts/fonts';
-import {formatTimestamp} from '../../constants/dummyData';
-import {useNavigation} from '@react-navigation/native';
-import ROUTE_NAMES from '../../../routes/routesName';
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import TextField from "../customText/TextField";
+import { COLORS } from "../../constants/theme";
+import { Fonts } from "../../../assets/fonts/fonts";
+import { formatTimestamp } from "../../constants/dummyData";
+import { useNavigation } from "@react-navigation/native";
+import ROUTE_NAMES from "../../../routes/routesName";
 
-const RadiusEventBlock = ({item}) => {
-  console.log('=====>>>>', item);
-  console.log('=====>>>>', item.type);
+const RadiusEventBlock = ({ item }) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
@@ -18,7 +16,8 @@ const RadiusEventBlock = ({item}) => {
         navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
           eventDetails: item,
         })
-      }>
+      }
+    >
       <TextField
         text={formatTimestamp(item.eventDate)}
         color={COLORS.green}
@@ -58,6 +57,6 @@ export default RadiusEventBlock;
 const styles = StyleSheet.create({
   eventBlock: {
     marginBottom: 10,
-    width: '100%',
+    width: "100%",
   },
 });

@@ -153,9 +153,6 @@ const ClubEventScreen = () => {
           ...value,
         }));
 
-        console.log('🔹 Raw Events:', formatted);
-        console.log('🔹 Looking for clubId:', clubData.id);
-
         // ✅ Updated filtering logic
         const filtered = formatted.filter(item => {
           const eventClubId =
@@ -172,8 +169,6 @@ const ClubEventScreen = () => {
 
           return hasOwnEvent || hasAwayEvent;
         });
-
-        console.log('✅ Filtered Events:', filtered);
 
         // ✅ Sort ascending by event date
         const sorted = filtered.sort(

@@ -17,7 +17,6 @@ const ClubSelected = () => {
 
   const routes = useRoute<any>();
   const {clubData, regionDetail} = routes?.params;
-  console.log(clubData);
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
