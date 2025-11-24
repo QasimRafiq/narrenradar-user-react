@@ -45,31 +45,52 @@ const EventDetailScreen = () => {
 
   const fetchWeather = async (lat: number, lon: number) => {
     try {
+      // Get today's date in yyyy-MM-dd format (matching Android)
+      const today = new Date();
+      const dateString = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+      // Use history.json API endpoint like Android
       const res = await fetch(
-        `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&days=1&aqi=no&alerts=no&lang=de`
+        `https://api.weatherapi.com/v1/history.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&dt=${dateString}&lang=de`
       );
       const json = await res.json();
 
-      // ✅ Current weather
-      setCurrentWeather(json.current);
+      if (json.forecast?.forecastday?.[0]) {
+        const forecastDayData = json.forecast.forecastday[0].day;
 
-      // ✅ Forecast (day info)
-      setForecastDay(json.forecast.forecastday[0].day);
+        // ✅ Use forecast day data (matching Android)
+        // Create a currentWeather-like object from forecast day data
+        setCurrentWeather({
+          temp_c: forecastDayData.avgtemp_c, // Use avgtemp_c like Android
+          condition: {
+            text: forecastDayData.condition.text,
+            icon: forecastDayData.condition.icon,
+          },
+          last_updated: json.forecast.forecastday[0].date,
+        });
 
-      // ✅ Hourly forecast (limit to next 5 hours)
-      const hourly = json.forecast.forecastday[0].hour.map((item: any) => ({
-        id: item.time_epoch.toString(),
-        temp: `${Math.round(item.temp_c)}°`,
-        time: new Date(item.time).toLocaleTimeString("de-DE", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        icon: item.condition.icon,
-      }));
+        // ✅ Forecast (day info)
+        setForecastDay(forecastDayData);
 
-      setWeatherData(hourly);
+        // ✅ Hourly forecast - show all hours like Android
+        const hourly = json.forecast.forecastday[0].hour.map((item: any) => {
+          const date = new Date(item.time);
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          return {
+            id: item.time_epoch.toString(),
+            temp: `${Math.round(item.temp_c)}°`,
+            time: `${hours}:${minutes}`,
+            icon: item.condition.icon,
+          };
+        });
+
+        setWeatherData(hourly);
+      }
     } catch (error) {
-      console.log("WeatherAPI fetch error:", error);
+      // WeatherAPI fetch error - handled silently
     }
   };
 
@@ -118,7 +139,7 @@ const EventDetailScreen = () => {
         title: eventDetails.name,
       });
     } catch (error) {
-      console.log("Error sharing event:", error);
+      // Error sharing event - handled silently
     }
   };
 
@@ -132,22 +153,23 @@ const EventDetailScreen = () => {
     icon: string;
   }) => (
     <LinearGradient
-      colors={["#004200", "#8dc63f"]} // 🌈 Gradient: dark to light green
+      colors={["#8dc63f", "#004200"]} // 🌈 Gradient: dark to light green
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{
         backgroundColor: COLORS.green,
         alignItems: "center",
-        borderRadius: 20,
-        marginRight: 10,
-        width: 60,
+        borderRadius: 26,
+        marginRight: 16,
+        width: 64,
+        paddingVertical: 8,
       }}
     >
       <View
         style={{
           alignItems: "center",
           borderRadius: 20,
-          padding: 10,
+          // padding: 10,
         }}
       >
         {icon && (
@@ -537,28 +559,39 @@ const EventDetailScreen = () => {
               {currentWeather?.condition?.icon && (
                 <Image
                   source={{ uri: `https:${currentWeather?.condition?.icon}` }}
-                  style={{ width: 40, height: 40 }}
+                  style={{ width: 100, height: 100 }}
                 />
               )}
 
               <TextField
                 textAlign="center"
-                text={`${Math.round(currentWeather?.temp_c)}°`}
+                text={`${
+                  currentWeather?.temp_c
+                    ? Math.round(currentWeather.temp_c)
+                    : "--"
+                }°`}
                 color={COLORS.white}
                 fontSize={48}
                 fontFamily={Fonts.heading}
               />
               <TextField
                 fontSize={16}
-                text={currentWeather?.condition?.text}
+                text={currentWeather?.condition?.text || ""}
                 color={COLORS.white}
                 fontFamily={Fonts.comfortaaRegular}
-                marginBottom={10}
               />
 
               {forecastDay && (
                 <TextField
-                  text={`Max: ${forecastDay.maxtemp_c}°  Min: ${forecastDay.mintemp_c}°`}
+                  text={`Max: ${
+                    forecastDay.maxtemp_c
+                      ? Math.round(forecastDay.maxtemp_c)
+                      : "--"
+                  }°  Min: ${
+                    forecastDay.mintemp_c
+                      ? Math.round(forecastDay.mintemp_c)
+                      : "--"
+                  }°`}
                   color={COLORS.white}
                   fontFamily={Fonts.comfortaaRegular}
                   marginBottom={10}
@@ -589,12 +622,12 @@ const EventDetailScreen = () => {
                   paddingHorizontal: 10,
                 }}
               >
-                <TextField
+                {/* <TextField
                   text={`Today`}
                   color={COLORS.white}
                   fontFamily={Fonts.comfortaaRegular}
                   marginBottom={10}
-                />
+                /> */}
 
                 <TextField
                   text={formattedDate}
@@ -602,6 +635,10 @@ const EventDetailScreen = () => {
                   fontFamily={Fonts.comfortaaRegular}
                   marginBottom={10}
                   marginLeft={10}
+                  textAlign="right"
+                  alignSelf="flex-end"
+                  width="100%"
+                  fontSize={16}
                 />
               </View>
 
