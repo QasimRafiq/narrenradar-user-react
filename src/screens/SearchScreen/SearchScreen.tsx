@@ -7,49 +7,49 @@ import {
   TouchableOpacity,
   Image,
   Text,
-} from 'react-native';
-import React, {useState} from 'react';
-import {IMAGES} from '../../assets/images';
-import {GlobalStyleSheet} from '../../shared/constants/GlobalStyleSheet';
-import CustomHeader from '../../shared/components/customHeader/CusstomHeader';
-import de from '../../shared/constants/de.json';
-import TextField from '../../shared/components/customText/TextField';
-import {COLORS} from '../../shared/constants/theme';
-import {Fonts} from '../../assets/fonts/fonts';
+} from "react-native";
+import React, { useState } from "react";
+import { IMAGES } from "../../assets/images";
+import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
+import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
+import de from "../../shared/constants/de.json";
+import TextField from "../../shared/components/customText/TextField";
+import { COLORS } from "../../shared/constants/theme";
+import { Fonts } from "../../assets/fonts/fonts";
 import {
   useClubUsers,
   useEvents,
   useRegions,
-} from '../../shared/utills/firebaseUtils';
-import {formatTimestamp} from '../../shared/constants/dummyData';
-import ROUTE_NAMES from '../../routes/routesName';
-import {useNavigation} from '@react-navigation/native';
-import CustomRegionGrid from '../../shared/components/customRenderItems/CustomRegionGrid';
-import ClubUserList from '../../shared/components/customRenderItems/ClubUserList';
-import CustomLoader from '../../shared/components/CustomLoader';
+} from "../../shared/utills/firebaseUtils";
+import { formatTimestamp } from "../../shared/constants/dummyData";
+import ROUTE_NAMES from "../../routes/routesName";
+import { useNavigation } from "@react-navigation/native";
+import CustomRegionGrid from "../../shared/components/customRenderItems/CustomRegionGrid";
+import ClubUserList from "../../shared/components/customRenderItems/ClubUserList";
+import CustomLoader from "../../shared/components/CustomLoader";
 
 const SearchScreen = () => {
   const navigation = useNavigation<any>();
-  const {regions, loading: regionsLoading} = useRegions();
-  const {events, loading: eventsLoading} = useEvents();
-  const {clubUsers, loading} = useClubUsers();
+  const { regions, loading: regionsLoading } = useRegions();
+  const { events, loading: eventsLoading } = useEvents();
+  const { clubUsers, loading } = useClubUsers();
 
   const [activeFilter, setActiveFilter] = useState(de.event);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
 
-  const filters = [de.event, 'Verband', 'Verein'];
+  const filters = [de.event, "Verband", "Verein"];
 
   // Clear search when switching filters (matching Android behavior)
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
-    setSearchText('');
+    setSearchText("");
   };
 
   // Filter events matching Android behavior: search by name, eventLocation, and description
   const filteredEvents = searchText
     ? events?.filter((e: any) => {
         // Skip header items if any (shouldn't be in flat events list)
-        if (e.type === 'header') return false;
+        if (e.type === "header") return false;
 
         const searchLower = searchText.toLowerCase();
         return (
@@ -58,12 +58,12 @@ const SearchScreen = () => {
           e.description?.toLowerCase().includes(searchLower)
         );
       })
-    : events?.filter((e: any) => e.type !== 'header'); // Filter out any header items
+    : events?.filter((e: any) => e.type !== "header"); // Filter out any header items
 
   // Filter regions matching Android behavior: search by name (title)
   const filteredRegion = searchText
     ? regions?.filter((e: any) =>
-        e?.name?.toLowerCase().includes(searchText.toLowerCase()),
+        e?.name?.toLowerCase().includes(searchText.toLowerCase())
       )
     : regions;
 
@@ -80,7 +80,7 @@ const SearchScreen = () => {
           ? Object.values(e.regionTitles)
           : [];
         const regionMatch = regionTitles.some((region: string) =>
-          region?.toLowerCase().includes(searchLower),
+          region?.toLowerCase().includes(searchLower)
         );
         const ortMatch = e?.ort?.toLowerCase().includes(searchLower) || false;
         return clubNameMatch || regionMatch || ortMatch;
@@ -90,7 +90,8 @@ const SearchScreen = () => {
     <ImageBackground
       source={IMAGES.backgroundImg}
       resizeMode="cover"
-      style={GlobalStyleSheet.bgImage}>
+      style={GlobalStyleSheet.bgImage}
+    >
       <CustomHeader />
 
       {/* Title */}
@@ -100,9 +101,9 @@ const SearchScreen = () => {
         text={
           activeFilter === de.event
             ? de.event
-            : activeFilter === 'Verband'
-            ? 'Verband'
-            : 'Verein'
+            : activeFilter === "Verband"
+            ? "Verband"
+            : "Verein"
         }
         color={COLORS.green}
         fontSize={22}
@@ -114,20 +115,21 @@ const SearchScreen = () => {
 
       {/* Filter Buttons */}
       <View style={styles.filterRow}>
-        {filters.map(item => (
+        {filters.map((item) => (
           <TouchableOpacity
             key={item}
             style={[
               styles.filterBtn,
               activeFilter === item && styles.filterBtnActive,
             ]}
-            onPress={() => handleFilterChange(item)}>
+            onPress={() => handleFilterChange(item)}
+          >
             <TextField
               textAlign="center"
               text={item}
               fontSize={14}
               fontFamily={Fonts.regular}
-              color={activeFilter === item ? 'white' : COLORS.green}
+              color={activeFilter === item ? "white" : COLORS.green}
             />
           </TouchableOpacity>
         ))}
@@ -138,10 +140,10 @@ const SearchScreen = () => {
         <TextInput
           placeholder={
             activeFilter === de.event
-              ? 'Veranstaltung suchen'
-              : activeFilter === 'Verband'
-              ? 'Verband suchen'
-              : 'Verein suchen'
+              ? "Veranstaltung suchen"
+              : activeFilter === "Verband"
+              ? "Verband suchen"
+              : "Verein suchen"
           }
           placeholderTextColor={COLORS.title}
           style={styles.input}
@@ -151,7 +153,7 @@ const SearchScreen = () => {
         <Image
           source={IMAGES.search}
           resizeMode="contain"
-          style={{width: 24, height: 24}}
+          style={{ width: 24, height: 24 }}
         />
       </View>
 
@@ -164,10 +166,10 @@ const SearchScreen = () => {
             <FlatList
               data={filteredEvents}
               keyExtractor={(item, index) => item?.id || index?.toString()}
-              contentContainerStyle={{padding: 15}}
-              renderItem={({item}) => {
+              contentContainerStyle={{ padding: 15 }}
+              renderItem={({ item }) => {
                 // Skip rendering header items
-                if (item.type === 'header') return null;
+                if (item.type === "header") return null;
 
                 return (
                   <TouchableOpacity
@@ -176,10 +178,11 @@ const SearchScreen = () => {
                         eventDetails: item,
                       })
                     }
-                    style={{marginBottom: 18}}>
+                    style={{ marginBottom: 18 }}
+                  >
                     <TextField
                       text={`${formatTimestamp(item.eventDate)}- ${
-                        item.name || ''
+                        item.name || ""
                       }`}
                       fontSize={16}
                       color={COLORS.green}
@@ -192,11 +195,12 @@ const SearchScreen = () => {
           ) : (
             <Text
               style={{
-                textAlign: 'center',
+                textAlign: "center",
                 marginTop: 20,
                 color: COLORS.green,
                 fontFamily: Fonts.regular,
-              }}>
+              }}
+            >
               Keine Veranstaltungen gefunden.
             </Text>
           )}
@@ -204,7 +208,7 @@ const SearchScreen = () => {
       )}
 
       {/* Region List */}
-      {activeFilter === 'Verband' && (
+      {activeFilter === "Verband" && (
         <View style={GlobalStyleSheet.componentContainer}>
           {regionsLoading ? (
             <CustomLoader message="DATEN ABRUFEN..." />
@@ -213,18 +217,21 @@ const SearchScreen = () => {
               data={filteredRegion}
               titleKey="name"
               imageKey="imageUrl"
-              onPress={item =>
-                navigation.navigate(ROUTE_NAMES.CLUB_DETAIL, {regionData: item})
+              onPress={(item) =>
+                navigation.navigate(ROUTE_NAMES.CLUB_DETAIL, {
+                  regionData: item,
+                })
               }
             />
           ) : (
             <Text
               style={{
-                textAlign: 'center',
+                textAlign: "center",
                 marginTop: 20,
                 color: COLORS.green,
                 fontFamily: Fonts.regular,
-              }}>
+              }}
+            >
               Keine Verbände gefunden.
             </Text>
           )}
@@ -232,8 +239,8 @@ const SearchScreen = () => {
       )}
 
       {/* Club Users List */}
-      {activeFilter === 'Verein' && (
-        <View style={{paddingHorizontal: 15}}>
+      {activeFilter === "Verein" && (
+        <View style={{ paddingHorizontal: 15 }}>
           {loading ? (
             <CustomLoader message="DATEN ABRUFEN..." />
           ) : filteredClubUsers && filteredClubUsers.length > 0 ? (
@@ -241,11 +248,12 @@ const SearchScreen = () => {
           ) : (
             <Text
               style={{
-                textAlign: 'center',
+                textAlign: "center",
                 marginTop: 20,
                 color: COLORS.green,
                 fontFamily: Fonts.regular,
-              }}>
+              }}
+            >
               Keine Vereine gefunden.
             </Text>
           )}
@@ -259,8 +267,8 @@ export default SearchScreen;
 
 const styles = StyleSheet.create({
   filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 15,
   },
   filterBtn: {
@@ -269,17 +277,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 12,
     marginHorizontal: 5,
-    backgroundColor: 'white',
-    width: '30%',
+    backgroundColor: "white",
+    width: "30%",
     marginBottom: 10,
   },
   filterBtnActive: {
     backgroundColor: COLORS.green,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,

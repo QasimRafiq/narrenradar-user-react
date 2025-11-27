@@ -110,12 +110,12 @@ const SearchByRadius = () => {
           fetchDetails={true}
           onPress={(data, details = null) => {
             try {
-              if (details?.geometry?.location) {
-                updateRegion(
-                  details.geometry.location.lat,
+            if (details?.geometry?.location) {
+              updateRegion(
+                details.geometry.location.lat,
                   details.geometry.location.lng
-                );
-                setSelectedAddress(data.description);
+              );
+              setSelectedAddress(data.description);
               } else if (data?.description) {
                 // Fallback: use description if details are not available
                 setSelectedAddress(data.description);

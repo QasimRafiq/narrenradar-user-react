@@ -29,6 +29,7 @@ import CustomGradientButton from "../../shared/components/customButton/CustomGra
 import { useNavigation, useRoute } from "@react-navigation/native";
 import ROUTE_NAMES from "../../routes/routesName";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { useRegions } from "../../shared/utills/firebaseUtils";
 
 const { width } = Dimensions.get("window");
 
@@ -36,6 +37,7 @@ const ClubProfileScreen = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
   const { clubData, regionDetail } = routes?.params;
+  const { regions } = useRegions();
   const handleWeb = async () => {
     await Linking.openURL(clubData?.websiteUrl);
   };
@@ -86,6 +88,9 @@ const ClubProfileScreen = () => {
   };
   const InfoItemRow = ({ label, value }) => {
     const isArray = Array.isArray(value);
+    // Check if array contains strings (for Verbände) or objects (for Narrenfiguren)
+    const isStringArray =
+      isArray && value.length > 0 && typeof value[0] === "string";
 
     return (
       <View style={{ marginBottom: isArray ? 10 : 6 }}>
@@ -98,43 +103,60 @@ const ClubProfileScreen = () => {
               fontSize={18}
               marginBottom={6}
             />
-            {value.map((item, index) => (
-              <View key={index} style={{ marginLeft: 12, marginBottom: 6 }}>
-                <TextField
-                  text={
-                    item.foundingYear
-                      ? `${item.title} (seit ${item.foundingYear})`
-                      : item.title
-                  }
-                  color={COLORS.green}
-                  fontFamily={Fonts.comfortaaMedium}
-                  fontSize={18}
-                />
-                {item.narrenruf ? (
-                  <TextField
-                    text={`"${item.narrenruf}"`}
-                    color={COLORS.green}
-                    fontFamily={Fonts.comfortaaRegular}
-                    fontSize={18}
-                  />
-                ) : null}
-              </View>
-            ))}
+            {isStringArray
+              ? // Handle string arrays (Verbände) - matching Android: item.replace("-", "-\n")
+                value.map((item, index) => (
+                  <View key={index} style={{ marginBottom: 6 }}>
+                    <TextField
+                      text={item.replace(/-/g, "-\n")} // Match Android: replace "-" with "-\n"
+                      color={COLORS.green}
+                      fontFamily={Fonts.comfortaaMedium}
+                      fontSize={18}
+                    />
+                  </View>
+                ))
+              : // Handle object arrays (Narrenfiguren)
+                value.map((item, index) => (
+                  <View key={index} style={{ marginBottom: 6 }}>
+                    <TextField
+                      text={
+                        item.foundingYear
+                          ? `${item.title} (seit ${item.foundingYear})`
+                          : item.title
+                      }
+                      color={COLORS.green}
+                      fontFamily={Fonts.comfortaaMedium}
+                      fontSize={18}
+                    />
+                    {item.narrenruf ? (
+                      <TextField
+                        text={`"${item.narrenruf}"`}
+                        color={COLORS.green}
+                        fontFamily={Fonts.comfortaaRegular}
+                        fontSize={18}
+                      />
+                    ) : null}
+                  </View>
+                ))}
           </View>
         ) : (
           <View>
-            <TextField
-              text={`${label}: `}
-              color={COLORS.green}
-              fontFamily={Fonts.comfortaaBold}
-              fontSize={18}
-            />
-            <TextField
-              text={value}
-              color={COLORS.green}
-              fontFamily={Fonts.comfortaaRegular}
-              fontSize={18}
-            />
+            {value && (
+              <>
+                <TextField
+                  text={label}
+                  color={COLORS.green}
+                  fontFamily={Fonts.comfortaaBold}
+                  fontSize={18}
+                />
+                <TextField
+                  text={value}
+                  color={COLORS.green}
+                  fontFamily={Fonts.comfortaaRegular}
+                  fontSize={18}
+                />
+              </>
+            )}
           </View>
         )}
       </View>
@@ -200,6 +222,7 @@ const ClubProfileScreen = () => {
   const profileData = [
     { label: "Vereinsname", value: clubData?.clubName },
     { label: "Gründungsjahr", value: clubData?.grundungsjahr },
+    { label: "Eintragung ins Vereinsregister", value: clubData?.eintrag },
     { label: "Mitgliederzahl", value: clubData?.mitgliederzahl },
     {
       label: "Mitgliederzahl Stand (Datum)",
@@ -211,9 +234,73 @@ const ClubProfileScreen = () => {
     },
     {
       label: "Verbände",
-      value: regionDetail?.regionTitles || regionDetail?.name,
+      value: (() => {
+        // Handle regionTitles from clubData (matching Android: club.regionTitles)
+        // First, try to get regionTitles from clubData (if it exists)
+        let regionTitles: string[] = [];
+
+        if (clubData?.regionTitles) {
+          if (Array.isArray(clubData.regionTitles)) {
+            regionTitles = clubData.regionTitles.filter(
+              (title: any) => title && typeof title === "string"
+            ) as string[];
+          } else if (typeof clubData.regionTitles === "object") {
+            regionTitles = Object.values(clubData.regionTitles).filter(
+              (title: any) => title && typeof title === "string"
+            ) as string[];
+          }
+        }
+
+        // If regionTitles is empty, try to map regionIds to region names
+        if (
+          regionTitles.length === 0 &&
+          clubData?.regionIds &&
+          regions.length > 0
+        ) {
+          const regionIds = Array.isArray(clubData.regionIds)
+            ? clubData.regionIds
+            : clubData.regionIds
+            ? Object.values(clubData.regionIds)
+            : [];
+
+          regionTitles = regionIds
+            .map((regionId: any) => {
+              const region = regions.find((r: any) => r.id === regionId);
+              return region?.name;
+            })
+            .filter(
+              (name: any) => name && typeof name === "string"
+            ) as string[];
+        }
+
+        // If regionTitles is still empty and we have regionDetail (from ClubHome flow), use it as fallback
+        if (regionTitles.length === 0 && regionDetail) {
+          if (regionDetail.regionTitles) {
+            if (Array.isArray(regionDetail.regionTitles)) {
+              regionTitles = regionDetail.regionTitles.filter(
+                (title: any) => title && typeof title === "string"
+              ) as string[];
+            } else if (typeof regionDetail.regionTitles === "object") {
+              regionTitles = Object.values(regionDetail.regionTitles).filter(
+                (title: any) => title && typeof title === "string"
+              ) as string[];
+            }
+          } else if (regionDetail.name) {
+            regionTitles = [regionDetail.name];
+          }
+        }
+
+        // If still empty, show fallback message
+        if (regionTitles.length === 0) {
+          return "Keinem Verband angehörig";
+        }
+
+        // Return array for InfoItemRow to handle
+        return regionTitles;
+      })(),
     },
   ];
+
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
@@ -271,7 +358,7 @@ const ClubProfileScreen = () => {
             }}
           >
             <TextField
-              text={`Website:`}
+              text="Website"
               color={COLORS.green}
               fontFamily={Fonts.comfortaaBold}
               fontSize={18}
@@ -292,7 +379,7 @@ const ClubProfileScreen = () => {
           </View>
 
           <TextField
-            text={"KONTAKT (VEREINSSITZ)"}
+            text={"KONTAKT (Vereinsanschrift)"}
             color={COLORS.green}
             fontSize={22}
             fontFamily={Fonts.heading}
@@ -314,7 +401,7 @@ const ClubProfileScreen = () => {
               item.value ? (
                 <View key={index} style={{ marginBottom: 12 }}>
                   <TextField
-                    text={`${item.label}:`}
+                    text={item.label}
                     color={COLORS.green}
                     fontFamily={Fonts.comfortaaBold}
                     fontSize={18}
@@ -403,6 +490,7 @@ const ClubProfileScreen = () => {
                 fontSize={22}
                 fontFamily={Fonts.heading}
                 marginTop={10}
+                marginBottom={10}
                 letterSpacing={1.5}
               />
 
@@ -420,7 +508,6 @@ const ClubProfileScreen = () => {
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaMedium}
                         fontSize={18}
-                        marginBottom={8}
                       />
 
                       {member.imageUrl ? (
@@ -440,15 +527,7 @@ const ClubProfileScreen = () => {
                             )
                           }
                         />
-                      ) : (
-                        <TextField
-                          text="Kein Bild verfügbar"
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaRegular}
-                          fontSize={14}
-                          marginBottom={10}
-                        />
-                      )}
+                      ) : null}
 
                       {member.name ? (
                         <TextField
@@ -456,17 +535,16 @@ const ClubProfileScreen = () => {
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
-                          marginTop={8}
                         />
                       ) : null}
-                      {member.email ? (
+                      {/* {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null}
+                      ) : null} */}
                     </View>
                   ))}
                 </>
@@ -516,14 +594,14 @@ const ClubProfileScreen = () => {
                         />
                       ) : null}
 
-                      {member.email ? (
+                      {/* {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null}
+                      ) : null} */}
                     </View>
                   ))}
                 </>

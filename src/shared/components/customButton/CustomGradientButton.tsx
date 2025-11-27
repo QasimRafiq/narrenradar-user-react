@@ -30,7 +30,7 @@ const CustomGradientButton = ({
     <LinearGradient
       colors={colors}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      end={{ x: 1, y: 0 }} // Horizontal gradient (left to right) like Android
       style={[styles.gradientContainer, style]}
     >
       <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -41,6 +41,9 @@ const CustomGradientButton = ({
           fontSize={fontSize}
           fontFamily={fontFamily}
           letterSpacing={letterSpacing}
+          fontWeight="bold"
+          textAlign="center"
+          numofLine={2}
         />
       </TouchableOpacity>
     </LinearGradient>
@@ -51,19 +54,20 @@ export default CustomGradientButton;
 
 const styles = StyleSheet.create({
   gradientContainer: {
-    borderRadius: 24,
-    marginVertical: 16,
+    borderRadius: 32, // Match Android: RoundedCornerShape(32.dp)
+    minWidth: 220, // Minimum width like Android, but allow expansion
+    maxWidth: "90%", // Prevent button from being too wide
+    minHeight: 50, // Minimum height like Android, but allow expansion for wrapped text
     alignItems: "center",
     justifyContent: "center",
-    // width: "60%",
     alignSelf: "center",
-    marginBottom: 6,
+    marginVertical: 8,
+    paddingHorizontal: 16, // Match Android: horizontal = 16.dp
+    paddingVertical: 8, // Match Android: vertical = 8.dp
   },
   button: {
-    paddingHorizontal: 10,
-    paddingVertical: 14,
     width: "100%",
     alignItems: "center",
-    alignSelf: "center",
+    justifyContent: "center",
   },
 });

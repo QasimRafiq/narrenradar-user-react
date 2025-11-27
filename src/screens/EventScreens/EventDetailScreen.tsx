@@ -35,7 +35,6 @@ const EventDetailScreen = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
   const { eventDetails } = routes?.params || {};
-
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [currentWeather, setCurrentWeather] = useState<any>(null);
   const [forecastDay, setForecastDay] = useState<any>(null);
@@ -74,14 +73,14 @@ const EventDetailScreen = () => {
         // ✅ Forecast (day info)
         setForecastDay(forecastDayData);
 
-        // ✅ Hourly forecast - show all hours like Android
+        // ✅ Hourly forecast - show all hours like Android (using toInt = truncate)
         const hourly = json.forecast.forecastday[0].hour.map((item: any) => {
           const date = new Date(item.time);
           const hours = String(date.getHours()).padStart(2, "0");
           const minutes = String(date.getMinutes()).padStart(2, "0");
           return {
             id: item.time_epoch.toString(),
-            temp: `${Math.round(item.temp_c)}°`,
+            temp: `${Math.trunc(item.temp_c)}°`,
             time: `${hours}:${minutes}`,
             icon: item.condition.icon,
           };
@@ -334,7 +333,7 @@ const EventDetailScreen = () => {
               <TextField
                 text={de.line_up}
                 color={COLORS.green}
-                fontSize={22}
+                fontSize={18}
                 fontFamily={Fonts.heading}
                 marginTop={20}
                 marginBottom={20}
@@ -357,7 +356,7 @@ const EventDetailScreen = () => {
               <TextField
                 text={de.ground_plan}
                 color={COLORS.green}
-                fontSize={22}
+                fontSize={18}
                 fontFamily={Fonts.heading}
                 marginTop={20}
                 marginBottom={20}
@@ -403,14 +402,20 @@ const EventDetailScreen = () => {
                       />
                     </View>
 
-                    <View style={{ flexDirection: "row", paddingLeft: 24 }}>
+                    <View style={{ paddingLeft: 24 }}>
                       <TextField
                         fontSize={15}
                         text={`${item.address}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaRegular}
-                        marginBottom={10}
-                        width={"90%"}
+                        width={"80%"}
+                      />
+                      <TextField
+                        fontSize={15}
+                        text={`Hinweis: ${item.hin}`}
+                        color={COLORS.green}
+                        fontFamily={Fonts.comfortaaRegular}
+                        width={"80%"}
                       />
                     </View>
                     {/* ICONS */}
@@ -470,10 +475,9 @@ const EventDetailScreen = () => {
           {eventDetails?.documents && (
             <>
               <TextField
-                textAlign="center"
                 text={de.other_documents}
                 color={COLORS.green}
-                fontSize={22}
+                fontSize={18}
                 fontFamily={Fonts.heading}
                 marginTop={10}
                 marginBottom={10}
@@ -559,37 +563,44 @@ const EventDetailScreen = () => {
               {currentWeather?.condition?.icon && (
                 <Image
                   source={{ uri: `https:${currentWeather?.condition?.icon}` }}
-                  style={{ width: 100, height: 100 }}
+                  style={{ width: 100, height: 100, alignSelf: "center" }}
                 />
               )}
 
               <TextField
                 textAlign="center"
                 text={`${
-                  currentWeather?.temp_c
-                    ? Math.round(currentWeather.temp_c)
+                  currentWeather?.temp_c !== undefined &&
+                  currentWeather?.temp_c !== null
+                    ? Math.trunc(currentWeather.temp_c)
                     : "--"
                 }°`}
                 color={COLORS.white}
                 fontSize={48}
                 fontFamily={Fonts.heading}
               />
-              <TextField
-                fontSize={16}
-                text={currentWeather?.condition?.text || ""}
-                color={COLORS.white}
-                fontFamily={Fonts.comfortaaRegular}
-              />
+              <View style={{ width: "60%" }}>
+                <TextField
+                  fontSize={16}
+                  text={currentWeather?.condition?.text || ""}
+                  color={COLORS.white}
+                  fontFamily={Fonts.comfortaaRegular}
+                  marginLeft={10}
+                />
+              </View>
 
               {forecastDay && (
                 <TextField
+                  textAlign="center"
                   text={`Max: ${
-                    forecastDay.maxtemp_c
-                      ? Math.round(forecastDay.maxtemp_c)
+                    forecastDay.maxtemp_c !== undefined &&
+                    forecastDay.maxtemp_c !== null
+                      ? Math.trunc(forecastDay.maxtemp_c)
                       : "--"
                   }°  Min: ${
-                    forecastDay.mintemp_c
-                      ? Math.round(forecastDay.mintemp_c)
+                    forecastDay.mintemp_c !== undefined &&
+                    forecastDay.mintemp_c !== null
+                      ? Math.trunc(forecastDay.mintemp_c)
                       : "--"
                   }°`}
                   color={COLORS.white}

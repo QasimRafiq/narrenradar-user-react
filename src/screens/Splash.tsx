@@ -13,14 +13,20 @@
 
 // const styles = StyleSheet.create({});
 
-import {StyleSheet, Animated, SafeAreaView, Easing, Image} from 'react-native';
-import React, {useEffect} from 'react';
+import {
+  StyleSheet,
+  Animated,
+  SafeAreaView,
+  Easing,
+  Image,
+} from "react-native";
+import React, { useEffect } from "react";
 
-import ROUTE_NAMES from '../routes/routesName';
-import {IMAGES} from '../assets/images';
-import {COLORS} from '../shared/constants/theme';
+import ROUTE_NAMES from "../routes/routesName";
+import { IMAGES } from "../assets/images";
+import { COLORS } from "../shared/constants/theme";
 
-const Splash: React.FC<{navigation: any}> = ({navigation}) => {
+const Splash: React.FC<{ navigation: any }> = ({ navigation }) => {
   const animation = new Animated.Value(0);
 
   useEffect(() => {
@@ -42,7 +48,7 @@ const Splash: React.FC<{navigation: any}> = ({navigation}) => {
       }),
     ]);
     logoAnimation.start(() => {
-      navigation.navigate(ROUTE_NAMES.WELCOME_SCREEN);
+      navigation.navigate(ROUTE_NAMES.EVENT_HOME_SCREEN);
     });
     const loginCheckTimeout = setTimeout(() => {}, 2000);
     return () => clearTimeout(loginCheckTimeout);
@@ -57,18 +63,20 @@ const Splash: React.FC<{navigation: any}> = ({navigation}) => {
     <SafeAreaView
       style={[
         {
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
           flex: 1,
           backgroundColor: COLORS.white,
         },
-      ]}>
+      ]}
+    >
       <Animated.View
-        style={[styles.container, {transform: [{scale: logoScale}]}]}>
+        style={[styles.container, { transform: [{ scale: logoScale }] }]}
+      >
         <Image
           source={IMAGES.appIcon}
           resizeMode="contain"
-          style={{width: 100, height: 100}}
+          style={{ width: 100, height: 100 }}
         />
       </Animated.View>
     </SafeAreaView>
@@ -80,8 +88,8 @@ export default Splash;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.white,
   },
 });
