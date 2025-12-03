@@ -65,6 +65,7 @@ const EventStackScreen: FC = () => (
     <Stack.Screen name={ROUTE_NAMES.AWAY_DATE} component={AwayDateScreen} />
 
     <Stack.Screen name={ROUTE_NAMES.Search_Screen} component={SearchScreen} />
+    <Stack.Screen name={ROUTE_NAMES.IMAGE_PREVIEW} component={GroundViewer} />
   </Stack.Navigator>
 );
 // Club Stack Component
@@ -147,7 +148,12 @@ const RootNavigator: React.FC = () => {
       drawerContent={(props) => <CustomDrawerContent />}
       screenOptions={{
         headerShown: false,
-        swipeEnabled: Platform.OS !== "ios",
+        swipeEnabled: false,
+        swipeEdgeWidth: 50,
+        drawerType: "front",
+        drawerStyle: {
+          width: "75%",
+        },
       }}
     >
       {/* <Stack.Navigator

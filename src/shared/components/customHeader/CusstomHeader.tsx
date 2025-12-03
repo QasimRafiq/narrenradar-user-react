@@ -26,6 +26,12 @@ const CustomHeader = () => {
         activeOpacity={0.7}
         style={styles.titleContainer}
       >
+        <Icon
+          name="home"
+          size={24}
+          color={COLORS.green}
+          style={styles.homeIcon}
+        />
         <Text style={styles.title}>{de.app_name}</Text>
       </TouchableOpacity>
 

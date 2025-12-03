@@ -17,5 +17,6 @@ const ROUTE_NAMES = {
   CLUB_EVENT: 'ClubEvent',
   CLUB_EVENT_DETAIL: 'ClubEventDetail',
   AWAY_DATE: 'AwayDate',
+  IMAGE_PREVIEW: 'ImagePreview',
 };
 export default ROUTE_NAMES;

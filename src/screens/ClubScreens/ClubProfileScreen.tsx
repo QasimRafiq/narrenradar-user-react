@@ -175,16 +175,27 @@ const ClubProfileScreen = () => {
         />
       )}
       {item.imageUrl && (
-        <Image
-          source={{ uri: item.imageUrl }}
-          resizeMode="cover"
-          style={{
-            height: 280,
-            borderRadius: 16,
-            width: "80%",
-            marginBottom: 10,
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => {
+            if (item.imageUrl) {
+              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                imgDocument: item.imageUrl,
+              });
+            }
           }}
-        />
+        >
+          <Image
+            source={{ uri: item.imageUrl }}
+            resizeMode="cover"
+            style={{
+              height: 280,
+              borderRadius: 16,
+              width: "80%",
+              marginBottom: 10,
+            }}
+          />
+        </TouchableOpacity>
       )}
       {item.narrenruf && (
         <TextField
@@ -312,11 +323,22 @@ const ClubProfileScreen = () => {
         contentContainerStyle={{ paddingBottom: 60 }} // add bottom padding for spacing
         showsVerticalScrollIndicator={false}
       >
-        <Image
-          resizeMode="cover"
-          source={{ uri: clubData?.clubCoverUrl }}
-          style={styles.image}
-        />
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => {
+            if (clubData?.clubCoverUrl) {
+              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                imgDocument: clubData.clubCoverUrl,
+              });
+            }
+          }}
+        >
+          <Image
+            resizeMode="cover"
+            source={{ uri: clubData?.clubCoverUrl }}
+            style={styles.image}
+          />
+        </TouchableOpacity>
         <View style={styles.bottomContainer}>
           <View
             style={{
@@ -325,11 +347,22 @@ const ClubProfileScreen = () => {
               marginBottom: 10,
             }}
           >
-            <Image
-              resizeMode="contain"
-              source={{ uri: clubData?.clubImageUrl }}
-              style={{ height: 120, width: 120 }}
-            />
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => {
+                if (clubData?.clubImageUrl) {
+                  navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                    imgDocument: clubData.clubImageUrl,
+                  });
+                }
+              }}
+            >
+              <Image
+                resizeMode="contain"
+                source={{ uri: clubData?.clubImageUrl }}
+                style={{ height: 120, width: 120 }}
+              />
+            </TouchableOpacity>
             <View style={{ flex: 1 }} />
             <TouchableOpacity onPress={shareClub}>
               <AntDesign name="sharealt" size={24} color={COLORS.green} />
@@ -511,22 +544,33 @@ const ClubProfileScreen = () => {
                       />
 
                       {member.imageUrl ? (
-                        <Image
-                          source={{ uri: member.imageUrl }}
-                          style={{
-                            height: 250,
-                            width: width * 0.8,
-                            borderRadius: 16,
-                            backgroundColor: "#fff",
+                        <TouchableOpacity
+                          activeOpacity={0.9}
+                          onPress={() => {
+                            if (member.imageUrl) {
+                              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                imgDocument: member.imageUrl,
+                              });
+                            }
                           }}
-                          resizeMode="cover"
-                          onError={(e) =>
-                            console.log(
-                              "Vorstand image load error:",
-                              e.nativeEvent.error
-                            )
-                          }
-                        />
+                        >
+                          <Image
+                            source={{ uri: member.imageUrl }}
+                            style={{
+                              height: 250,
+                              width: width * 0.8,
+                              borderRadius: 16,
+                              backgroundColor: "#fff",
+                            }}
+                            resizeMode="cover"
+                            onError={(e) =>
+                              console.log(
+                                "Vorstand image load error:",
+                                e.nativeEvent.error
+                              )
+                            }
+                          />
+                        </TouchableOpacity>
                       ) : null}
 
                       {member.name ? (
@@ -559,22 +603,33 @@ const ClubProfileScreen = () => {
                       style={{ marginBottom: 20 }}
                     >
                       {member.imageUrl ? (
-                        <Image
-                          source={{ uri: member.imageUrl }}
-                          style={{
-                            height: 250,
-                            width: width * 0.8,
-                            borderRadius: 16,
-                            backgroundColor: "#fff",
+                        <TouchableOpacity
+                          activeOpacity={0.9}
+                          onPress={() => {
+                            if (member.imageUrl) {
+                              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                imgDocument: member.imageUrl,
+                              });
+                            }
                           }}
-                          resizeMode="cover"
-                          onError={(e) =>
-                            console.log(
-                              "Funktionaere image load error:",
-                              e.nativeEvent.error
-                            )
-                          }
-                        />
+                        >
+                          <Image
+                            source={{ uri: member.imageUrl }}
+                            style={{
+                              height: 250,
+                              width: width * 0.8,
+                              borderRadius: 16,
+                              backgroundColor: "#fff",
+                            }}
+                            resizeMode="cover"
+                            onError={(e) =>
+                              console.log(
+                                "Funktionaere image load error:",
+                                e.nativeEvent.error
+                              )
+                            }
+                          />
+                        </TouchableOpacity>
                       ) : null}
                       {member.functionInClub ? (
                         <TextField

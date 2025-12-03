@@ -263,16 +263,27 @@ const EventDetailScreen = () => {
             letterSpacing={1.5}
           />
           {eventDetails?.eventImage?.url && (
-            <Image
-              source={{ uri: eventDetails?.eventImage?.url }}
-              style={{
-                width: "90%",
-                height: 280,
-                marginBottom: 10,
-                borderRadius: 24,
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => {
+                if (eventDetails?.eventImage?.url) {
+                  navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                    imgDocument: eventDetails.eventImage.url,
+                  });
+                }
               }}
-              resizeMode="cover"
-            />
+            >
+              <Image
+                source={{ uri: eventDetails?.eventImage?.url }}
+                style={{
+                  width: "90%",
+                  height: 280,
+                  marginBottom: 10,
+                  borderRadius: 24,
+                }}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
           )}
 
           <View style={{ marginBottom: 10 }}>
@@ -486,6 +497,7 @@ const EventDetailScreen = () => {
               />
               {eventDetails.documents?.map((doc: any, index: number) => (
                 <CustomGradientButton
+                  style={{ width: 220 }}
                   key={index}
                   text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
                   onPress={() => {
@@ -537,7 +549,8 @@ const EventDetailScreen = () => {
           </LinearGradient> */}
 
           <TextField
-            text={"WETTER"}
+            uppercase={true}
+            text={"Aktuelles Wetter"}
             color={COLORS.green}
             fontSize={18}
             fontFamily={Fonts.heading}
