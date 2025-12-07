@@ -30,6 +30,7 @@ import Carousel from "react-native-reanimated-carousel";
 import ROUTE_NAMES from "../../routes/routesName";
 import Geolocation from "@react-native-community/geolocation";
 import { getDistanceInKm } from "../../shared/constants/dummyData";
+import { groupAndFlattenEvents } from "../../shared/utills/groupedUtils";
 
 const { width } = Dimensions.get("window");
 
@@ -157,30 +158,44 @@ const EventHome = () => {
     return true;
   });
 
-  // 🔹 Filter events based on selected or user location
-  const filteredEvents = activeLocation
-    ? flatGroupedEvents.filter((item) => {
-        // Get latitude/longitude from item or from first location in locations array
-        const itemLat =
-          item.latitude || (item.locations && item.locations[0]?.latitude);
-        const itemLng =
-          item.longitude || (item.locations && item.locations[0]?.longitude);
+  // 🔹 Filter events based on selected or user location (matching Android behavior)
+  // Android: currentLocation == null || isEventWithinRadius(...)
+  // This means: if no location, show ALL events. If location exists, filter by radius.
+  const filteredEvents = React.useMemo(() => {
+    if (!activeLocation) {
+      // No location selected → show all events (matching Android)
+      return flatGroupedEvents;
+    }
 
-        // Skip if no valid coordinates
-        if (!itemLat || !itemLng || itemLat === 0 || itemLng === 0) {
-          return false;
-        }
+    // Location exists → filter by radius
+    // First filter the raw events, then group them (matching Android: filter first, then group)
+    const filteredRawEvents = events.filter((event) => {
+      // Get latitude/longitude from event
+      const eventLat =
+        event?.eventLatitude ||
+        (Array.isArray(event.locations) && event.locations[0]?.latitude);
+      const eventLng =
+        event?.eventLongitude ||
+        (Array.isArray(event.locations) && event.locations[0]?.longitude);
 
-        const distance = getDistanceInKm(
-          activeLocation.lat,
-          activeLocation.lng,
-          itemLat,
-          itemLng
-        );
+      // Skip if no valid coordinates
+      if (!eventLat || !eventLng || eventLat === 0 || eventLng === 0) {
+        return false;
+      }
 
-        return distance <= activeRadius;
-      })
-    : flatGroupedEvents;
+      const distance = getDistanceInKm(
+        activeLocation.lat,
+        activeLocation.lng,
+        eventLat,
+        eventLng
+      );
+
+      return distance <= activeRadius;
+    });
+
+    // Group the filtered events by date (matching Android behavior)
+    return groupAndFlattenEvents(filteredRawEvents);
+  }, [activeLocation, activeRadius, events, flatGroupedEvents]);
 
   return (
     <ImageBackground

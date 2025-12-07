@@ -9,6 +9,23 @@ import ROUTE_NAMES from "../../../routes/routesName";
 
 const RadiusEventBlock = ({ item }) => {
   const navigation = useNavigation();
+
+  // Handle header items (date headers) - date is already formatted as dd.MM.yyyy
+  if (item.type === "header") {
+    return (
+      <View style={styles.eventBlock}>
+        <TextField
+          text={item.date}
+          color={COLORS.green}
+          fontSize={20}
+          fontFamily={Fonts.heading}
+          marginBottom={10}
+        />
+      </View>
+    );
+  }
+
+  // Handle event items
   return (
     <TouchableOpacity
       style={styles.eventBlock}
@@ -19,36 +36,12 @@ const RadiusEventBlock = ({ item }) => {
       }
     >
       <TextField
-        text={formatTimestamp(item.eventDate)}
-        color={COLORS.green}
-        fontSize={20}
-        fontFamily={Fonts.heading}
-        marginBottom={10}
-      />
-      <TextField
         text={`  ${item?.name}`}
         color={COLORS.green}
         fontFamily={Fonts.comfortaaMedium}
         marginBottom={10}
         fontSize={16}
       />
-
-      {/* {item.type === 'header' ? (
-        <TextField
-          text={formatTimestamp(item.date)}
-          color={COLORS.green}
-          fontSize={20}
-          fontFamily={Fonts.heading}
-          marginBottom={10}
-        />
-      ) : (
-        <TextField
-          text={`  ${item?.name}`}
-          color={COLORS.green}
-          fontFamily={Fonts.comfortaaSemiBold}
-          marginBottom={10}
-        />
-      )} */}
     </TouchableOpacity>
   );
 };
