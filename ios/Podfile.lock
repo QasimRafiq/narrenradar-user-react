@@ -120,7 +120,7 @@ PODS:
     - GoogleMaps (~> 7.3)
   - Google-Maps-iOS-Utils/QuadTree (4.2.2):
     - GoogleMaps (~> 7.3)
-  - Google-Mobile-Ads-SDK (11.2.0):
+  - Google-Mobile-Ads-SDK (11.5.0):
     - GoogleUserMessagingPlatform (>= 1.1)
   - GoogleDataTransport (9.4.1):
     - GoogleUtilities/Environment (~> 7.7)
@@ -131,7 +131,7 @@ PODS:
   - GoogleMaps/Base (7.4.0)
   - GoogleMaps/Maps (7.4.0):
     - GoogleMaps/Base
-  - GoogleUserMessagingPlatform (2.3.0)
+  - GoogleUserMessagingPlatform (2.4.0)
   - GoogleUtilities/AppDelegateSwizzler (7.13.3):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -1052,11 +1052,11 @@ PODS:
     - React-debug
   - react-native-blob-util (0.22.2):
     - React-Core
-  - react-native-config (1.5.3):
-    - react-native-config/App (= 1.5.3)
-  - react-native-config/App (1.5.3):
+  - react-native-config (1.6.0):
+    - react-native-config/App (= 1.6.0)
+  - react-native-config/App (1.6.0):
     - React-Core
-  - react-native-date-picker (5.0.0):
+  - react-native-date-picker (5.0.13):
     - React-Core
   - react-native-geolocation (3.2.1):
     - glog
@@ -1272,15 +1272,15 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNGoogleMobileAds (13.2.0):
+  - RNGoogleMobileAds (13.6.1):
     - glog
-    - Google-Mobile-Ads-SDK (= 11.2.0)
-    - GoogleUserMessagingPlatform (= 2.3.0)
+    - Google-Mobile-Ads-SDK (= 11.5.0)
+    - GoogleUserMessagingPlatform (= 2.4.0)
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNIap (12.15.1):
+  - RNIap (12.16.4):
     - React-Core
-  - RNPermissions (5.4.2):
+  - RNPermissions (5.4.4):
     - React-Core
   - RNReanimated (3.8.1):
     - glog
@@ -1612,10 +1612,10 @@ SPEC CHECKSUMS:
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   Google-Maps-iOS-Utils: f77eab4c4326d7e6a277f8e23a0232402731913a
-  Google-Mobile-Ads-SDK: 5a6d005a6cb5b5e8f4c7b69ca05cdea79c181139
+  Google-Mobile-Ads-SDK: 7db2098033ad3bfcd72a11e7503b49700a93029e
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleMaps: 032f676450ba0779bd8ce16840690915f84e57ac
-  GoogleUserMessagingPlatform: b1ad7bb1ee3ce64749d4fec24f667b36e45c396c
+  GoogleUserMessagingPlatform: f131fa7978d2ba88d7426702b057c2cc318e6595
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   GTMSessionFetcher: 5595ec75acf5be50814f81e9189490412bad82ba
   hermes-engine: 9cecf9953a681df7556b8cc9c74905de8f3293c0
@@ -1647,8 +1647,8 @@ SPEC CHECKSUMS:
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: 84ea43c6c6232049135b1550b8c60b2faac19fab
   react-native-blob-util: 3c3dc88417b94e750c46c185662a07b2816a6b5e
-  react-native-config: 8f7283449bbb048902f4e764affbbf24504454af
-  react-native-date-picker: 656d78c3f8a5e79bc1642b8d1c587ce10aab2195
+  react-native-config: 9b5857573d57aaf6003fa3f66f7c177c927b5044
+  react-native-date-picker: b64721d6278b52708457292c218196b383b553b1
   react-native-geolocation: ed9e1d132f576b9a4a503af46f9704413ea0dec1
   react-native-google-maps: b80d3947411fcf462ec420c3e6122b7fa24beb9a
   react-native-maps: 79610ffcd0ec2ca8e0cefb48aa8ae7c62a75d7cc
@@ -1684,9 +1684,9 @@ SPEC CHECKSUMS:
   RNFBDatabase: 16daa56d773d353b2ef2752a229cedf195b51cf3
   RNFBStorage: b5254c0728f704e90b0171769dfffdf4665afab7
   RNGestureHandler: bc2cdb2dc42facdf34992ae364b8a728e19a3686
-  RNGoogleMobileAds: 6a1d0ffbf5532bc0efad36414619fa5bbedc155d
-  RNIap: 17583f958d35788a87948e94072ff6edd3580497
-  RNPermissions: dd4f62f5b093e8e7e0338c6170f2a4e2387663ec
+  RNGoogleMobileAds: fe43db9d9896373e221ece8a0a6ef6504a15685a
+  RNIap: cc6ad44185936b2ced74691b154cc9c322a2cb5a
+  RNPermissions: 7fd0c18db25c59a59007e0521e04862b86466518
   RNReanimated: 8a4d86eb951a4a99d8e86266dc71d7735c0c30a9
   RNScreens: b6b64d956af3715adbfe84808694ae82d3fec74f
   RNVectorIcons: 73ab573085f65a572d3b6233e68996d4707fd505
@@ -1695,6 +1695,6 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: 8083c27fb7f07ef7bf32482bc2ed308c99e5fd11
+PODFILE CHECKSUM: 1f37c987494766cdfb5fa185d43f36896745fffb
 
 COCOAPODS: 1.16.2

@@ -40,7 +40,7 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'ToilettenFinder' do
+target 'Narrenradar' do
   rn_maps_path = '../node_modules/react-native-maps'
   pod 'react-native-google-maps', :path => rn_maps_path
   config = use_native_modules!
@@ -72,7 +72,7 @@ target 'ToilettenFinder' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  target 'ToilettenFinderTests' do
+  target 'NarrenradarTests' do
     inherit! :complete
     # Pods for testing
   end

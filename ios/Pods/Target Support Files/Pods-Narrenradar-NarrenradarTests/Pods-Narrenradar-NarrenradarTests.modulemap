@@ -1,0 +1,6 @@
+module Pods_Narrenradar_NarrenradarTests {
+  umbrella header "Pods-Narrenradar-NarrenradarTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
