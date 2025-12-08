@@ -27,6 +27,7 @@ import { useNavigation } from "@react-navigation/native";
 import CustomRegionGrid from "../../shared/components/customRenderItems/CustomRegionGrid";
 import ClubUserList from "../../shared/components/customRenderItems/ClubUserList";
 import CustomLoader from "../../shared/components/CustomLoader";
+import SearchEventItem from "../../shared/components/customRenderItems/SearchEventItem";
 
 const SearchScreen = () => {
   const navigation = useNavigation<any>();
@@ -171,25 +172,7 @@ const SearchScreen = () => {
                 // Skip rendering header items
                 if (item.type === "header") return null;
 
-                return (
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
-                        eventDetails: item,
-                      })
-                    }
-                    style={{ marginBottom: 18 }}
-                  >
-                    <TextField
-                      text={`${formatTimestamp(item.eventDate)}- ${
-                        item.name || ""
-                      }`}
-                      fontSize={16}
-                      color={COLORS.green}
-                      fontFamily={Fonts.comfortaaSemiBold}
-                    />
-                  </TouchableOpacity>
-                );
+                return <SearchEventItem item={item} />;
               }}
             />
           ) : (

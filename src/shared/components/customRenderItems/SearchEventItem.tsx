@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import TextField from "../customText/TextField";
 import { COLORS } from "../../constants/theme";
 import { Fonts } from "../../../assets/fonts/fonts";
@@ -8,24 +8,13 @@ import { useNavigation } from "@react-navigation/native";
 import ROUTE_NAMES from "../../../routes/routesName";
 import { getCityName } from "../../utils/geocodingUtils";
 
-const RadiusEventBlock = ({ item }) => {
-  const navigation = useNavigation();
-  const [cityName, setCityName] = useState(null);
+interface SearchEventItemProps {
+  item: any;
+}
 
-  // Handle header items (date headers) - date is already formatted as dd.MM.yyyy
-  if (item.type === "header") {
-    return (
-      <View style={styles.eventBlock}>
-        <TextField
-          text={item.date}
-          color={COLORS.green}
-          fontSize={20}
-          fontFamily={Fonts.heading}
-          marginBottom={10}
-        />
-      </View>
-    );
-  }
+const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
+  const navigation = useNavigation<any>();
+  const [cityName, setCityName] = useState<string | null>(null);
 
   // Get latitude and longitude from event
   const eventLat =
@@ -44,35 +33,27 @@ const RadiusEventBlock = ({ item }) => {
 
   // Format event name with city
   const displayText = cityName
-    ? `${item?.name} - ${cityName}`
-    : item?.name;
+    ? `${item?.name || ""} - ${cityName}`
+    : item?.name || "";
 
-  // Handle event items
   return (
     <TouchableOpacity
-      style={styles.eventBlock}
       onPress={() =>
         navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
           eventDetails: item,
         })
       }
+      style={{ marginBottom: 18 }}
     >
       <TextField
-        text={`  ${displayText}`}
-        color={COLORS.green}
-        fontFamily={Fonts.comfortaaMedium}
-        marginBottom={10}
+        text={`${formatTimestamp(item.eventDate)}- ${displayText}`}
         fontSize={16}
+        color={COLORS.green}
+        fontFamily={Fonts.comfortaaSemiBold}
       />
     </TouchableOpacity>
   );
 };
 
-export default RadiusEventBlock;
+export default SearchEventItem;
 
-const styles = StyleSheet.create({
-  eventBlock: {
-    marginBottom: 10,
-    width: "100%",
-  },
-});
