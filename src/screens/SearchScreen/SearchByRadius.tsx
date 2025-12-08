@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import MapView, { Marker, Circle } from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -31,20 +31,62 @@ const SearchByRadius = () => {
 
   // const mapRef = useRef<MapView>(null);
 
-  // 🔹 Fetch formatted address via Geocoding API
+  // 🔹 Fetch formatted address via BigDataCloud API (faster and better)
   const fetchAddress = async (lat: number, lng: number) => {
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${map_api_key}&language=de`
-      );
+      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=de`;
+      const res = await fetch(url);
       const data = await res.json();
-      if (data.results?.length > 0) {
-        setSelectedAddress(data.results[0].formatted_address);
+      
+      if (data) {
+        // Build address from available fields
+        const addressParts = [];
+        if (data.locality) addressParts.push(data.locality);
+        if (data.postcode) addressParts.push(data.postcode);
+        if (data.city) addressParts.push(data.city);
+        if (data.principalSubdivision) addressParts.push(data.principalSubdivision);
+        if (data.countryName) addressParts.push(data.countryName);
+        
+        const formattedAddress = addressParts.length > 0 
+          ? addressParts.join(", ")
+          : data.locality || data.city || data.principalSubdivision || null;
+        
+        if (formattedAddress) {
+          setSelectedAddress(formattedAddress);
+        } else {
+          // Fallback: try Google Maps API if BigDataCloud doesn't return address
+          try {
+            const googleRes = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${map_api_key}&language=de`
+            );
+            const googleData = await googleRes.json();
+            if (googleData.results?.length > 0) {
+              setSelectedAddress(googleData.results[0].formatted_address);
+            } else {
+              setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+            }
+          } catch {
+            setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+          }
+        }
       } else {
         setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
       }
     } catch (error) {
-      setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      // Fallback to Google Maps API on error
+      try {
+        const googleRes = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${map_api_key}&language=de`
+        );
+        const googleData = await googleRes.json();
+        if (googleData.results?.length > 0) {
+          setSelectedAddress(googleData.results[0].formatted_address);
+        } else {
+          setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+        }
+      } catch {
+        setSelectedAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      }
     }
   };
 
@@ -68,23 +110,18 @@ const SearchByRadius = () => {
   };
 
   const reverseGeocode = async (latitude: number, longitude: number) => {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${map_api_key}&language=de`
-      );
-      const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        setSelectedAddress(data.results[0].formatted_address);
-      } else {
-        setSelectedAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-      }
-    } catch (error) {
-      setSelectedAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-    }
+    await fetchAddress(latitude, longitude);
   };
 
   const { region, setRegion, mapRef, getCurrentLocation } =
     useCurrentLocation(reverseGeocode);
+
+  // 🔹 Fetch address whenever region changes
+  useEffect(() => {
+    if (region.latitude && region.longitude) {
+      fetchAddress(region.latitude, region.longitude);
+    }
+  }, [region.latitude, region.longitude]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -268,8 +305,7 @@ const SearchByRadius = () => {
             />
             <TextField
               text={
-                selectedAddress ||
-                `${region.latitude.toFixed(4)}, ${region.longitude.toFixed(4)}`
+                selectedAddress || "Adresse wird geladen..."
               }
               color="#000"
               fontSize={14}
