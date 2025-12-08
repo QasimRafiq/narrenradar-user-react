@@ -55,7 +55,7 @@ const IsPublishEventDetails = () => {
 
     const shareText = `Schau dir diese Veranstaltung an: ${
       eventDetails.name
-    }\n\n${eventDetails.description || ""}\n\n${shareUrl}`;
+    }\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar`;
 
     try {
       const result = await Share.share({
