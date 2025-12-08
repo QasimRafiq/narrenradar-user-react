@@ -250,15 +250,26 @@ const EventHome = () => {
           <FlatList
             key={refreshKey}
             ListHeaderComponent={() => (
-              <TextField
-                text={"ALLE EVENTS"}
-                color={COLORS.green}
-                fontSize={22}
-                fontFamily={Fonts.heading}
-                marginTop={20}
-                marginBottom={10}
-                letterSpacing={1.5}
-              />
+              <View>
+                <TextField
+                  text={"ALLE EVENTS"}
+                  color={COLORS.green}
+                  fontSize={22}
+                  fontFamily={Fonts.heading}
+                  marginTop={20}
+                  marginBottom={10}
+                  letterSpacing={1.5}
+                />
+                <TextField
+                  text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."}
+                  color={COLORS.green}
+                  fontSize={14}
+                  fontFamily={Fonts.comfortaaLight}
+                  marginBottom={10}
+                  textAlign="left"
+                  paddingHorizontal={20}
+                />
+              </View>
             )}
             data={filteredEvents}
             keyExtractor={(item, index) => item.id || index.toString()}
