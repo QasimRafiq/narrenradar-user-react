@@ -162,14 +162,46 @@ const EventHome = () => {
   // Android: currentLocation == null || isEventWithinRadius(...)
   // This means: if no location, show ALL events. If location exists, filter by radius.
   const filteredEvents = React.useMemo(() => {
+    // Helper function to check if event is in the past
+    const isEventInPast = (event: any) => {
+      if (!event?.eventDate) return false;
+      const eventDate = new Date(event.eventDate).getTime();
+      return eventDate < currentTime;
+    };
+
     if (!activeLocation) {
       // No location selected → show all events (matching Android)
-      return flatGroupedEvents;
+      // Filter out past events, but keep headers only if they have future events
+      const filtered: any[] = [];
+      let currentHeader: any = null;
+      
+      for (let i = 0; i < flatGroupedEvents.length; i++) {
+        const item = flatGroupedEvents[i];
+        
+        if (item.type === 'header') {
+          currentHeader = item;
+        } else if (item.type === 'event') {
+          if (!isEventInPast(item)) {
+            // Add header if this is the first event for this date
+            if (currentHeader && (filtered.length === 0 || filtered[filtered.length - 1].type !== 'header')) {
+              filtered.push(currentHeader);
+            }
+            filtered.push(item);
+          }
+        }
+      }
+      
+      return filtered;
     }
 
     // Location exists → filter by radius
     // First filter the raw events, then group them (matching Android: filter first, then group)
     const filteredRawEvents = events.filter((event) => {
+      // Filter out past events
+      if (isEventInPast(event)) {
+        return false;
+      }
+
       // Get latitude/longitude from event
       const eventLat =
         event?.eventLatitude ||
@@ -195,7 +227,7 @@ const EventHome = () => {
 
     // Group the filtered events by date (matching Android behavior)
     return groupAndFlattenEvents(filteredRawEvents);
-  }, [activeLocation, activeRadius, events, flatGroupedEvents]);
+  }, [activeLocation, activeRadius, events, flatGroupedEvents, currentTime]);
 
   return (
     <ImageBackground
@@ -257,18 +289,19 @@ const EventHome = () => {
                   fontSize={22}
                   fontFamily={Fonts.heading}
                   marginTop={20}
-                  marginBottom={10}
+                  marginBottom={6}
                   letterSpacing={1.5}
                 />
-                <TextField
-                  text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."}
-                  color={COLORS.green}
-                  fontSize={14}
-                  fontFamily={Fonts.comfortaaLight}
-                  marginBottom={10}
-                  textAlign="left"
-                  paddingHorizontal={20}
-                />
+                <View >
+                  <TextField
+                    text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."}
+                    color={COLORS.green}
+                    fontSize={14}
+                    fontFamily={Fonts.comfortaaLight}
+                    marginBottom={10}
+                    textAlign="left"
+                  />
+                </View>
               </View>
             )}
             data={filteredEvents}
