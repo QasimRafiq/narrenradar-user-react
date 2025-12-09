@@ -537,7 +537,7 @@ const ClubProfileScreen = () => {
                     >
                       {/* 🔢 Index number */}
                       <TextField
-                        text={`${index + 1}. Vorstand`}
+                        text={`1. Vorstand`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaMedium}
                         fontSize={18}
