@@ -29,6 +29,7 @@ import {
 } from "../../shared/constants/dummyData";
 import de from "../../shared/constants/de.json";
 import Bullet from "../../shared/components/customText/Bullet";
+import { detectFileType, FileType } from "../../shared/utils/fileTypeDetection";
 
 const IsPublishEventDetails = () => {
   const navigation = useNavigation<any>();
@@ -270,11 +271,44 @@ const IsPublishEventDetails = () => {
               >
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() =>
-                    navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                      pdfDocument: eventDetails?.lineUp?.url,
-                    })
-                  }
+                  onPress={async () => {
+                    if (!eventDetails?.lineUp?.url) {
+                      return;
+                    }
+
+                    // Detect file type using comprehensive detection
+                    const detectedType = await detectFileType(
+                      eventDetails.lineUp.url,
+                      eventDetails.lineUp.type
+                    );
+
+                    // Determine if it's PDF or image
+                    const isPDF =
+                      detectedType === FileType.PDF ||
+                      (detectedType === FileType.UNKNOWN &&
+                        eventDetails.lineUp.type === "pdf");
+
+                    const isImage =
+                      (detectedType === FileType.IMAGE ||
+                        (detectedType === FileType.UNKNOWN &&
+                          eventDetails.lineUp.type !== "pdf")) &&
+                      !isPDF;
+
+                    if (isPDF) {
+                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                        pdfDocument: eventDetails.lineUp.url,
+                      });
+                    } else if (isImage) {
+                      navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                        imgDocument: eventDetails.lineUp.url,
+                      });
+                    } else {
+                      // Fallback: try as PDF first
+                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                        pdfDocument: eventDetails.lineUp.url,
+                      });
+                    }
+                  }}
                 >
                   <TextField
                     text={"AUFSTELLUNG ANSEHEN"}
@@ -309,11 +343,44 @@ const IsPublishEventDetails = () => {
               >
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() =>
-                    navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                      imgDocument: eventDetails?.groundPlan?.url,
-                    })
-                  }
+                  onPress={async () => {
+                    if (!eventDetails?.groundPlan?.url) {
+                      return;
+                    }
+
+                    // Detect file type using comprehensive detection
+                    const detectedType = await detectFileType(
+                      eventDetails.groundPlan.url,
+                      eventDetails.groundPlan.type
+                    );
+
+                    // Determine if it's PDF or image
+                    const isPDF =
+                      detectedType === FileType.PDF ||
+                      (detectedType === FileType.UNKNOWN &&
+                        eventDetails.groundPlan.type === "pdf");
+
+                    const isImage =
+                      (detectedType === FileType.IMAGE ||
+                        (detectedType === FileType.UNKNOWN &&
+                          eventDetails.groundPlan.type !== "pdf")) &&
+                      !isPDF;
+
+                    if (isPDF) {
+                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                        pdfDocument: eventDetails.groundPlan.url,
+                      });
+                    } else if (isImage) {
+                      navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                        imgDocument: eventDetails.groundPlan.url,
+                      });
+                    } else {
+                      // Fallback: try as image first (since it's ground plan)
+                      navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                        imgDocument: eventDetails.groundPlan.url,
+                      });
+                    }
+                  }}
                 >
                   <TextField
                     text={"PLAN ANSEHEN"}
@@ -393,15 +460,42 @@ const IsPublishEventDetails = () => {
 
                       {item?.flyer?.url && (
                         <TouchableOpacity
-                          onPress={() => {
-                            if (item?.flyer?.url) {
-                              navigation.navigate(
-                                ROUTE_NAMES.Ground_VIEWER_SCREEN,
-                                {
-                                  imgDocument: item?.flyer?.url,
-                                }
-                              );
+                          onPress={async () => {
+                            if (!item?.flyer?.url) {
+                              return;
+                            }
+
+                            // Detect file type using comprehensive detection
+                            const detectedType = await detectFileType(
+                              item.flyer.url,
+                              item.flyer.type
+                            );
+
+                            // Determine if it's PDF or image
+                            const isPDF =
+                              detectedType === FileType.PDF ||
+                              (detectedType === FileType.UNKNOWN &&
+                                item.flyer.type === "pdf");
+
+                            const isImage =
+                              (detectedType === FileType.IMAGE ||
+                                (detectedType === FileType.UNKNOWN &&
+                                  item.flyer.type !== "pdf")) &&
+                              !isPDF;
+
+                            if (isPDF) {
+                              navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                                pdfDocument: item.flyer.url,
+                              });
+                            } else if (isImage) {
+                              navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                                imgDocument: item.flyer.url,
+                              });
                             } else {
+                              // Fallback: try as image first (since it's a flyer)
+                              navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                                imgDocument: item.flyer.url,
+                              });
                             }
                           }}
                         >
@@ -456,14 +550,38 @@ const IsPublishEventDetails = () => {
                 >
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={() => {
-                      if (doc.type === "pdf") {
+                    onPress={async () => {
+                      if (!doc?.url) {
+                        return;
+                      }
+
+                      // Detect file type using comprehensive detection
+                      const detectedType = await detectFileType(doc.url, doc.type);
+
+                      // Determine if it's PDF or image
+                      const isPDF =
+                        detectedType === FileType.PDF ||
+                        (detectedType === FileType.UNKNOWN && doc.type === "pdf");
+
+                      const isImage =
+                        (detectedType === FileType.IMAGE ||
+                          (detectedType === FileType.UNKNOWN &&
+                            doc.type !== "pdf")) &&
+                        !isPDF;
+
+                      if (isPDF) {
                         navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                          pdfDocument: doc?.url,
+                          pdfDocument: doc.url,
+                        });
+                      } else if (isImage) {
+                        navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                          imgDocument: doc.url,
                         });
                       } else {
-                        navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                          imgDocument: doc?.url,
+                        // Fallback: try as PDF first, then image
+                        // This handles cases where detection fails
+                        navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                          pdfDocument: doc.url,
                         });
                       }
                     }}
