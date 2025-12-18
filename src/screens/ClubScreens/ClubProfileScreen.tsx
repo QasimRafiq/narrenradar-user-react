@@ -617,14 +617,14 @@ const ClubProfileScreen = () => {
                           fontSize={18}
                         />
                       ) : null}
-                      {/* {member.email ? (
+                      {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null} */}
+                      ) : null}
                     </View>
                   ))}
                 </>
@@ -685,14 +685,14 @@ const ClubProfileScreen = () => {
                         />
                       ) : null}
 
-                      {/* {member.email ? (
+                      {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null} */}
+                      ) : null}
                     </View>
                   ))}
                 </>
