@@ -24,8 +24,17 @@ export const groupAndFlattenEvents = (events: any[]) => {
       const timestampB = Number(b[1]?.[0]?.eventDate || 0);
       return timestampA - timestampB;
     })
-    .flatMap(([date, events]) => [
-      {type: 'header', id: `header-${date}`, date},
-      ...events.map(e => ({...e, type: 'event'})),
-    ]);
+    .flatMap(([date, events]) => {
+      // Sort events alphabetically by name within each date group
+      const sortedEvents = events.sort((a: any, b: any) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      
+      return [
+        {type: 'header', id: `header-${date}`, date},
+        ...sortedEvents.map(e => ({...e, type: 'event'})),
+      ];
+    });
 };

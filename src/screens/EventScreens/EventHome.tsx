@@ -182,27 +182,12 @@ const EventHome = () => {
 
     if (!activeLocation) {
       // No location selected → show all events (matching Android)
-      // Filter out past events, but keep headers only if they have future events
-      const filtered: any[] = [];
-      let currentHeader: any = null;
+      // Filter out past events, then regroup to ensure proper date grouping
+      const futureEvents = events.filter((event) => !isEventInPast(event));
       
-      for (let i = 0; i < flatGroupedEvents.length; i++) {
-        const item = flatGroupedEvents[i];
-        
-        if (item.type === 'header') {
-          currentHeader = item;
-        } else if (item.type === 'event') {
-          if (!isEventInPast(item)) {
-            // Add header if this is the first event for this date
-            if (currentHeader && (filtered.length === 0 || filtered[filtered.length - 1].type !== 'header')) {
-              filtered.push(currentHeader);
-            }
-            filtered.push(item);
-          }
-        }
-      }
-      
-      return filtered;
+      // Regroup events by date to ensure one header per date with all events under it
+      // This also ensures events are sorted alphabetically within each date (handled in groupAndFlattenEvents)
+      return groupAndFlattenEvents(futureEvents);
     }
 
     // Location exists → filter by radius
