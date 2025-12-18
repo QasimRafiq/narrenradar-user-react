@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import React from "react";
+import LinearGradient from "react-native-linear-gradient";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
@@ -383,33 +384,68 @@ const ClubProfileScreen = () => {
               <InfoItemRow key={index} label={item.label} value={item.value} />
             ))}
           </View>
-          <View
-            style={{
-              width: "100%",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <TextField
-              text="Website"
-              color={COLORS.green}
-              fontFamily={Fonts.comfortaaBold}
-              fontSize={18}
-            />
-            <CustomGradientButton
-              text={clubData.clubName}
-              onPress={() => clubLink(clubData.websiteUrl)}
-            />
+          {clubData?.websiteUrl && (
+            <View
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                marginTop: 10,
+              }}
+            >
+              <TextField
+                text="Website"
+                color={COLORS.green}
+                fontFamily={Fonts.comfortaaBold}
+                fontSize={18}
+              />
+              <LinearGradient
+                colors={["#004200", "#8dc63f"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 32,
+                  width: "100%",
+                  minHeight: 50,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  alignSelf: "stretch",
+                  marginVertical: 8,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onPress={() => clubLink(clubData.websiteUrl)}
+                >
+                  <TextField
+                    uppercase={true}
+                    text={clubData.clubName}
+                    color={COLORS.white}
+                    fontSize={14}
+                    fontFamily={Fonts.heading}
+                    letterSpacing={1}
+                    fontWeight="bold"
+                    textAlign="center"
+                    numofLine={2}
+                  />
+                </TouchableOpacity>
+              </LinearGradient>
 
-            {/* <TextField
-              textAlign="center"
-              text={clubData?.websiteName}
-              color={COLORS.green}
-              fontFamily={Fonts.comfortaaBold}
-              fontSize={14}
-              textDecorationLine="underline"
-            /> */}
-          </View>
+              {/* <TextField
+                textAlign="center"
+                text={clubData?.websiteName}
+                color={COLORS.green}
+                fontFamily={Fonts.comfortaaBold}
+                fontSize={14}
+                textDecorationLine="underline"
+              /> */}
+            </View>
+          )}
 
           <TextField
             text={"KONTAKT (Vereinsanschrift)"}
