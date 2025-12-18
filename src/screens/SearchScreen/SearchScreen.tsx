@@ -28,6 +28,8 @@ import CustomRegionGrid from "../../shared/components/customRenderItems/CustomRe
 import ClubUserList from "../../shared/components/customRenderItems/ClubUserList";
 import CustomLoader from "../../shared/components/CustomLoader";
 import SearchEventItem from "../../shared/components/customRenderItems/SearchEventItem";
+import RadiusEventBlock from "../../shared/components/customRenderItems/RadiusEventBlock";
+import { groupAndFlattenEvents } from "../../shared/utills/groupedUtils";
 
 const SearchScreen = () => {
   const navigation = useNavigation<any>();
@@ -47,7 +49,7 @@ const SearchScreen = () => {
   };
 
   // Filter events matching Android behavior: search by name, eventLocation, and description
-  const filteredEvents = searchText
+  const filteredEventsRaw = searchText
     ? events?.filter((e: any) => {
         // Skip header items if any (shouldn't be in flat events list)
         if (e.type === "header") return false;
@@ -60,6 +62,11 @@ const SearchScreen = () => {
         );
       })
     : events?.filter((e: any) => e.type !== "header"); // Filter out any header items
+
+  // Group filtered events by date and sort alphabetically within each date
+  const filteredEvents = filteredEventsRaw
+    ? groupAndFlattenEvents(filteredEventsRaw)
+    : [];
 
   // Filter regions matching Android behavior: search by name (title)
   const filteredRegion = searchText
@@ -166,14 +173,13 @@ const SearchScreen = () => {
           ) : filteredEvents && filteredEvents.length > 0 ? (
             <FlatList
               data={filteredEvents}
-              keyExtractor={(item, index) => item?.id || index?.toString()}
+              keyExtractor={(item, index) =>
+                item?.id || item?.type === "header"
+                  ? `header-${item.date}`
+                  : index?.toString()
+              }
               contentContainerStyle={{ padding: 15 }}
-              renderItem={({ item }) => {
-                // Skip rendering header items
-                if (item.type === "header") return null;
-
-                return <SearchEventItem item={item} />;
-              }}
+              renderItem={({ item }) => <RadiusEventBlock item={item} />}
             />
           ) : (
             <Text
