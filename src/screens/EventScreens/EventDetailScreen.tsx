@@ -488,13 +488,15 @@ const EventDetailScreen = () => {
                         fontFamily={Fonts.comfortaaRegular}
                         width={"80%"}
                       />
-                      <TextField
-                        fontSize={15}
-                        text={`Hinweis: ${item.hin}`}
-                        color={COLORS.green}
-                        fontFamily={Fonts.comfortaaRegular}
-                        width={"80%"}
-                      />
+                      {item.hin && (
+                        <TextField
+                          fontSize={15}
+                          text={`Hinweis: ${item.hin}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaRegular}
+                          width={"80%"}
+                        />
+                      )}
                     </View>
                     {/* ICONS */}
                     <View
