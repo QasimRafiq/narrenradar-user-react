@@ -62,7 +62,7 @@ const RadiusEventBlock = ({ item }) => {
         color={COLORS.green}
         fontFamily={Fonts.comfortaaMedium}
         marginBottom={10}
-        fontSize={16}
+        fontSize={18}
       />
     </TouchableOpacity>
   );
