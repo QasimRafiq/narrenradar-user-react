@@ -238,7 +238,7 @@ const ClubProfileScreen = () => {
     { label: "Mitgliederzahl", value: clubData?.mitgliederzahl },
     {
       label: "Mitgliederzahl Stand (Datum)",
-      value: formatTimestamp(clubData?.createdAt),
+      value: formatTimestamp(clubData?.stand),
     },
     {
       label: "Narrenfiguren mit Narrenruf",
