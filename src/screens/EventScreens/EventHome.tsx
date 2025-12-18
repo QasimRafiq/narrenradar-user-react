@@ -41,7 +41,14 @@ const EventHome = () => {
   const selectedRegion = route.params?.selectedRegion || null;
   const selectedRadius = route.params?.selectedRadius || null;
 
+  // Get start of today (midnight) for date comparison to include today's events
+  const getStartOfToday = () => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now.getTime();
+  };
   const currentTime = Date.now();
+  const startOfToday = getStartOfToday();
 
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [userLocation, setUserLocation] = useState<{
@@ -163,10 +170,14 @@ const EventHome = () => {
   // This means: if no location, show ALL events. If location exists, filter by radius.
   const filteredEvents = React.useMemo(() => {
     // Helper function to check if event is in the past
+    // Compare with start of today to include today's events
     const isEventInPast = (event: any) => {
       if (!event?.eventDate) return false;
       const eventDate = new Date(event.eventDate).getTime();
-      return eventDate < currentTime;
+      // Get start of event date (midnight) for fair comparison
+      const eventDateStart = new Date(event.eventDate);
+      eventDateStart.setHours(0, 0, 0, 0);
+      return eventDateStart.getTime() < startOfToday;
     };
 
     if (!activeLocation) {
@@ -227,7 +238,7 @@ const EventHome = () => {
 
     // Group the filtered events by date (matching Android behavior)
     return groupAndFlattenEvents(filteredRawEvents);
-  }, [activeLocation, activeRadius, events, flatGroupedEvents, currentTime]);
+  }, [activeLocation, activeRadius, events, flatGroupedEvents, startOfToday]);
 
   return (
     <ImageBackground
