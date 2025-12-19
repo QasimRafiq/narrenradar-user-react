@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   clubText: {
-    fontSize: 14,
+    fontSize: 18,
     color: COLORS.green,
     fontFamily: Fonts.bold,
     flex: 1,

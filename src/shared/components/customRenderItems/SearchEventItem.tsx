@@ -47,7 +47,7 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
     >
       <TextField
         text={`${formatTimestamp(item.eventDate)}- ${displayText}`}
-        fontSize={16}
+        fontSize={18}
         color={COLORS.green}
         fontFamily={Fonts.comfortaaSemiBold}
       />
