@@ -133,37 +133,43 @@ const EventHome = () => {
     : userLocation;
   const activeRadius = selectedRadius || 40; // default 40km
 
-  const sponsoredEvents = events?.filter((e) => {
-    if (!e?.hasSponsoring || e?.sponsorPackage !== "Plus" || !e?.eventDate)
-      return false;
-    const eventDate = new Date(e.eventDate).getTime();
-    const sevenDaysBefore = eventDate - 7 * 24 * 60 * 60 * 1000;
-    const isWithin7Days =
-      currentTime >= sevenDaysBefore && currentTime <= eventDate;
-    if (!isWithin7Days) return false;
+  // Matching Android logic: events from today up to 7 days in the future
+  const sponsoredEvents = events
+    ?.filter((e) => {
+      if (!e?.hasSponsoring || e?.sponsorPackage !== "Plus" || !e?.eventDate)
+        return false;
 
-    // Extract location
-    const eventLat =
-      e?.eventLatitude ||
-      (Array.isArray(e.locations) && e.locations[0]?.latitude);
-    const eventLng =
-      e?.eventLongitude ||
-      (Array.isArray(e.locations) && e.locations[0]?.longitude);
+      const eventDate = new Date(e.eventDate).getTime();
+      const sevenDaysFromNow = currentTime + 7 * 24 * 60 * 60 * 1000;
 
-    // If location enabled → check radius
-    if (activeLocation && eventLat && eventLng) {
-      const distance = getDistanceInKm(
-        activeLocation.lat,
-        activeLocation.lng,
-        eventLat,
-        eventLng
-      );
-      return distance <= activeRadius;
-    }
+      // Include events from today onwards, up to 7 days in the future
+      const isWithin7DaysFromNow =
+        eventDate >= currentTime && eventDate <= sevenDaysFromNow;
+      if (!isWithin7DaysFromNow) return false;
 
-    // No location → show all sponsored within 7 days
-    return true;
-  });
+      // Extract location
+      const eventLat =
+        e?.eventLatitude ||
+        (Array.isArray(e.locations) && e.locations[0]?.latitude);
+      const eventLng =
+        e?.eventLongitude ||
+        (Array.isArray(e.locations) && e.locations[0]?.longitude);
+
+      // If location enabled → check radius
+      if (activeLocation && eventLat && eventLng) {
+        const distance = getDistanceInKm(
+          activeLocation.lat,
+          activeLocation.lng,
+          eventLat,
+          eventLng
+        );
+        return distance <= activeRadius;
+      }
+
+      // No location → show all sponsored within 7 days from now
+      return true;
+    })
+    .sort((a, b) => (a.eventDate || 0) - (b.eventDate || 0)); // Sort by eventDate ascending
 
   // 🔹 Filter events based on selected or user location (matching Android behavior)
   // Android: currentLocation == null || isEventWithinRadius(...)
@@ -247,81 +253,79 @@ const EventHome = () => {
       style={GlobalStyleSheet.bgImage}
     >
       <CustomHeader />
-      <ScrollView>
-        <View style={styles.container}>
-          <RoundedButton title={de.event} onPress={() => {}} opacity={1} />
-          <TouchableOpacity onPress={radiusPress} style={styles.radiusButton}>
-            <Image
-              source={IMAGES.radius_ic}
-              resizeMode="contain"
-              style={{ height: 32, width: 32 }}
-            />
-            <TextField
-              uppercase
-              textAlign="center"
-              text={"Suchradius wählen"}
-              color={COLORS.green}
-              fontSize={20}
-              fontFamily={Fonts.heading}
-              letterSpacing={1.5}
-              marginLeft={10}
-            />
-          </TouchableOpacity>
-          {sponsoredEvents?.length > 0 && (
-            <>
-              {eventsLoading ? (
-                <CustomLoader message="Ereignisse werden geladen..." />
-              ) : (
-                <Carousel
-                  style={{ marginTop: 10 }}
-                  key={refreshKey}
-                  loop={sponsoredEvents?.length > 1}
-                  width={width}
-                  height={500}
-                  autoPlay={sponsoredEvents?.length > 1}
-                  data={sponsoredEvents || []}
-                  scrollAnimationDuration={1000}
-                  enabled={sponsoredEvents?.length > 1} // 👈 disables swiping when only one
-                  renderItem={({ item }) => (
-                    <EventCard item={item} navigation={navigation} />
-                  )}
-                />
-              )}
-            </>
-          )}
-
-          <FlatList
-            key={refreshKey}
-            ListHeaderComponent={() => (
-              <View>
-                <TextField
-                  text={"ALLE EVENTS"}
-                  color={COLORS.green}
-                  fontSize={22}
-                  fontFamily={Fonts.heading}
-                  marginTop={20}
-                  marginBottom={6}
-                  letterSpacing={1.5}
-                />
-                <View >
-                  <TextField
-                    text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."}
-                    color={COLORS.green}
-                    fontSize={14}
-                    fontFamily={Fonts.comfortaaLight}
-                    marginBottom={10}
-                    textAlign="left"
+      <FlatList
+        key={refreshKey}
+        ListHeaderComponent={() => (
+          <View style={styles.container}>
+            <RoundedButton title={de.event} onPress={() => {}} opacity={1} />
+            <TouchableOpacity onPress={radiusPress} style={styles.radiusButton}>
+              <Image
+                source={IMAGES.radius_ic}
+                resizeMode="contain"
+                style={{ height: 32, width: 32 }}
+              />
+              <TextField
+                uppercase
+                textAlign="center"
+                text={"Suchradius wählen"}
+                color={COLORS.green}
+                fontSize={20}
+                fontFamily={Fonts.heading}
+                letterSpacing={1.5}
+                marginLeft={10}
+              />
+            </TouchableOpacity>
+            {sponsoredEvents?.length > 0 && (
+              <>
+                {eventsLoading ? (
+                  <CustomLoader message="Ereignisse werden geladen..." />
+                ) : (
+                  <Carousel
+                    style={{ marginTop: 10 }}
+                    key={refreshKey}
+                    loop={sponsoredEvents?.length > 1}
+                    width={width}
+                    height={500}
+                    autoPlay={sponsoredEvents?.length > 1}
+                    data={sponsoredEvents || []}
+                    scrollAnimationDuration={1000}
+                    enabled={sponsoredEvents?.length > 1} // 👈 disables swiping when only one
+                    renderItem={({ item }) => (
+                      <EventCard item={item} navigation={navigation} />
+                    )}
                   />
-                </View>
-              </View>
+                )}
+              </>
             )}
-            data={filteredEvents}
-            keyExtractor={(item, index) => item.id || index.toString()}
-            renderItem={({ item }) => <RadiusEventBlock item={item} />}
-            style={styles.radiusList}
-          />
-        </View>
-      </ScrollView>
+            <View style={{ paddingHorizontal: 20, width: "100%" }}>
+              <TextField
+                text={"ALLE EVENTS"}
+                color={COLORS.green}
+                fontSize={22}
+                fontFamily={Fonts.heading}
+                marginTop={20}
+                marginBottom={6}
+                letterSpacing={1.5}
+              />
+              <TextField
+                text={
+                  "Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."
+                }
+                color={COLORS.green}
+                fontSize={14}
+                fontFamily={Fonts.comfortaaLight}
+                marginBottom={10}
+                textAlign="left"
+              />
+            </View>
+          </View>
+        )}
+        data={filteredEvents}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        renderItem={({ item }) => <RadiusEventBlock item={item} />}
+        contentContainerStyle={styles.flatListContent}
+        style={styles.radiusList}
+      />
 
       {/* 🚨 Permission Modal for iOS */}
       <Modal visible={showPermissionModal} transparent animationType="fade">
@@ -374,13 +378,16 @@ const EventHome = () => {
 export default EventHome;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", width: "100%" },
+  container: { alignItems: "center", width: "100%" },
   radiusButton: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
   },
   radiusList: { width: "100%", paddingHorizontal: 20 },
+  flatListContent: {
+    paddingBottom: 32,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",

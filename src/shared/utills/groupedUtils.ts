@@ -26,6 +26,13 @@ export const groupAndFlattenEvents = (events: any[]) => {
     })
     .flatMap(([date, events]) => [
       {type: 'header', id: `header-${date}`, date},
-      ...events.map(e => ({...e, type: 'event'})),
+      // Sort events alphabetically within each date group (matching Android)
+      ...events
+        .sort((a, b) => {
+          const nameA = (a.name || '').toLowerCase();
+          const nameB = (b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        })
+        .map(e => ({...e, type: 'event'})),
     ]);
 };
