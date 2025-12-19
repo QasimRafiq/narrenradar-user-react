@@ -48,18 +48,42 @@ const SearchScreen = () => {
 
   // Filter events matching Android behavior: search by name, eventLocation, and description
   const filteredEvents = searchText
-    ? events?.filter((e: any) => {
-        // Skip header items if any (shouldn't be in flat events list)
-        if (e.type === "header") return false;
+    ? events
+        ?.filter((e: any) => {
+          // Skip header items if any (shouldn't be in flat events list)
+          if (e.type === "header") return false;
 
-        const searchLower = searchText.toLowerCase();
-        return (
-          e.name?.toLowerCase().includes(searchLower) ||
-          e.eventLocation?.toLowerCase().includes(searchLower) ||
-          e.description?.toLowerCase().includes(searchLower)
-        );
-      })
-    : events?.filter((e: any) => e.type !== "header"); // Filter out any header items
+          const searchLower = searchText.toLowerCase();
+          return (
+            e.name?.toLowerCase().includes(searchLower) ||
+            e.eventLocation?.toLowerCase().includes(searchLower) ||
+            e.description?.toLowerCase().includes(searchLower)
+          );
+        })
+        .sort((a: any, b: any) => {
+          const dateA = a.eventDate || 0;
+          const dateB = b.eventDate || 0;
+          // If dates are the same, sort alphabetically by name
+          if (dateA === dateB) {
+            const nameA = a.name?.toLowerCase() || "";
+            const nameB = b.name?.toLowerCase() || "";
+            return nameA.localeCompare(nameB);
+          }
+          return dateA - dateB;
+        })
+    : events
+        ?.filter((e: any) => e.type !== "header")
+        .sort((a: any, b: any) => {
+          const dateA = a.eventDate || 0;
+          const dateB = b.eventDate || 0;
+          // If dates are the same, sort alphabetically by name
+          if (dateA === dateB) {
+            const nameA = a.name?.toLowerCase() || "";
+            const nameB = b.name?.toLowerCase() || "";
+            return nameA.localeCompare(nameB);
+          }
+          return dateA - dateB;
+        }); // Filter out any header items and sort
 
   // Filter regions matching Android behavior: search by name (title)
   const filteredRegion = searchText
