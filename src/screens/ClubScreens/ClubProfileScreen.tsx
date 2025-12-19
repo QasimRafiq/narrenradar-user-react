@@ -238,7 +238,7 @@ const ClubProfileScreen = () => {
     { label: "Mitgliederzahl", value: clubData?.mitgliederzahl },
     {
       label: "Mitgliederzahl Stand (Datum)",
-      value: formatTimestamp(clubData?.createdAt),
+      value: formatTimestamp(clubData?.stand),
     },
     {
       label: "Narrenfiguren mit Narrenruf",
@@ -616,15 +616,15 @@ const ClubProfileScreen = () => {
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null}
-                      {/* {member.email ? (
+                      ) : null} 
+                      {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null} */}
+                      ) : null}
                     </View>
                   ))}
                 </>
@@ -684,7 +684,14 @@ const ClubProfileScreen = () => {
                           fontSize={18}
                         />
                       ) : null}
-
+ {member.email ? (
+                        <TextField
+                          text={member.email}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
+                      ) : null}
                       {/* {member.email ? (
                         <TextField
                           text={member.email}
