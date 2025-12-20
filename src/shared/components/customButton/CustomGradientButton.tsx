@@ -55,7 +55,7 @@ export default CustomGradientButton;
 const styles = StyleSheet.create({
   gradientContainer: {
     borderRadius: 32, // Match Android: RoundedCornerShape(32.dp)
-    width: 220, // Minimum width like Android, but allow expansion
+    width: 260, // Minimum width like Android, but allow expansion
     minHeight: 50, // Minimum height like Android, but allow expansion for wrapped text
     alignItems: "center",
     justifyContent: "center",
