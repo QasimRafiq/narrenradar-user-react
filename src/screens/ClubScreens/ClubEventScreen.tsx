@@ -202,6 +202,21 @@ const ClubEventScreen = () => {
         letterSpacing={1.5}
       />
 
+
+
+
+            <TextField
+                text={
+                  "Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."
+                }
+                color={COLORS.green}
+                fontSize={14}
+                fontFamily={Fonts.comfortaaLight}
+                marginLeft={10}
+                marginRight={10}
+                textAlign="left"
+              />
+
       {loading ? (
         <ActivityIndicator
           color={COLORS.green}

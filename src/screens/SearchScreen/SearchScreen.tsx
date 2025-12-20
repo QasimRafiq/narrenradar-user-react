@@ -35,10 +35,10 @@ const SearchScreen = () => {
   const { events, loading: eventsLoading } = useEvents();
   const { clubUsers, loading } = useClubUsers();
 
-  const [activeFilter, setActiveFilter] = useState(de.event);
+  const [activeFilter, setActiveFilter] = useState("Veranstaltung");
   const [searchText, setSearchText] = useState("");
 
-  const filters = [de.event, "Verband", "Verein"];
+  const filters = ["Veranstaltung", "Verband", "Verein"];
 
   // Clear search when switching filters (matching Android behavior)
   const handleFilterChange = (filter: string) => {
@@ -124,8 +124,8 @@ const SearchScreen = () => {
         uppercase
         textAlign="center"
         text={
-          activeFilter === de.event
-            ? de.event
+          activeFilter === "Veranstaltung"
+            ? "Veranstaltung"
             : activeFilter === "Verband"
             ? "Verband"
             : "Verein"
@@ -164,7 +164,7 @@ const SearchScreen = () => {
       <View style={styles.searchBox}>
         <TextInput
           placeholder={
-            activeFilter === de.event
+            activeFilter === "Veranstaltung"
               ? "Veranstaltung suchen"
               : activeFilter === "Verband"
               ? "Verband suchen"
@@ -183,7 +183,7 @@ const SearchScreen = () => {
       </View>
 
       {/* Event List */}
-      {activeFilter === de.event && (
+      {activeFilter === "Veranstaltung" && (
         <>
           {eventsLoading ? (
             <CustomLoader message="DATEN ABRUFEN..." />

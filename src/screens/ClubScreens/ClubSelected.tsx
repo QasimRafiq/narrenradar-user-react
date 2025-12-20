@@ -70,6 +70,7 @@ const ClubSelected = () => {
         onPress={() => navigation.navigate(ROUTE_NAMES.AWAY_DATE, {clubData})}
         opacity={0.7}
       />
+     
     </ImageBackground>
   );
 };
