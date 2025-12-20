@@ -45,7 +45,7 @@ const RadiusEventBlock = ({ item }) => {
   // Format event name with city
   const displayText = cityName
     ? `${item?.name} - ${cityName}`
-    : item?.name;
+    : `${item?.name}`;
 
   // Handle event items
   return (
@@ -58,11 +58,12 @@ const RadiusEventBlock = ({ item }) => {
       }
     >
       <TextField
-        text={`  ${displayText}`}
+        text={`${displayText}`}
         color={COLORS.green}
         fontFamily={Fonts.comfortaaMedium}
         marginBottom={10}
         fontSize={16}
+        marginLeft={10}
       />
     </TouchableOpacity>
   );

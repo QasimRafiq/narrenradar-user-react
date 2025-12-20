@@ -594,9 +594,8 @@ const ClubProfileScreen = () => {
                             source={{ uri: member.imageUrl }}
                             style={{
                               height: 250,
-                              width: width * 0.8,
+                              width: 250,
                               borderRadius: 16,
-                              backgroundColor: "#fff",
                             }}
                             resizeMode="cover"
                             onError={(e) =>
@@ -616,7 +615,7 @@ const ClubProfileScreen = () => {
                           fontFamily={Fonts.comfortaaMedium}
                           fontSize={18}
                         />
-                      ) : null} 
+                      ) : null}
                       {member.email ? (
                         <TextField
                           text={member.email}
@@ -684,7 +683,7 @@ const ClubProfileScreen = () => {
                           fontSize={18}
                         />
                       ) : null}
- {member.email ? (
+                      {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}

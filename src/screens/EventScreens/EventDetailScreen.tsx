@@ -131,7 +131,9 @@ const EventDetailScreen = () => {
 
     const shareText = `Schau dir diese Veranstaltung an: ${
       eventDetails.name
-    }\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar`;
+    }\n\n${
+      eventDetails.description || ""
+    }\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar`;
 
     try {
       const result = await Share.share({
@@ -277,8 +279,8 @@ const EventDetailScreen = () => {
               <Image
                 source={{ uri: eventDetails?.eventImage?.url }}
                 style={{
-                  width: "90%",
-                  height: 280,
+                  width: 260,
+                  height: 260,
                   marginBottom: 10,
                   borderRadius: 24,
                 }}
@@ -549,18 +551,27 @@ const EventDetailScreen = () => {
                               !isPDF;
 
                             if (isPDF) {
-                              navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                                pdfDocument: item.flyer.url,
-                              });
+                              navigation.navigate(
+                                ROUTE_NAMES.PDF_VIEWER_SCREEN,
+                                {
+                                  pdfDocument: item.flyer.url,
+                                }
+                              );
                             } else if (isImage) {
-                              navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                                imgDocument: item.flyer.url,
-                              });
+                              navigation.navigate(
+                                ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                {
+                                  imgDocument: item.flyer.url,
+                                }
+                              );
                             } else {
                               // Fallback: try as image first (since it's a flyer)
-                              navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                                imgDocument: item.flyer.url,
-                              });
+                              navigation.navigate(
+                                ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                {
+                                  imgDocument: item.flyer.url,
+                                }
+                              );
                             }
                           }}
                         >
@@ -602,7 +613,10 @@ const EventDetailScreen = () => {
                     }
 
                     // Detect file type using comprehensive detection
-                    const detectedType = await detectFileType(doc.url, doc.type);
+                    const detectedType = await detectFileType(
+                      doc.url,
+                      doc.type
+                    );
 
                     // Determine if it's PDF or image
                     const isPDF =
