@@ -25,7 +25,7 @@ const SearchByRadius = () => {
   const navigation = useNavigation<any>();
 
   // const [region, setRegion] = useState(DEFAULT_REGION);
-  const [radius, setRadius] = useState(1000); // 10 km
+  const [radius, setRadius] = useState(10000); // 10 km
   const [selectedAddress, setSelectedAddress] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -241,6 +241,7 @@ const SearchByRadius = () => {
             minimumValue={SLIDER_CONFIG.min}
             maximumValue={SLIDER_CONFIG.max}
             step={SLIDER_CONFIG.step}
+            value={radius}
             minimumTrackTintColor={COLORS.green}
             maximumTrackTintColor="#E0E0E0"
             thumbTintColor={COLORS.green}
