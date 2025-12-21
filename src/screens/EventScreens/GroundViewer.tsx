@@ -10,6 +10,7 @@ import {
   Platform,
   LayoutChangeEvent,
 } from "react-native";
+import { COLORS } from "../../shared/constants/theme"; 
 import {
   PinchGestureHandler,
   TapGestureHandler,
@@ -21,7 +22,6 @@ import { useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
-import { COLORS } from "../../shared/constants/theme";
 import TextField from "../../shared/components/customText/TextField";
 import { Fonts } from "../../assets/fonts/fonts";
 
@@ -99,7 +99,7 @@ const GroundViewer = () => {
     setContainerSize({ width, height });
   };
 
-  // Clamp pan so the zoomed image never leaves the screen (iOS-like)
+  // Clamp pan so the zoomed image never leaves the screen
   const constrainTranslation = (
     tx: number,
     ty: number,
@@ -366,6 +366,11 @@ const GroundViewer = () => {
   const iw = imageSize.width || containerSize.width;
   const ih = imageSize.height || containerSize.height;
 
+  // ✅ Only allow panning if zoomed image is bigger than screen on at least one axis
+  const canPan =
+    baseScale * iw > containerSize.width ||
+    baseScale * ih > containerSize.height;
+
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
@@ -385,7 +390,7 @@ const GroundViewer = () => {
                 ref={panRef}
                 onGestureEvent={onPanGestureEvent}
                 onHandlerStateChange={onPanHandlerStateChange}
-                enabled={baseScale > 1}
+                enabled={canPan}                 // 👈 HERE
                 simultaneousHandlers={[pinchRef, doubleTapRef]}
               >
                 <Animated.View style={styles.imageWrapper}>
