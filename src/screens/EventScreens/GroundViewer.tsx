@@ -1,3 +1,4 @@
+import React, { useRef, useState, useEffect } from "react";
 import {
   Image,
   ImageBackground,
@@ -7,8 +8,8 @@ import {
   TouchableOpacity,
   Animated,
   Platform,
+  LayoutChangeEvent,
 } from "react-native";
-import React, { useRef, useState, useEffect } from "react";
 import {
   PinchGestureHandler,
   TapGestureHandler,
@@ -36,7 +37,13 @@ const GroundViewer = () => {
   const [baseScale, setBaseScale] = useState(1);
   const [baseTranslateX, setBaseTranslateX] = useState(0);
   const [baseTranslateY, setBaseTranslateY] = useState(0);
+
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [containerSize, setContainerSize] = useState({
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  });
+
   const [showControls, setShowControls] = useState(false);
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(
     null
@@ -45,13 +52,15 @@ const GroundViewer = () => {
   const baseScaleAnimated = useRef(new Animated.Value(1)).current;
   const baseTranslateXAnimated = useRef(new Animated.Value(0)).current;
   const baseTranslateYAnimated = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(1)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(0)).current;
+
+  const pinchScale = useRef(new Animated.Value(1)).current;
+  const panTranslateX = useRef(new Animated.Value(0)).current;
+  const panTranslateY = useRef(new Animated.Value(0)).current;
 
   const lastScale = useRef(1);
   const lastTranslateX = useRef(0);
   const lastTranslateY = useRef(0);
+
   const lastTapTime = useRef(0);
   const lastTapPosition = useRef({ x: 0, y: 0 });
 
@@ -59,25 +68,21 @@ const GroundViewer = () => {
   const panRef = useRef(null);
   const doubleTapRef = useRef(null);
 
-  // Auto-hide controls after 2 seconds
+  // Auto-hide controls
   const startControlsTimeout = () => {
-    if (controlsTimeout) {
-      clearTimeout(controlsTimeout);
-    }
+    if (controlsTimeout) clearTimeout(controlsTimeout);
+
     setShowControls(true);
+
     if (baseScale !== 1 || baseTranslateX !== 0 || baseTranslateY !== 0) {
-      const timeout = setTimeout(() => {
-        setShowControls(false);
-      }, 2000);
-      setControlsTimeout(timeout);
+      const t = setTimeout(() => setShowControls(false), 2000);
+      setControlsTimeout(t);
     }
   };
 
   useEffect(() => {
     return () => {
-      if (controlsTimeout) {
-        clearTimeout(controlsTimeout);
-      }
+      if (controlsTimeout) clearTimeout(controlsTimeout);
     };
   }, [controlsTimeout]);
 
@@ -89,21 +94,40 @@ const GroundViewer = () => {
     }
   }, [baseScale, baseTranslateX, baseTranslateY]);
 
-  // Constrain translation within bounds
+  const onContainerLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setContainerSize({ width, height });
+  };
+
+  // Clamp pan so the zoomed image never leaves the screen (iOS-like)
   const constrainTranslation = (
     tx: number,
     ty: number,
     currentScale: number
   ) => {
-    if (imageSize.width === 0 || imageSize.height === 0) {
-      return { x: tx, y: ty };
+    const { width: cw, height: ch } = containerSize;
+    const iw = imageSize.width || cw;
+    const ih = imageSize.height || ch;
+
+    if (!cw || !ch || !iw || !ih) return { x: tx, y: ty };
+
+    const scaledWidth = iw * currentScale;
+    const scaledHeight = ih * currentScale;
+
+    let maxTranslateX = 0;
+    let maxTranslateY = 0;
+
+    if (scaledWidth > cw) {
+      maxTranslateX = (scaledWidth - cw) / 2;
+    } else {
+      tx = 0;
     }
 
-    const scaledWidth = imageSize.width * currentScale;
-    const scaledHeight = imageSize.height * currentScale;
-
-    const maxTranslateX = Math.max(0, (scaledWidth - SCREEN_WIDTH) / 2);
-    const maxTranslateY = Math.max(0, (scaledHeight - SCREEN_HEIGHT) / 2);
+    if (scaledHeight > ch) {
+      maxTranslateY = (scaledHeight - ch) / 2;
+    } else {
+      ty = 0;
+    }
 
     const constrainedX = Math.max(-maxTranslateX, Math.min(maxTranslateX, tx));
     const constrainedY = Math.max(-maxTranslateY, Math.min(maxTranslateY, ty));
@@ -111,57 +135,49 @@ const GroundViewer = () => {
     return { x: constrainedX, y: constrainedY };
   };
 
-  // Handle pinch gesture
+  // Pinch
   const onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: scale } }],
-    {
-      useNativeDriver: true,
-      listener: (event: any) => {
-        const newScale = lastScale.current * event.nativeEvent.scale;
-        if (newScale < MIN_SCALE || newScale > MAX_SCALE) {
-          return;
-        }
-      },
-    }
+    [{ nativeEvent: { scale: pinchScale } }],
+    { useNativeDriver: true }
   );
 
   const onPinchHandlerStateChange = (event: any) => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
-      const newScale = Math.max(
-        MIN_SCALE,
-        Math.min(MAX_SCALE, lastScale.current * event.nativeEvent.scale)
-      );
+      const rawScale = lastScale.current * event.nativeEvent.scale;
+      const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, rawScale));
+
       lastScale.current = newScale;
       setBaseScale(newScale);
       baseScaleAnimated.setValue(newScale);
-      scale.setValue(1);
+      pinchScale.setValue(1);
 
-      // Constrain translation after scale change
       const constrained = constrainTranslation(
         lastTranslateX.current,
         lastTranslateY.current,
         newScale
       );
+
       lastTranslateX.current = constrained.x;
       lastTranslateY.current = constrained.y;
       setBaseTranslateX(constrained.x);
       setBaseTranslateY(constrained.y);
       baseTranslateXAnimated.setValue(constrained.x);
       baseTranslateYAnimated.setValue(constrained.y);
-      translateX.setValue(0);
-      translateY.setValue(0);
+
+      panTranslateX.setValue(0);
+      panTranslateY.setValue(0);
 
       startControlsTimeout();
     }
   };
 
-  // Handle pan gesture (for dragging when zoomed)
+  // Pan
   const onPanGestureEvent = Animated.event(
     [
       {
         nativeEvent: {
-          translationX: translateX,
-          translationY: translateY,
+          translationX: panTranslateX,
+          translationY: panTranslateY,
         },
       },
     ],
@@ -187,14 +203,15 @@ const GroundViewer = () => {
       setBaseTranslateY(constrained.y);
       baseTranslateXAnimated.setValue(constrained.x);
       baseTranslateYAnimated.setValue(constrained.y);
-      translateX.setValue(0);
-      translateY.setValue(0);
+
+      panTranslateX.setValue(0);
+      panTranslateY.setValue(0);
 
       startControlsTimeout();
     }
   };
 
-  // Handle double tap
+  // Double tap
   const onDoubleTap = (event: any) => {
     if (event.nativeEvent.state === State.ACTIVE) {
       const now = Date.now();
@@ -206,24 +223,23 @@ const GroundViewer = () => {
         Math.abs(x - lastTapPosition.current.x) < 50 &&
         Math.abs(y - lastTapPosition.current.y) < 50
       ) {
-        // Double tap detected
         const newScale = baseScale === 1 ? DOUBLE_TAP_SCALE : 1;
         const targetScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
         Animated.parallel([
-          Animated.timing(scale, {
+          Animated.timing(baseScaleAnimated, {
             toValue: targetScale,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
-          Animated.timing(translateX, {
+          Animated.timing(baseTranslateXAnimated, {
             toValue: 0,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
-          Animated.timing(translateY, {
+          Animated.timing(baseTranslateYAnimated, {
             toValue: 0,
-            duration: 300,
+            duration: 250,
             useNativeDriver: true,
           }),
         ]).start(() => {
@@ -233,20 +249,14 @@ const GroundViewer = () => {
           setBaseScale(targetScale);
           setBaseTranslateX(0);
           setBaseTranslateY(0);
-          baseScaleAnimated.setValue(targetScale);
-          baseTranslateXAnimated.setValue(0);
-          baseTranslateYAnimated.setValue(0);
-          scale.setValue(1);
-          translateX.setValue(0);
-          translateY.setValue(0);
+          pinchScale.setValue(1);
+          panTranslateX.setValue(0);
+          panTranslateY.setValue(0);
           startControlsTimeout();
         });
       } else {
-        // Single tap - toggle controls
         setShowControls((prev) => !prev);
-        if (!showControls) {
-          startControlsTimeout();
-        }
+        if (!showControls) startControlsTimeout();
       }
 
       lastTapTime.current = now;
@@ -254,25 +264,24 @@ const GroundViewer = () => {
     }
   };
 
-  // Zoom in
+  // Buttons
   const handleZoomIn = () => {
     const newScale = Math.min(MAX_SCALE, baseScale * 1.5);
-    Animated.parallel([
-      Animated.timing(baseScaleAnimated, {
-        toValue: newScale,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+
+    Animated.timing(baseScaleAnimated, {
+      toValue: newScale,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
       lastScale.current = newScale;
       setBaseScale(newScale);
 
-      // Constrain translation
       const constrained = constrainTranslation(
         lastTranslateX.current,
         lastTranslateY.current,
         newScale
       );
+
       lastTranslateX.current = constrained.x;
       lastTranslateY.current = constrained.y;
       setBaseTranslateX(constrained.x);
@@ -284,20 +293,17 @@ const GroundViewer = () => {
     });
   };
 
-  // Zoom out
   const handleZoomOut = () => {
     const newScale = Math.max(MIN_SCALE, baseScale / 1.5);
-    Animated.parallel([
-      Animated.timing(baseScaleAnimated, {
-        toValue: newScale,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+
+    Animated.timing(baseScaleAnimated, {
+      toValue: newScale,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
       lastScale.current = newScale;
       setBaseScale(newScale);
 
-      // Reset translation if zoomed out to minimum
       if (newScale === 1) {
         lastTranslateX.current = 0;
         lastTranslateY.current = 0;
@@ -318,26 +324,26 @@ const GroundViewer = () => {
         baseTranslateXAnimated.setValue(constrained.x);
         baseTranslateYAnimated.setValue(constrained.y);
       }
+
       startControlsTimeout();
     });
   };
 
-  // Reset zoom and position
   const handleReset = () => {
     Animated.parallel([
       Animated.timing(baseScaleAnimated, {
         toValue: 1,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(baseTranslateXAnimated, {
         toValue: 0,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(baseTranslateYAnimated, {
         toValue: 0,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
     ]).start(() => {
@@ -347,15 +353,18 @@ const GroundViewer = () => {
       setBaseScale(1);
       setBaseTranslateX(0);
       setBaseTranslateY(0);
-      scale.setValue(1);
-      translateX.setValue(0);
-      translateY.setValue(0);
+      pinchScale.setValue(1);
+      panTranslateX.setValue(0);
+      panTranslateY.setValue(0);
       setShowControls(false);
     });
   };
 
   const isZoomed =
     baseScale !== 1 || baseTranslateX !== 0 || baseTranslateY !== 0;
+
+  const iw = imageSize.width || containerSize.width;
+  const ih = imageSize.height || containerSize.height;
 
   return (
     <ImageBackground
@@ -364,7 +373,7 @@ const GroundViewer = () => {
       style={GlobalStyleSheet.bgImage}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.container}>
+        <View style={styles.container} onLayout={onContainerLayout}>
           <PinchGestureHandler
             ref={pinchRef}
             onGestureEvent={onPinchGestureEvent}
@@ -382,64 +391,76 @@ const GroundViewer = () => {
                 <Animated.View style={styles.imageWrapper}>
                   <TapGestureHandler
                     ref={doubleTapRef}
-                    onHandlerStateChange={onDoubleTap}
                     numberOfTaps={2}
+                    onHandlerStateChange={onDoubleTap}
                     simultaneousHandlers={[pinchRef, panRef]}
                   >
+                    {/* OUTER: translation only */}
                     <Animated.View
-                      style={[
-                        styles.imageInnerWrapper,
-                        {
+                      style={{
+                        width: containerSize.width,
+                        height: containerSize.height,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        transform: [
+                          {
+                            translateX: Animated.add(
+                              baseTranslateXAnimated,
+                              panTranslateX
+                            ),
+                          },
+                          {
+                            translateY: Animated.add(
+                              baseTranslateYAnimated,
+                              panTranslateY
+                            ),
+                          },
+                        ],
+                      }}
+                    >
+                      {/* INNER: image scaling only */}
+                      <Animated.View
+                        style={{
+                          width: iw,
+                          height: ih,
                           transform: [
                             {
                               scale: Animated.multiply(
                                 baseScaleAnimated,
-                                scale
-                              ),
-                            },
-                            {
-                              translateX: Animated.add(
-                                baseTranslateXAnimated,
-                                translateX
-                              ),
-                            },
-                            {
-                              translateY: Animated.add(
-                                baseTranslateYAnimated,
-                                translateY
+                                pinchScale
                               ),
                             },
                           ],
-                        },
-                      ]}
-                    >
-                      <Image
-                        source={{ uri: imgDocument }}
-                        resizeMode="contain"
-                        style={styles.image}
-                        onLoad={(e) => {
-                          const { width, height } = e.nativeEvent.source;
-                          const imageAspectRatio = width / height;
-                          const screenAspectRatio =
-                            SCREEN_WIDTH / SCREEN_HEIGHT;
-
-                          let displayWidth = SCREEN_WIDTH;
-                          let displayHeight = SCREEN_HEIGHT;
-
-                          if (imageAspectRatio > screenAspectRatio) {
-                            // Image is wider
-                            displayHeight = SCREEN_WIDTH / imageAspectRatio;
-                          } else {
-                            // Image is taller
-                            displayWidth = SCREEN_HEIGHT * imageAspectRatio;
-                          }
-
-                          setImageSize({
-                            width: displayWidth,
-                            height: displayHeight,
-                          });
                         }}
-                      />
+                      >
+                        <Image
+                          source={{ uri: imgDocument }}
+                          resizeMode="contain"
+                          style={{ width: "100%", height: "100%" }}
+                          onLoad={(e) => {
+                            const { width, height } = e.nativeEvent.source;
+                            const imageAspectRatio = width / height;
+                            const containerAspectRatio =
+                              containerSize.width / containerSize.height;
+
+                            let displayWidth = containerSize.width;
+                            let displayHeight = containerSize.height;
+
+                            if (imageAspectRatio > containerAspectRatio) {
+                              displayHeight =
+                                containerSize.width / imageAspectRatio;
+                            } else {
+                              displayWidth =
+                                containerSize.height * imageAspectRatio;
+                            }
+
+                            setImageSize({
+                              width: displayWidth,
+                              height: displayHeight,
+                            });
+                          }}
+                        />
+                      </Animated.View>
                     </Animated.View>
                   </TapGestureHandler>
                 </Animated.View>
@@ -447,7 +468,6 @@ const GroundViewer = () => {
             </Animated.View>
           </PinchGestureHandler>
 
-          {/* Control Bar */}
           {isZoomed && (
             <Animated.View
               style={[
@@ -458,7 +478,6 @@ const GroundViewer = () => {
               ]}
             >
               <View style={styles.controlBarContent}>
-                {/* Zoom Level Indicator */}
                 <View style={styles.zoomIndicator}>
                   <Icon name="zoom-in" size={20} color={COLORS.green} />
                   <TextField
@@ -470,9 +489,7 @@ const GroundViewer = () => {
                   />
                 </View>
 
-                {/* Control Buttons */}
                 <View style={styles.controlButtons}>
-                  {/* Zoom Out */}
                   {baseScale > MIN_SCALE && (
                     <TouchableOpacity
                       style={styles.controlButton}
@@ -483,7 +500,6 @@ const GroundViewer = () => {
                     </TouchableOpacity>
                   )}
 
-                  {/* Zoom In */}
                   {baseScale < MAX_SCALE && (
                     <TouchableOpacity
                       style={styles.controlButton}
@@ -494,12 +510,10 @@ const GroundViewer = () => {
                     </TouchableOpacity>
                   )}
 
-                  {/* Divider */}
                   {(baseScale > MIN_SCALE || baseScale < MAX_SCALE) && (
                     <View style={styles.divider} />
                   )}
 
-                  {/* Reset Button */}
                   {(baseScale !== 1 ||
                     baseTranslateX !== 0 ||
                     baseTranslateY !== 0) && (
@@ -540,16 +554,6 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-  },
-  imageInnerWrapper: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
   },
   controlBar: {
     position: "absolute",
