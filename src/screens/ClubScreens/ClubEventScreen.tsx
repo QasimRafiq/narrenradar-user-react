@@ -193,7 +193,7 @@ const ClubEventScreen = () => {
       <TextField
         uppercase
         textAlign="center"
-        text={de.event}
+        text="Narrenfahrplan"
         color={COLORS.green}
         fontSize={22}
         fontFamily={Fonts.heading}
@@ -212,7 +212,7 @@ const ClubEventScreen = () => {
                 color={COLORS.green}
                 fontSize={14}
                 fontFamily={Fonts.comfortaaLight}
-                marginLeft={10}
+                marginLeft={25}
                 marginRight={10}
                 textAlign="left"
               />
