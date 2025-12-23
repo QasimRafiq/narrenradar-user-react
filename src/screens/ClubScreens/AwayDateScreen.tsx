@@ -174,99 +174,96 @@ const AwayDateScreen = () => {
       return;
     }
 
-    // query events by clubId (same as Android)
-    const eventRef = database()
-      .ref('/events')
-      .orderByChild('clubId')
-      .equalTo(clubId);
+    // Fetch ALL events (like Android), then filter in code
+    const eventRef = database().ref('/events');
 
     const onValueChange = eventRef.on('value', snapshot => {
       const data = snapshot.val();
-      console.log('raw events for club ->', data);
 
       if (data) {
         const events = Object.entries(data)
           .map(([key, value]: any) => {
             const raw = value || {};
-            // NORMALIZE awayDates:
-            // Cases:
-            // 1) raw.awayDates = { departureType: "...", ... }  => use as-is
-            // 2) raw.awayDates = { "<clubId>": [ { departureType: ... }, ... ] } => use first element
-            let normalizedAwayDates: any = {};
+            
+            // Parse awayDates for this specific clubId (matching Android parseAwayData)
+            // Android: awayDatesSnapshot.child(clubId)
+            let parsedAwayDates: any = {};
             const rawAway = raw.awayDates;
 
-            if (rawAway) {
-              // If awayDates has a key equal to clubId, prefer that
-              if (
-                typeof rawAway === 'object' &&
-                !Array.isArray(rawAway) &&
-                Object.prototype.hasOwnProperty.call(rawAway, clubId)
-              ) {
-                const entry = rawAway[clubId];
-                // entry might be an array or an object
-                if (Array.isArray(entry) && entry.length > 0) {
-                  normalizedAwayDates = entry[0];
-                } else if (typeof entry === 'object' && entry !== null) {
-                  normalizedAwayDates = entry;
-                } else {
-                  // fallback: keep rawAway as-is
-                  normalizedAwayDates = rawAway;
+            if (rawAway && typeof rawAway === 'object' && !Array.isArray(rawAway)) {
+              // Check if awayDates has a key matching clubId
+              if (Object.prototype.hasOwnProperty.call(rawAway, clubId)) {
+                const clubAwayData = rawAway[clubId];
+                
+                // Parse the awayDates structure for this club
+                if (typeof clubAwayData === 'object' && clubAwayData !== null) {
+                  parsedAwayDates = {
+                    departureType: clubAwayData.departureType || 'Not specified',
+                    departureTime: clubAwayData.departureTime || null,
+                    departureBusTimes: clubAwayData.departureBusTimes || null,
+                    returnType: clubAwayData.returnType || 'Not specified',
+                    returnTime: clubAwayData.returnTime || null,
+                    returnBusTimes: clubAwayData.returnBusTimes || null,
+                    postcode: clubAwayData.postcode || '',
+                    description: clubAwayData.description || '',
+                    isPublish: clubAwayData.isPublish || false,
+                    createdAt: clubAwayData.createdAt || 0,
+                  };
+                  
+                  // Handle departureBusTimes - convert object to array if needed
+                  if (parsedAwayDates.departureBusTimes && typeof parsedAwayDates.departureBusTimes === 'object' && !Array.isArray(parsedAwayDates.departureBusTimes)) {
+                    parsedAwayDates.departureBusTimes = Object.values(parsedAwayDates.departureBusTimes).filter((t: any) => t);
+                  }
+                  
+                  // Handle returnBusTimes - convert object to array if needed
+                  if (parsedAwayDates.returnBusTimes && typeof parsedAwayDates.returnBusTimes === 'object' && !Array.isArray(parsedAwayDates.returnBusTimes)) {
+                    parsedAwayDates.returnBusTimes = Object.values(parsedAwayDates.returnBusTimes).filter((t: any) => t);
+                  }
                 }
-              } else {
-                // no clubId key — use rawAway directly
-                normalizedAwayDates = rawAway;
               }
-            } else {
-              normalizedAwayDates = {};
             }
 
-            // Keep whole event but replace awayDates with normalized version
-            return {id: key, ...raw, awayDates: normalizedAwayDates};
+            // Return event with parsed awayDates
+            return {
+              id: key,
+              ...raw,
+              awayDates: parsedAwayDates,
+            };
           })
           .filter((item: any) => {
-            // same filtering logic as before but using normalized awayDates
+            // Filter logic matching Android exactly
             const ad = item.awayDates || {};
 
-            // Normalize strings and safe-check types
-            const departureType = (ad.departureType || '').toString();
-            const returnType = (ad.returnType || '').toString();
-
             const hasDepartureInfo =
-              (departureType.toLowerCase() === 'shuttlebus' &&
-                !!ad.departureTime) ||
-              (Array.isArray(ad.departureBusTimes) &&
-                ad.departureBusTimes.length > 0);
+              (ad.departureType === 'Shuttlebus' && ad.departureTime != null) ||
+              (Array.isArray(ad.departureBusTimes) && ad.departureBusTimes.length > 0);
 
             const hasReturnInfo =
-              (returnType.toLowerCase() === 'shuttlebus' && !!ad.returnTime) ||
-              (Array.isArray(ad.returnBusTimes) &&
-                ad.returnBusTimes.length > 0);
+              (ad.returnType === 'Shuttlebus' && ad.returnTime != null) ||
+              (Array.isArray(ad.returnBusTimes) && ad.returnBusTimes.length > 0);
 
             const matches =
               hasDepartureInfo ||
               hasReturnInfo ||
-              departureType === 'Eigene Anreise' ||
-              returnType === 'Eigene Anreise' ||
-              departureType === 'Nicht angegeben' ||
-              returnType === 'Nicht angegeben';
-
-            // Debug each item
-            console.log(
-              'event:',
-              item.id,
-              item.name,
-              'awayDates(normalized):',
-              ad,
-              'matches:',
-              matches,
-            );
+              ad.departureType === 'Eigene Anreise' ||
+              ad.returnType === 'Eigene Anreise' ||
+              ad.departureType === 'Nicht angegeben' ||
+              ad.returnType === 'Nicht angegeben';
 
             return matches;
           })
           .sort((a: any, b: any) => {
-            // sort ascending by eventDate (string or number)
-            const da = parseInt(a.eventDate || '0', 10);
-            const db = parseInt(b.eventDate || '0', 10);
+            // Sort ascending by eventDate first
+            const da = a.eventDate ? (typeof a.eventDate === 'string' ? parseInt(a.eventDate, 10) : a.eventDate) : Number.MAX_SAFE_INTEGER;
+            const db = b.eventDate ? (typeof b.eventDate === 'string' ? parseInt(b.eventDate, 10) : b.eventDate) : Number.MAX_SAFE_INTEGER;
+            
+            // If dates are the same, sort alphabetically by name
+            if (da === db) {
+              const nameA = (a.name || '').toLowerCase();
+              const nameB = (b.name || '').toLowerCase();
+              return nameA.localeCompare(nameB);
+            }
+            
             return da - db;
           });
 
@@ -280,44 +277,78 @@ const AwayDateScreen = () => {
     return () => eventRef.off('value', onValueChange);
   }, [clubId]);
 
-  const renderTransportSection = (
-    labelBase: string,
+  // Helper functions matching Android
+  const hasDepartureInfo = (awayDates: any): boolean => {
+    if (!awayDates) return false;
+    return (
+      (awayDates.departureType === 'Shuttlebus' && awayDates.departureTime != null) ||
+      (Array.isArray(awayDates.departureBusTimes) && awayDates.departureBusTimes.length > 0)
+    );
+  };
+
+  const hasReturnInfo = (awayDates: any): boolean => {
+    if (!awayDates) return false;
+    return (
+      (awayDates.returnType === 'Shuttlebus' && awayDates.returnTime != null) ||
+      (Array.isArray(awayDates.returnBusTimes) && awayDates.returnBusTimes.length > 0)
+    );
+  };
+
+  const labelWithOptionalNumber = (
+    base: string,
     type: string,
-    singleTime?: string,
-    times?: string[],
+    indexOrNull: number | null,
+  ): string => {
+    if (indexOrNull == null) {
+      return `${base} ${type}:`;
+    } else {
+      return `${base} ${type} ${indexOrNull}:`;
+    }
+  };
+
+  const renderTransportSection = (
+    type: string,
+    singleTime: string | null | undefined,
+    times: string[] | null | undefined,
+    isDeparture: boolean,
   ) => {
-    if (singleTime) {
+    const labelBase = isDeparture ? 'Abfahrt' : 'Rückfahrt';
+    const displayType = type || 'Transport';
+
+    // Case 1: single time (e.g., Shuttlebus has a single time)
+    if (singleTime && singleTime.trim() !== '') {
       return (
         <View style={styles.detailRow}>
           <TextField
-            text={`${labelBase} ${type}: ${singleTime} Uhr`}
+            text={`${labelBase} ${displayType}: ${singleTime.trim()} Uhr`}
             color={COLORS.green}
             fontSize={16}
             fontFamily={Fonts.comfortaaMedium}
-            lineHeight={22}
+            lineHeight={17}
           />
         </View>
       );
     }
 
-    if (Array.isArray(times) && times.length > 0) {
-      const useNumbering = times.length > 1;
-      return times.map((time, i) => (
-        <View key={i} style={styles.detailRow}>
+    // Case 2: multiple times (e.g., Bus or any other type with list of times)
+    const safeTimes = (times || []).filter(t => t && t.trim() !== '');
+    if (safeTimes.length === 0) return null;
+
+    const useNumbering = safeTimes.length > 1;
+    return safeTimes.map((time, idx) => {
+      const indexForLabel = useNumbering ? idx + 1 : null;
+      return (
+        <View key={idx} style={styles.detailRow}>
           <TextField
-            text={`${labelBase} ${type}${
-              useNumbering ? ` ${i + 1}` : ''
-            }: ${time} Uhr`}
+            text={`${labelWithOptionalNumber(labelBase, displayType, indexForLabel)} ${time.trim()} Uhr`}
             color={COLORS.green}
             fontSize={16}
             fontFamily={Fonts.comfortaaMedium}
-            lineHeight={22}
+            lineHeight={17}
           />
         </View>
-      ));
-    }
-
-    return null;
+      );
+    });
   };
 
   const renderEventItem = ({item}: any) => {
@@ -337,53 +368,87 @@ const AwayDateScreen = () => {
             });
           }
         }}>
+        {/* Event row (no bullet) */}
         <View style={styles.row}>
           <TextField
-            text={`${formatTimestamp(item?.eventDate)} - ${item?.name || ''}`}
+            text={
+              item.eventDate
+                ? `${formatTimestamp(item.eventDate)} - ${item.name || ''}`
+                : item.name || ''
+            }
             color={COLORS.green}
             fontSize={16}
             fontFamily={Fonts.comfortaaBold}
           />
         </View>
 
-        {ad.departureType === 'Eigene Anreise' ||
-        ad.departureType === 'Nicht angegeben' ? (
+        {/* DEPARTURE */}
+        {hasDepartureInfo(ad) &&
+          renderTransportSection(
+            ad.departureType || '',
+            ad.departureTime,
+            ad.departureBusTimes,
+            true,
+          )}
+
+        {/* RETURN */}
+        {hasReturnInfo(ad) &&
+          renderTransportSection(
+            ad.returnType || '',
+            ad.returnTime,
+            ad.returnBusTimes,
+            false,
+          )}
+
+        {/* Eigene Anreise */}
+        {ad.departureType === 'Eigene Anreise' && (
           <View style={styles.detailRow}>
             <TextField
               text={ad.departureType}
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
-              lineHeight={22}
             />
           </View>
-        ) : (
-          renderTransportSection(
-            'Abfahrt',
-            ad.departureType || '',
-            ad.departureTime,
-            ad.departureBusTimes,
-          )
         )}
 
-        {ad.returnType === 'Eigene Abreise' ||
-        ad.returnType === 'Nicht angegeben' ? (
+        {/* Eigene Abreise */}
+        {ad.returnType === 'Eigene Abreise' && (
           <View style={styles.detailRow}>
             <TextField
               text={ad.returnType}
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
-              lineHeight={22}
+             
             />
           </View>
-        ) : (
-          renderTransportSection(
-            'Rückfahrt',
-            ad.returnType || '',
-            ad.returnTime,
-            ad.returnBusTimes,
-          )
+        )}
+
+        {/* Nicht angegeben - Departure */}
+        {ad.departureType === 'Nicht angegeben' && (
+          <View style={styles.detailRow}>
+            <TextField
+              text={ad.departureType}
+              color={COLORS.green}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
+              lineHeight={17}
+            />
+          </View>
+        )}
+
+        {/* Nicht angegeben - Return */}
+        {ad.returnType === 'Nicht angegeben' && (
+          <View style={styles.detailRow}>
+            <TextField
+              text={ad.returnType}
+              color={COLORS.green}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
+              lineHeight={17}
+            />
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -471,8 +536,9 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 20,
-    marginTop: 4,
+    marginLeft: 32,
+    marginTop: 2,
+    marginBottom: 2,
   },
   center: {
     marginTop: 40,
