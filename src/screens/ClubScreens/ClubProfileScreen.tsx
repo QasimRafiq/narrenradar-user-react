@@ -76,7 +76,7 @@ const ClubProfileScreen = () => {
 
     const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${
       clubData.foundingHistory || ""
-    }\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar`;
+    }\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
     try {
       const result = await Share.share({
