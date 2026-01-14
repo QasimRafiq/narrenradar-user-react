@@ -25,7 +25,7 @@ const SearchByRadius = () => {
   const navigation = useNavigation<any>();
 
   // const [region, setRegion] = useState(DEFAULT_REGION);
-  const [radius, setRadius] = useState(10000); // 10 km
+  const [radius, setRadius] = useState(100000); // 100 km
   const [selectedAddress, setSelectedAddress] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 

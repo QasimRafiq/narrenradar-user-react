@@ -131,7 +131,7 @@ const EventHome = () => {
   const activeLocation = selectedRegion
     ? { lat: selectedRegion.latitude, lng: selectedRegion.longitude }
     : userLocation;
-  const activeRadius = selectedRadius || 10; // default 40km
+  const activeRadius = selectedRadius || 100; // default 100km
 
   // Matching Android logic: events from today up to 7 days in the future
   const sponsoredEvents = events
