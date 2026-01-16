@@ -41,9 +41,53 @@ const EventDetailScreen = () => {
   const [currentWeather, setCurrentWeather] = useState<any>(null);
   const [forecastDay, setForecastDay] = useState<any>(null);
   const [checkPress, setCheckPress] = useState(false);
-  const [imageSize, setImageSize] = useState<{ width: number; height: number }>({ width: 400, height: 400 });
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
 
   const WEATHER_API_KEY = "d028bd113c2b4a1e86d105239252604"; // your key
+
+  // Calculate image size matching Android's widthIn/heightIn with ContentScale.Fit
+  useEffect(() => {
+    if (eventDetails?.eventImage?.url) {
+      Image.getSize(
+        eventDetails.eventImage.url,
+        (width, height) => {
+          const screenWidth = Dimensions.get("window").width;
+          const availableWidth = screenWidth - 40; // Account for 20px padding on each side
+          
+          // Android uses 400dp, but React Native's logical pixels are closer to iOS points
+          // On a typical device, 400dp in Android ≈ 200-250 logical pixels
+          // Adjust based on screen density to match Android visual size
+          const MAX_SIZE = Math.min(250, availableWidth);
+          
+          // Start with original dimensions
+          let displayWidth = width;
+          let displayHeight = height;
+          
+          console.log('Original image size:', width, 'x', height);
+          
+          // ContentScale.Fit: Only scale DOWN if image exceeds MAX_SIZE
+          // Never scale up - this matches Android behavior
+          if (displayWidth > MAX_SIZE || displayHeight > MAX_SIZE) {
+            const scale = Math.min(MAX_SIZE / displayWidth, MAX_SIZE / displayHeight);
+            displayWidth = displayWidth * scale;
+            displayHeight = displayHeight * scale;
+          }
+          
+          console.log('Display size:', Math.round(displayWidth), 'x', Math.round(displayHeight));
+          
+          setImageSize({
+            width: Math.round(displayWidth),
+            height: Math.round(displayHeight),
+          });
+        },
+        (error) => {
+          console.log("Error getting image size:", error);
+          // Fallback to a reasonable default
+          setImageSize({ width: 200, height: 200 });
+        }
+      );
+    }
+  }, [eventDetails?.eventImage?.url]);
 
   const fetchWeather = async (lat: number, lon: number) => {
     try {
@@ -111,54 +155,6 @@ const EventDetailScreen = () => {
     }
   }, [eventDetails]);
 
-  // Pre-calculate image size to prevent layout shift
-  useEffect(() => {
-    if (eventDetails?.eventImage?.url) {
-      Image.getSize(
-        eventDetails.eventImage.url,
-        (width, height) => {
-          const imageAspectRatio = width / height;
-          
-          // Calculate size that fits within 400x400 while maintaining aspect ratio
-          // Matching Android's widthIn(min = 120.dp, max = 400.dp) and heightIn(min = 120.dp, max = 400.dp)
-          let displayWidth = 400;
-          let displayHeight = 400;
-          
-          // Step 1: Scale to fit within 400x400 while maintaining aspect ratio
-          if (imageAspectRatio > 1) {
-            // Landscape: width is the limiting factor
-            displayHeight = 400 / imageAspectRatio;
-          } else {
-            // Portrait or square: height is the limiting factor
-            displayWidth = 400 * imageAspectRatio;
-          }
-          
-          // Step 2: If either dimension is too small, scale up proportionally
-          if (displayWidth < 120 || displayHeight < 120) {
-            const scale = Math.max(120 / displayWidth, 120 / displayHeight);
-            displayWidth = displayWidth * scale;
-            displayHeight = displayHeight * scale;
-          }
-          
-          // Step 3: If either dimension exceeds 400, scale down proportionally
-          if (displayWidth > 400 || displayHeight > 400) {
-            const scale = Math.min(400 / displayWidth, 400 / displayHeight);
-            displayWidth = displayWidth * scale;
-            displayHeight = displayHeight * scale;
-          }
-          
-          setImageSize({
-            width: displayWidth,
-            height: displayHeight,
-          });
-        },
-        (error) => {
-          // On error, use default size
-          console.log("Error getting image size:", error);
-        }
-      );
-    }
-  }, [eventDetails?.eventImage?.url]);
 
   const formattedDate = currentWeather?.last_updated
     ? new Date(currentWeather?.last_updated).toLocaleDateString("en-US", {
@@ -342,7 +338,7 @@ const EventDetailScreen = () => {
             uppercase={true}
             letterSpacing={1.5}
           />
-          {eventDetails?.eventImage?.url && (
+          {eventDetails?.eventImage?.url && imageSize && (
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => {
