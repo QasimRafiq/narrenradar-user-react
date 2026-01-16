@@ -481,7 +481,7 @@ const AwayDateScreen = () => {
                 color={COLORS.green}
                 fontSize={14}
                 fontFamily={Fonts.comfortaaLight}
-                marginLeft={10}
+                marginLeft={25}
                 marginRight={10}
                 textAlign="left"
               />
@@ -522,7 +522,7 @@ export default AwayDateScreen;
 
 const styles = StyleSheet.create({
   listContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 25,
     paddingBottom: 40,
   },
   itemWrapper: {
