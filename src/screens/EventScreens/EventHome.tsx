@@ -303,7 +303,7 @@ const EventHome = () => {
                 )}
               </>
             )}
-            <View style={{ paddingHorizontal: 20, width: "100%" }}>
+            <View style={{ width: "100%" }}>
               <TextField
                 text={"ALLE EVENTS"}
                 color={COLORS.green}
@@ -329,7 +329,7 @@ const EventHome = () => {
         data={filteredEvents}
         keyExtractor={(item, index) => item.id || index.toString()}
         renderItem={({ item }) => <RadiusEventBlock item={item} />}
-        contentContainerStyle={styles.flatListContent}
+        contentContainerStyle={[styles.flatListContent, { paddingHorizontal: 20 }]}
         style={styles.radiusList}
       />
 
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 10,
   },
-  radiusList: { width: "100%", paddingHorizontal: 20 },
+  radiusList: { width: "100%" },
   flatListContent: {
     paddingBottom: 32,
   },
