@@ -287,6 +287,7 @@ const EventHome = () => {
                     width={width}
                     height={500}
                     autoPlay={sponsoredEvents?.length > 1}
+                    autoPlayInterval={4000}
                     data={sponsoredEvents || []}
                     scrollAnimationDuration={1000}
                     enabled={sponsoredEvents?.length > 1} // 👈 disables swiping when only one
