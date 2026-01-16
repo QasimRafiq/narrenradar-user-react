@@ -134,29 +134,37 @@ const EventHome = () => {
   const activeRadius = selectedRadius || 100; // default 100km
 
   // Matching Android logic: events from today up to 7 days in the future
+  // Android: filteredAndSorted = events.filter {...}.sortedBy { it.eventDate }
   const sponsoredEvents = events
     ?.filter((e) => {
+      // Android: event.hasSponsoring && event.sponsorPackage == "Plus"
       if (!e?.hasSponsoring || e?.sponsorPackage !== "Plus" || !e?.eventDate)
         return false;
 
       const eventDate = new Date(e.eventDate).getTime();
       const sevenDaysFromNow = currentTime + 7 * 24 * 60 * 60 * 1000;
 
-      // Include events from today onwards, up to 7 days in the future
+      // Android: eventDate >= currentTime && eventDate <= sevenDaysFromNow
       const isWithin7DaysFromNow =
         eventDate >= currentTime && eventDate <= sevenDaysFromNow;
       if (!isWithin7DaysFromNow) return false;
 
-      // Extract location
-      const eventLat =
-        e?.eventLatitude ||
-        (Array.isArray(e.locations) && e.locations[0]?.latitude);
-      const eventLng =
-        e?.eventLongitude ||
-        (Array.isArray(e.locations) && e.locations[0]?.longitude);
+      // Android: (currentLocation == null || isEventWithinRadius(...))
+      // Android accesses: event.locations[0].latitude, event.locations[0].longitude
+      if (activeLocation) {
+        // Match Android's direct access pattern: event.locations[0].latitude
+        const eventLat =
+          (Array.isArray(e.locations) && e.locations[0]?.latitude) ||
+          e?.eventLatitude;
+        const eventLng =
+          (Array.isArray(e.locations) && e.locations[0]?.longitude) ||
+          e?.eventLongitude;
 
-      // If location enabled → check radius
-      if (activeLocation && eventLat && eventLng) {
+        // Skip if no valid coordinates (matching Android behavior)
+        if (!eventLat || !eventLng || eventLat === 0 || eventLng === 0) {
+          return false;
+        }
+
         const distance = getDistanceInKm(
           activeLocation.lat,
           activeLocation.lng,
@@ -169,7 +177,19 @@ const EventHome = () => {
       // No location → show all sponsored within 7 days from now
       return true;
     })
-    .sort((a, b) => (a.eventDate || 0) - (b.eventDate || 0)); // Sort by eventDate ascending
+    .sort((a, b) => {
+      // Android: .sortedBy { it.eventDate } - ascending order
+      // When eventDate is the same, preserve order from createdAt descending (newer first)
+      const dateA = a.eventDate || 0;
+      const dateB = b.eventDate || 0;
+      if (dateA !== dateB) {
+        return dateA - dateB;
+      }
+      // Secondary sort by createdAt descending (newer events first) to match Android
+      const createdAtA = a.createdAt || 0;
+      const createdAtB = b.createdAt || 0;
+      return createdAtB - createdAtA; // Descending (newer first)
+    });
 
   // 🔹 Filter events based on selected or user location (matching Android behavior)
   // Android: currentLocation == null || isEventWithinRadius(...)

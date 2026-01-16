@@ -39,11 +39,11 @@ export const useEvents = () => {
           }))
           // Filter out dummyEvent events (matching Android behavior)
           .filter((event: any) => !event.dummyEvent)
-          // Sort by eventDate ascending (matching Android behavior)
+          // Sort by createdAt descending (matching Android: events.sortByDescending { it.createdAt })
           .sort((a: any, b: any) => {
-            const dateA = a.eventDate || 0;
-            const dateB = b.eventDate || 0;
-            return dateA - dateB;
+            const createdAtA = a.createdAt || 0;
+            const createdAtB = b.createdAt || 0;
+            return createdAtB - createdAtA; // Descending order (newest first)
           });
         
         setEvents(formatted);
