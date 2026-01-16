@@ -23,11 +23,12 @@ const EventCard = ({ item, navigation }) => {
           textAlign="center"
           text={item?.name}
           color={COLORS.green}
-          fontSize={18}
+          fontSize={16}
           fontFamily={Fonts.heading}
-          marginBottom={10}
           uppercase={true}
+          fontWeight="normal"
         />
+        <View style={{ height: 16 }} />
         <TouchableOpacity
           onPress={() =>
             navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
@@ -38,7 +39,7 @@ const EventCard = ({ item, navigation }) => {
           <FastImage
             style={{
               height: 280,
-              borderRadius: 20,
+              borderRadius: 24,
               width: 280,
             }}
             source={{
@@ -49,15 +50,16 @@ const EventCard = ({ item, navigation }) => {
             resizeMode={FastImage.resizeMode.contain}
           />
         </TouchableOpacity>
+        <View style={{ height: 16 }} />
         <TextField
           textAlign="center"
           text={formatTimestamp(item?.eventDate)}
           color={COLORS.green}
-          fontSize={18}
+          fontSize={16}
           fontFamily={Fonts.comfortaaMedium}
-          marginTop={10}
-          marginBottom={10}
+          fontWeight="500"
         />
+        <View style={{ height: 8 }} />
         {item?.sponsorLogo && (
           <CustomFooter
             sponsorImg={item?.sponsorLogo?.url}

@@ -29,10 +29,11 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
     <View
       style={{
         backgroundColor: COLORS.light_green,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
+        paddingTop: 8,
+        paddingBottom: 8,
         width: "100%",
         alignItems: "center",
+       
       }}
     >
       <TextField
@@ -41,25 +42,31 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
         color={COLORS.green}
         fontSize={16}
         fontFamily={Fonts.heading}
-        marginTop={4}
+        marginTop={8}
         uppercase={true}
-        marginBottom={4}
         letterSpacing={1}
+        fontWeight="bold"
       />
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.8}
+      <View style={{ height: 8 }} />
+      <View
         style={{
+          width: "100%",
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
         }}
       >
-        <Image
-          source={{ uri: sponsorImg }}
-          resizeMode="contain"
-          style={styles.homeLogo}
-        />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handlePress}
+          activeOpacity={0.8}
+          style={styles.imageContainer}
+        >
+          <Image
+            source={{ uri: sponsorImg }}
+            resizeMode="contain"
+            style={styles.homeLogo}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -67,8 +74,15 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
 export default CustomFooter;
 
 const styles = StyleSheet.create({
+  imageContainer: {
+    flex: 1,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 120,
+  },
   homeLogo: {
-    height: 80,
-    width: 150,
+    height: 120,
+    width: "100%",
   },
 });
