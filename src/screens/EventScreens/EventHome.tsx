@@ -211,6 +211,7 @@ const EventHome = () => {
       // Filter out past events, but keep headers only if they have future events
       const filtered: any[] = [];
       let currentHeader: any = null;
+      const addedHeaders = new Set<string>(); // Track which headers have been added
       
       for (let i = 0; i < flatGroupedEvents.length; i++) {
         const item = flatGroupedEvents[i];
@@ -219,9 +220,10 @@ const EventHome = () => {
           currentHeader = item;
         } else if (item.type === 'event') {
           if (!isEventInPast(item)) {
-            // Add header if this is the first event for this date
-            if (currentHeader && (filtered.length === 0 || filtered[filtered.length - 1].type !== 'header')) {
+            // Add header only once per date if it hasn't been added yet
+            if (currentHeader && currentHeader.id && !addedHeaders.has(currentHeader.id)) {
               filtered.push(currentHeader);
+              addedHeaders.add(currentHeader.id);
             }
             filtered.push(item);
           }
@@ -347,7 +349,15 @@ const EventHome = () => {
           </View>
         )}
         data={filteredEvents}
-        keyExtractor={(item, index) => item.id || index.toString()}
+        keyExtractor={(item, index) => {
+          // Ensure unique keys: headers use their id (should be unique per date), events use id
+          if (item.type === 'header') {
+            // Use header id (header-${date}) which should be unique, with index fallback for safety
+            return item.id || `header-${item.date}-${index}`;
+          }
+          // Events use their unique id from Firebase
+          return item.id || `event-${index}`;
+        }}
         renderItem={({ item }) => <RadiusEventBlock item={item} />}
         contentContainerStyle={[styles.flatListContent, { paddingHorizontal: 20 }]}
         style={styles.radiusList}
