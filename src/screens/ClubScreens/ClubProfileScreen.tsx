@@ -74,9 +74,7 @@ const ClubProfileScreen = () => {
 
     const shareUrl = `https://go.narrenradar.de/vereine/club/profile?clubId=${clubData.id}`;
 
-    const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${
-      clubData.foundingHistory || ""
-    }\n\n${shareUrl}\n\n📱 App herunterladen: https://play.google.com/store/apps/details?id=com.holderied.narrenradar\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
+    const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${clubData.foundingHistory || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
     try {
       const result = await Share.share({
