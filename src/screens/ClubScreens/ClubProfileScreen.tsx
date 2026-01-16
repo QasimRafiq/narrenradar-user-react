@@ -37,7 +37,7 @@ const { width } = Dimensions.get("window");
 const ClubProfileScreen = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
-  const { clubData, regionDetail } = routes?.params;
+  const { clubData, regionDetail } = routes?.params || {};
   const { regions } = useRegions();
   const handleWeb = async () => {
     await Linking.openURL(clubData?.websiteUrl);
@@ -162,72 +162,77 @@ const ClubProfileScreen = () => {
     );
   };
 
-  const ItemCard = ({ item }) => (
-    <View style={styles.card}>
-      {item.title && (
-        <TextField
-          text={item.title}
-          fontSize={18}
-          fontFamily={Fonts.comfortaaMedium}
-          color={COLORS.green}
-          marginBottom={8}
-        />
-      )}
-      {item.imageUrl && (
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => {
-            if (item.imageUrl) {
-              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
-                imgDocument: item.imageUrl,
-              });
-            }
-          }}
-        >
-          <Image
-            source={{ uri: item.imageUrl }}
-            resizeMode="cover"
-            style={{
-              height: 280,
-              borderRadius: 16,
-              width: "80%",
-              marginBottom: 10,
-            }}
+  const ItemCard = ({ item }) => {
+    if (!item) return null;
+    
+    return (
+      <View style={styles.card}>
+        {item.title && (
+          <TextField
+            text={item.title}
+            fontSize={18}
+            fontFamily={Fonts.comfortaaMedium}
+            color={COLORS.green}
+            marginBottom={8}
           />
-        </TouchableOpacity>
-      )}
-      {item.narrenruf && (
-        <TextField
-          text={item.narrenruf}
-          fontSize={18}
-          color={COLORS.green}
-          fontFamily={Fonts.comfortaaMedium}
-          marginTop={16}
-          lineHeight={22}
-        />
-      )}
-      {item.foundingYear && (
-        <TextField
-          text={"Erscheinungsjahr: " + item.foundingYear}
-          fontSize={18}
-          color={COLORS.green}
-          fontFamily={Fonts.comfortaaMedium}
-          marginTop={16}
-          lineHeight={22}
-        />
-      )}
-      {item.description && (
-        <TextField
-          text={item?.description}
-          fontSize={18}
-          color={COLORS.green}
-          fontFamily={Fonts.comfortaaMedium}
-          marginTop={16}
-          lineHeight={22}
-        />
-      )}
-    </View>
-  );
+        )}
+        {item.imageUrl && (
+          <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => {
+                if (item.imageUrl) {
+                  navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                    imgDocument: item.imageUrl,
+                  });
+                }
+              }}
+            >
+              <Image
+                source={{ uri: item.imageUrl }}
+                resizeMode="cover"
+                style={{
+                  height: 250,
+                  width: 250,
+                  borderRadius: 16,
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+        {item.narrenruf && (
+          <TextField
+            text={item.narrenruf}
+            fontSize={18}
+            color={COLORS.green}
+            fontFamily={Fonts.comfortaaMedium}
+            marginTop={16}
+            lineHeight={22}
+          />
+        )}
+        {item.foundingYear && (
+          <TextField
+            text={"Erscheinungsjahr: " + item.foundingYear}
+            fontSize={18}
+            color={COLORS.green}
+            fontFamily={Fonts.comfortaaMedium}
+            marginTop={16}
+            lineHeight={22}
+          />
+        )}
+        {item.description && (
+          <TextField
+            text={item?.description}
+            fontSize={18}
+            color={COLORS.green}
+            fontFamily={Fonts.comfortaaMedium}
+            marginTop={16}
+            lineHeight={22}
+          />
+        )}
+      </View>
+    );
+  };
 
   const profileData = [
     { label: "Vereinsname", value: clubData?.clubName },
@@ -540,7 +545,7 @@ const ClubProfileScreen = () => {
           />
 
           <FlatList
-            data={clubData?.characters}
+            data={clubData?.characters || []}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => <ItemCard item={item} />}
           />
@@ -578,32 +583,34 @@ const ClubProfileScreen = () => {
                       />
 
                       {member.imageUrl ? (
-                        <TouchableOpacity
-                          activeOpacity={0.9}
-                          onPress={() => {
-                            if (member.imageUrl) {
-                              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
-                                imgDocument: member.imageUrl,
-                              });
-                            }
-                          }}
-                        >
-                          <Image
-                            source={{ uri: member.imageUrl }}
-                            style={{
-                              height: 250,
-                              width: 250,
-                              borderRadius: 16,
+                        <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
+                          <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPress={() => {
+                              if (member.imageUrl) {
+                                navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                  imgDocument: member.imageUrl,
+                                });
+                              }
                             }}
-                            resizeMode="cover"
-                            onError={(e) =>
-                              console.log(
-                                "Vorstand image load error:",
-                                e.nativeEvent.error
-                              )
-                            }
-                          />
-                        </TouchableOpacity>
+                          >
+                            <Image
+                              source={{ uri: member.imageUrl }}
+                              style={{
+                                height: 250,
+                                width: 250,
+                                borderRadius: 16,
+                              }}
+                              resizeMode="cover"
+                              onError={(e) =>
+                                console.log(
+                                  "Vorstand image load error:",
+                                  e.nativeEvent.error
+                                )
+                              }
+                            />
+                          </TouchableOpacity>
+                        </View>
                       ) : null}
 
                       {member.name ? (
@@ -636,33 +643,34 @@ const ClubProfileScreen = () => {
                       style={{ marginBottom: 20 }}
                     >
                       {member.imageUrl ? (
-                        <TouchableOpacity
-                          activeOpacity={0.9}
-                          onPress={() => {
-                            if (member.imageUrl) {
-                              navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
-                                imgDocument: member.imageUrl,
-                              });
-                            }
-                          }}
-                        >
-                          <Image
-                            source={{ uri: member.imageUrl }}
-                            style={{
-                              height: 250,
-                              width: width * 0.8,
-                              borderRadius: 16,
-                              backgroundColor: "#fff",
+                        <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
+                          <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPress={() => {
+                              if (member.imageUrl) {
+                                navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                  imgDocument: member.imageUrl,
+                                });
+                              }
                             }}
-                            resizeMode="cover"
-                            onError={(e) =>
-                              console.log(
-                                "Funktionaere image load error:",
-                                e.nativeEvent.error
-                              )
-                            }
-                          />
-                        </TouchableOpacity>
+                          >
+                            <Image
+                              source={{ uri: member.imageUrl }}
+                              style={{
+                                height: 250,
+                                width: 250,
+                                borderRadius: 16,
+                              }}
+                              resizeMode="cover"
+                              onError={(e) =>
+                                console.log(
+                                  "Funktionaere image load error:",
+                                  e.nativeEvent.error
+                                )
+                              }
+                            />
+                          </TouchableOpacity>
+                        </View>
                       ) : null}
                       {member.functionInClub ? (
                         <TextField

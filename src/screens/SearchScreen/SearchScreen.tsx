@@ -48,8 +48,8 @@ const SearchScreen = () => {
 
   // Filter events matching Android behavior: search by name, eventLocation, and description
   const filteredEvents = searchText
-    ? events
-        ?.filter((e: any) => {
+    ? (events || [])
+        .filter((e: any) => {
           // Skip header items if any (shouldn't be in flat events list)
           if (e.type === "header") return false;
 
@@ -71,8 +71,8 @@ const SearchScreen = () => {
           }
           return dateA - dateB;
         })
-    : events
-        ?.filter((e: any) => e.type !== "header")
+    : (events || [])
+        .filter((e: any) => e.type !== "header")
         .sort((a: any, b: any) => {
           const dateA = a.eventDate || 0;
           const dateB = b.eventDate || 0;
@@ -87,14 +87,14 @@ const SearchScreen = () => {
 
   // Filter regions matching Android behavior: search by name (title)
   const filteredRegion = searchText
-    ? regions?.filter((e: any) =>
+    ? (regions || []).filter((e: any) =>
         e?.name?.toLowerCase().includes(searchText.toLowerCase())
       )
-    : regions;
+    : regions || [];
 
   // Filter club users matching Android behavior: search by clubName, regionTitles, and ort
   const filteredClubUsers = searchText
-    ? clubUsers?.filter((e: any) => {
+    ? (clubUsers || []).filter((e: any) => {
         const searchLower = searchText.toLowerCase();
         const clubNameMatch =
           e?.clubName?.toLowerCase().includes(searchLower) || false;
@@ -110,7 +110,7 @@ const SearchScreen = () => {
         const ortMatch = e?.ort?.toLowerCase().includes(searchLower) || false;
         return clubNameMatch || regionMatch || ortMatch;
       })
-    : clubUsers;
+    : clubUsers || [];
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
