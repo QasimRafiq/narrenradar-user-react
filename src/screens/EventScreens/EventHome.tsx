@@ -290,7 +290,12 @@ const EventHome = () => {
                     autoPlayInterval={4000}
                     data={sponsoredEvents || []}
                     scrollAnimationDuration={1000}
-                    enabled={sponsoredEvents?.length > 1} // 👈 disables swiping when only one
+                    enabled={sponsoredEvents?.length > 1}
+                    onConfigurePanGesture={(gesture) => {
+                      'worklet';
+                      gesture.activeOffsetX([-10, 10]);
+                      gesture.failOffsetY([-5, 5]);
+                    }}
                     renderItem={({ item }) => (
                       <EventCard item={item} navigation={navigation} />
                     )}
