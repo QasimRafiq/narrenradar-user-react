@@ -18,8 +18,9 @@ import {
   State,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import TextField from "../../shared/components/customText/TextField";
@@ -32,6 +33,7 @@ const DOUBLE_TAP_SCALE = 2.5;
 
 const GroundViewer = () => {
   const routes = useRoute<any>();
+  const navigation = useNavigation<any>();
   const { imgDocument } = routes?.params;
 
   const [baseScale, setBaseScale] = useState(1);
@@ -379,6 +381,14 @@ const GroundViewer = () => {
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container} onLayout={onContainerLayout}>
+          {/* Close Button - Always visible */}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <AntDesign name="close" size={18} color={COLORS.white} />
+          </TouchableOpacity>
           <PinchGestureHandler
             ref={pinchRef}
             onGestureEvent={onPinchGestureEvent}
@@ -608,5 +618,28 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
     backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  closeButton: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 15 : 15,
+    right: 16,
+    width: 24,
+    height: 24,
+    borderRadius: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
 });
