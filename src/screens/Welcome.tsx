@@ -202,10 +202,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
-    height: 80,
+    height: 120,
   },
   homeLogo: {
-    height: 80,
+    height: 120,
     width: '100%',
     maxWidth: 120,
   },
