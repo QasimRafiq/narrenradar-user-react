@@ -319,13 +319,15 @@ const AwayDateScreen = () => {
     if (singleTime && singleTime.trim() !== '') {
       return (
         <View style={styles.detailRow}>
-          <TextField
-            text={`${labelBase} ${displayType}: ${singleTime.trim()} Uhr`}
-            color={COLORS.green}
-            fontSize={16}
-            fontFamily={Fonts.comfortaaMedium}
-            lineHeight={17}
-          />
+          <View style={{flex: 1, flexShrink: 1}}>
+            <TextField
+              text={`${labelBase} ${displayType}: ${singleTime.trim()} Uhr`}
+              color={COLORS.green}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
+              lineHeight={20}
+            />
+          </View>
         </View>
       );
     }
@@ -339,13 +341,15 @@ const AwayDateScreen = () => {
       const indexForLabel = useNumbering ? idx + 1 : null;
       return (
         <View key={idx} style={styles.detailRow}>
-          <TextField
-            text={`${labelWithOptionalNumber(labelBase, displayType, indexForLabel)} ${time.trim()} Uhr`}
-            color={COLORS.green}
-            fontSize={16}
-            fontFamily={Fonts.comfortaaMedium}
-            lineHeight={17}
-          />
+          <View style={{flex: 1, flexShrink: 1}}>
+            <TextField
+              text={`${labelWithOptionalNumber(labelBase, displayType, indexForLabel)} ${time.trim()} Uhr`}
+              color={COLORS.green}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
+              lineHeight={20}
+            />
+          </View>
         </View>
       );
     });
@@ -408,6 +412,7 @@ const AwayDateScreen = () => {
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
+              lineHeight={20}
             />
           </View>
         )}
@@ -420,7 +425,7 @@ const AwayDateScreen = () => {
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
-             
+              lineHeight={20}
             />
           </View>
         )}
@@ -433,7 +438,7 @@ const AwayDateScreen = () => {
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
-              lineHeight={17}
+              lineHeight={20}
             />
           </View>
         )}
@@ -446,7 +451,7 @@ const AwayDateScreen = () => {
               color={COLORS.green}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
-              lineHeight={17}
+              lineHeight={20}
             />
           </View>
         )}
@@ -535,7 +540,7 @@ const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginLeft: 32,
     marginTop: 2,
     marginBottom: 2,
