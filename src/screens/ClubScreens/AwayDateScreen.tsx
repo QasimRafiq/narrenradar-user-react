@@ -206,6 +206,7 @@ const AwayDateScreen = () => {
                     returnBusTimes: clubAwayData.returnBusTimes || null,
                     postcode: clubAwayData.postcode || '',
                     description: clubAwayData.description || '',
+                    anmerkungen: clubAwayData.anmerkungen || null,
                     isPublish: clubAwayData.isPublish || false,
                     createdAt: clubAwayData.createdAt || 0,
                   };
@@ -385,6 +386,19 @@ const AwayDateScreen = () => {
             fontFamily={Fonts.comfortaaBold}
           />
         </View>
+
+        {/* Anmerkung */}
+        {ad.anmerkungen && ad.anmerkungen.trim() !== '' && (
+          <View style={styles.row}>
+            <TextField
+              text={`Anmerkung: ${ad.anmerkungen.trim()}`}
+              color={COLORS.green}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
+              lineHeight={20}
+            />
+          </View>
+        )}
 
         {/* DEPARTURE */}
         {hasDepartureInfo(ad) &&

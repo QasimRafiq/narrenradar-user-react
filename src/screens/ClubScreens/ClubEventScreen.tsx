@@ -226,32 +226,56 @@ const ClubEventScreen = () => {
       ) : (
         <ScrollView contentContainerStyle={styles.listContainer}>
           {events.length > 0 ? (
-            events.map((event, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.eventRow}
-                activeOpacity={0.7}
-                onPress={() => {
-                  // console.log(event)
-                  if (event?.sponsorPackage === 'Plus') {
-                    navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
-                      eventDetails: event,
-                    });
-                  } else {
-                    navigation.navigate(ROUTE_NAMES.Is_Publish_Event_Details, {
-                      eventDetails: event,
-                    });
-                  }
-                }}>
-                <TextField
-                  fontSize={16}
-                  text={`${formatTimestamp(event?.eventDate)} - ${event?.name}`}
-                  color={COLORS.green}
-                  fontFamily={Fonts.comfortaaBold}
-                  marginBottom={10}
-                />
-              </TouchableOpacity>
-            ))
+            events.map((event, index) => {
+              // Extract anmerkungen from awayDates for this club
+              const clubAwayData = event?.awayDates?.[clubData?.id];
+              const anmerkungen = clubAwayData?.anmerkungen;
+
+              // Check if event has away dates for this club
+              const hasAwayDates = 
+                event?.awayDates &&
+                Object.keys(event.awayDates || {}).includes(String(clubData.id));
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.eventRow}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    // console.log(event)
+                    if (event?.sponsorPackage === 'Plus') {
+                      navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
+                        eventDetails: event,
+                      });
+                    } else {
+                      navigation.navigate(ROUTE_NAMES.Is_Publish_Event_Details, {
+                        eventDetails: event,
+                      });
+                    }
+                  }}>
+                  <View style={styles.eventContent}>
+                    <TextField
+                      fontSize={16}
+                      text={`${formatTimestamp(event?.eventDate)} - ${event?.name}`}
+                      color={COLORS.green}
+                      fontFamily={Fonts.comfortaaBold}
+                      marginBottom={10}
+                    />
+                    {/* Show anmerkung only for events with away dates */}
+                    {hasAwayDates && anmerkungen && anmerkungen.trim() !== '' && (
+                      <TextField
+                        text={`Anmerkung: ${anmerkungen.trim()}`}
+                        color={COLORS.green}
+                        fontSize={16}
+                        fontFamily={Fonts.comfortaaMedium}
+                        lineHeight={20}
+                        marginBottom={10}
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })
           ) : (
             <TextField
               text=""
@@ -278,5 +302,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  eventContent: {
+    flex: 1,
   },
 });
