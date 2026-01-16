@@ -599,49 +599,50 @@ const EventDetailScreen = () => {
                 letterSpacing={1.5}
               />
               {eventDetails.documents?.map((doc: any, index: number) => (
-                <CustomGradientButton
-                  style={{ width: 220 }}
-                  key={index}
-                  text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
-                  onPress={async () => {
-                    if (!doc?.url) {
-                      return;
-                    }
+                <View key={index} style={{ paddingHorizontal: 10 }}>
+                  <CustomGradientButton
+                    style={{ width: '100%' }}
+                    text={doc.name?.toUpperCase() || `DOKUMENT ${index + 1}`}
+                    onPress={async () => {
+                      if (!doc?.url) {
+                        return;
+                      }
 
-                    // Detect file type using comprehensive detection
-                    const detectedType = await detectFileType(
-                      doc.url,
-                      doc.type
-                    );
+                      // Detect file type using comprehensive detection
+                      const detectedType = await detectFileType(
+                        doc.url,
+                        doc.type
+                      );
 
-                    // Determine if it's PDF or image
-                    const isPDF =
-                      detectedType === FileType.PDF ||
-                      (detectedType === FileType.UNKNOWN && doc.type === "pdf");
+                      // Determine if it's PDF or image
+                      const isPDF =
+                        detectedType === FileType.PDF ||
+                        (detectedType === FileType.UNKNOWN && doc.type === "pdf");
 
-                    const isImage =
-                      (detectedType === FileType.IMAGE ||
-                        (detectedType === FileType.UNKNOWN &&
-                          doc.type !== "pdf")) &&
-                      !isPDF;
+                      const isImage =
+                        (detectedType === FileType.IMAGE ||
+                          (detectedType === FileType.UNKNOWN &&
+                            doc.type !== "pdf")) &&
+                        !isPDF;
 
-                    if (isPDF) {
-                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                        pdfDocument: doc.url,
-                      });
-                    } else if (isImage) {
-                      navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
-                        imgDocument: doc.url,
-                      });
-                    } else {
-                      // Fallback: try as PDF first, then image
-                      // This handles cases where detection fails
-                      navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
-                        pdfDocument: doc.url,
-                      });
-                    }
-                  }}
-                />
+                      if (isPDF) {
+                        navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                          pdfDocument: doc.url,
+                        });
+                      } else if (isImage) {
+                        navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
+                          imgDocument: doc.url,
+                        });
+                      } else {
+                        // Fallback: try as PDF first, then image
+                        // This handles cases where detection fails
+                        navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
+                          pdfDocument: doc.url,
+                        });
+                      }
+                    }}
+                  />
+                </View>
               ))}
             </>
           )}
