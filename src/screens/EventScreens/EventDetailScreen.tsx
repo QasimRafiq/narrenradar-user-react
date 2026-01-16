@@ -192,6 +192,36 @@ const EventDetailScreen = () => {
     }
   };
 
+  const handleLocationClick = async (locationLink: string | null, locationAddress?: string) => {
+    if (!locationLink) {
+      return;
+    }
+
+    try {
+      // Extract coordinates from ?q=lat,lng format
+      const regex = /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const matchResult = locationLink.match(regex);
+
+      if (matchResult) {
+        const lat = matchResult[1];
+        const lng = matchResult[2];
+
+        // Use address if available, otherwise use coordinates
+        // This ensures Google Maps shows the address instead of raw coordinates
+        const destination = locationAddress ? encodeURIComponent(locationAddress) : `${lat},${lng}`;
+        
+        // Open Google Maps with directions (works on both iOS and Android)
+        const googleMapsUrl = `http://maps.google.com/maps?daddr=${destination}`;
+        await Linking.openURL(googleMapsUrl);
+      } else {
+        // Fallback to original URL
+        await Linking.openURL(locationLink);
+      }
+    } catch (error) {
+      // Error opening map - handled silently
+    }
+  };
+
   const WeatherItem = ({
     temp,
     time,
@@ -565,9 +595,7 @@ const EventDetailScreen = () => {
                     >
                       <TouchableOpacity
                         onPress={() => {
-                          if (item.link) {
-                            Linking.openURL(item.link);
-                          }
+                          handleLocationClick(item.link, item.address);
                         }}
                       >
                         <Image
