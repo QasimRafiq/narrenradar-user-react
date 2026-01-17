@@ -10,7 +10,7 @@ import { getCityName } from "../../utils/geocodingUtils";
 
 const RadiusEventBlock = ({ item }) => {
   const navigation = useNavigation();
-  const [cityName, setCityName] = useState(null);
+  const [cityName, setCityName] = useState("");
 
   // Handle header items (date headers) - date is already formatted as dd.MM.yyyy
   if (item.type === "header") {
@@ -27,7 +27,7 @@ const RadiusEventBlock = ({ item }) => {
     );
   }
 
-  // Get latitude and longitude from event
+  // Get latitude and longitude from event (matching Android: event.locations[0].latitude/longitude)
   const eventLat =
     item?.eventLatitude ||
     (Array.isArray(item.locations) && item.locations[0]?.latitude);
@@ -35,17 +35,36 @@ const RadiusEventBlock = ({ item }) => {
     item?.eventLongitude ||
     (Array.isArray(item.locations) && item.locations[0]?.longitude);
 
-  // Fetch city name when component mounts or when coordinates change
+  // Fetch city name when component mounts or when coordinates change (matching Android LaunchedEffect)
   useEffect(() => {
-    if (eventLat && eventLng) {
-      getCityName(eventLat, eventLng).then(setCityName);
+    if (
+      eventLat &&
+      eventLng &&
+      eventLat !== 0 &&
+      eventLng !== 0 &&
+      !isNaN(eventLat) &&
+      !isNaN(eventLng)
+    ) {
+      getCityName(eventLat, eventLng)
+        .then((city) => {
+          setCityName(city || "");
+        })
+        .catch(() => {
+          // Error fetching city name - handled silently
+          setCityName("");
+        });
+    } else {
+      // Reset city name if coordinates are invalid
+      setCityName("");
     }
   }, [eventLat, eventLng]);
 
-  // Format event name with city
-  const displayText = cityName
-    ? `${item?.name} - ${cityName}`
-    : `${item?.name}`;
+  // Format event name with city (matching Android: event.name +" - "+cityName)
+  // Show "..." if city name is empty (matching Android: cityName.ifEmpty { "..." })
+  const displayText =
+    cityName && cityName.trim()
+      ? `${item?.name} - ${cityName}`
+      : item?.name || "";
 
   // Handle event items
   return (

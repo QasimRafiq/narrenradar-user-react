@@ -278,6 +278,7 @@ const EventHome = () => {
     return groupAndFlattenEvents(filteredRawEvents);
   }, [activeLocation, activeRadius, events, flatGroupedEvents, startOfToday]);
 
+  console.log("filteredEvents", JSON.stringify(filteredEvents, null, 2));
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
@@ -317,7 +318,7 @@ const EventHome = () => {
                     key={refreshKey}
                     loop={sponsoredEvents?.length > 1}
                     width={width}
-                    height={550}
+                    height={596}
                     autoPlay={sponsoredEvents?.length > 1}
                     autoPlayInterval={4000}
                     data={sponsoredEvents || []}

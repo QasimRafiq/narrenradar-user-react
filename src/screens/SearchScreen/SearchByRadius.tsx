@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import MapView, { Marker, Circle } from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -28,6 +28,7 @@ const SearchByRadius = () => {
   const [radius, setRadius] = useState(100000); // 100 km
   const [selectedAddress, setSelectedAddress] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const skipAddressFetchRef = useRef(false);
 
   // const mapRef = useRef<MapView>(null);
 
@@ -37,20 +38,22 @@ const SearchByRadius = () => {
       const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=de`;
       const res = await fetch(url);
       const data = await res.json();
-      
+
       if (data) {
         // Build address from available fields
         const addressParts = [];
         if (data.locality) addressParts.push(data.locality);
         if (data.postcode) addressParts.push(data.postcode);
         if (data.city) addressParts.push(data.city);
-        if (data.principalSubdivision) addressParts.push(data.principalSubdivision);
+        if (data.principalSubdivision)
+          addressParts.push(data.principalSubdivision);
         if (data.countryName) addressParts.push(data.countryName);
-        
-        const formattedAddress = addressParts.length > 0 
-          ? addressParts.join(", ")
-          : data.locality || data.city || data.principalSubdivision || null;
-        
+
+        const formattedAddress =
+          addressParts.length > 0
+            ? addressParts.join(", ")
+            : data.locality || data.city || data.principalSubdivision || null;
+
         if (formattedAddress) {
           setSelectedAddress(formattedAddress);
         } else {
@@ -91,7 +94,7 @@ const SearchByRadius = () => {
   };
 
   // 🔹 Update region + address
-  const updateRegion = (lat: number, lng: number) => {
+  const updateRegion = (lat: number, lng: number, skipAddressFetch = false) => {
     const newRegion = {
       latitude: lat,
       longitude: lng,
@@ -100,7 +103,9 @@ const SearchByRadius = () => {
     };
     setRegion(newRegion);
     mapRef.current?.animateToRegion(newRegion, 1000);
-    fetchAddress(lat, lng);
+    if (!skipAddressFetch) {
+      fetchAddress(lat, lng);
+    }
   };
 
   // 🔹 Map tap
@@ -116,10 +121,16 @@ const SearchByRadius = () => {
   const { region, setRegion, mapRef, getCurrentLocation } =
     useCurrentLocation(reverseGeocode);
 
-  // 🔹 Fetch address whenever region changes
+  // 🔹 Fetch address whenever region changes (but skip if from search result)
   useEffect(() => {
-    if (region.latitude && region.longitude) {
+    if (region.latitude && region.longitude && !skipAddressFetchRef.current) {
       fetchAddress(region.latitude, region.longitude);
+    }
+    // Reset the flag after a short delay
+    if (skipAddressFetchRef.current) {
+      setTimeout(() => {
+        skipAddressFetchRef.current = false;
+      }, 100);
     }
   }, [region.latitude, region.longitude]);
 
@@ -148,13 +159,19 @@ const SearchByRadius = () => {
           onPress={(data, details = null) => {
             try {
               if (details?.geometry?.location) {
+                // Set flag to skip address fetch from useEffect
+                skipAddressFetchRef.current = true;
+                // Set address first from search result
+                setSelectedAddress(data.description);
+                // Update region without fetching address (skip address fetch)
                 updateRegion(
                   details.geometry.location.lat,
-                  details.geometry.location.lng
+                  details.geometry.location.lng,
+                  true // Skip address fetch - use search result address
                 );
-                setSelectedAddress(data.description);
               } else if (data?.description) {
                 // Fallback: use description if details are not available
+                skipAddressFetchRef.current = true;
                 setSelectedAddress(data.description);
               }
             } catch (error) {
@@ -183,7 +200,7 @@ const SearchByRadius = () => {
               styles.searchInput,
               {
                 borderWidth: 1,
-                borderColor: isFocused ? "green" : "#ccc",
+                borderColor: isFocused ? COLORS.green : "#ccc",
                 borderRadius: 12,
               },
             ],
@@ -194,7 +211,24 @@ const SearchByRadius = () => {
               borderWidth: 0.5,
               borderRadius: 16,
               borderColor: "#999",
-              padding: 10,
+              padding: 0,
+              maxHeight: 200,
+            },
+            row: {
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              borderBottomWidth: 0.5,
+              borderBottomColor: "#E0E0E0",
+            },
+            separator: {
+              height: 0,
+            },
+            description: {
+              fontSize: 14,
+              color: "#000",
+              fontFamily: Fonts.comfortaaRegular,
             },
             poweredContainer: {
               display: "none",
@@ -208,6 +242,53 @@ const SearchByRadius = () => {
               style={styles.searchIcon}
             />
           )}
+          filterReverseGeocodingByTypes={[
+            "locality",
+            "administrative_area_level_3",
+          ]}
+          renderRow={(rowData, index) => {
+            // Only show first 2 results (matching Android)
+            if (index >= 2) {
+              return <View style={{ height: 0, width: 0 }} />;
+            }
+
+            const title = rowData.structured_formatting?.main_text || "";
+            const description =
+              rowData.structured_formatting?.secondary_text || "";
+            return (
+              <View style={styles.searchRow}>
+                <Icon
+                  name="location-on"
+                  size={20}
+                  color="#999"
+                  style={styles.rowLocationIcon}
+                />
+                <View style={styles.searchRowText}>
+                  <TextField
+                    text={title}
+                    color="#000"
+                    fontSize={14}
+                    fontFamily={Fonts.comfortaaMedium}
+                    marginBottom={4}
+                  />
+                  {description ? (
+                    <TextField
+                      text={description}
+                      color="#999"
+                      fontSize={12}
+                      fontFamily={Fonts.comfortaaLight}
+                    />
+                  ) : null}
+                </View>
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#999"
+                  style={styles.rowArrowIcon}
+                />
+              </View>
+            );
+          }}
         />
         {/* Slider Section */}
         <View style={styles.sliderSection}>
@@ -305,9 +386,7 @@ const SearchByRadius = () => {
               marginBottom={10}
             />
             <TextField
-              text={
-                selectedAddress || "Adresse wird geladen..."
-              }
+              text={selectedAddress || "Adresse wird geladen..."}
               color="#000"
               fontSize={14}
               fontFamily={Fonts.comfortaaMedium}
@@ -463,5 +542,22 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#E0E0E0",
+  },
+  rowLocationIcon: {
+    marginRight: 12,
+  },
+  searchRowText: {
+    flex: 1,
+  },
+  rowArrowIcon: {
+    marginLeft: 8,
   },
 });

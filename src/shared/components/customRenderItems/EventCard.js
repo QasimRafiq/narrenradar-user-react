@@ -50,7 +50,7 @@ const EventCard = ({ item, navigation }) => {
               headers: { Authorization: "someAuthToken" },
               priority: FastImage.priority.normal,
             }}
-            resizeMode={FastImage.resizeMode.cover}
+            resizeMode={FastImage.resizeMode.contain}
           />
         </TouchableOpacity>
         <View style={{ height: 16 }} />

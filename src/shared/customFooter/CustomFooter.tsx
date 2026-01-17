@@ -6,6 +6,7 @@ import {
   Linking,
 } from "react-native";
 import React from "react";
+import { WebView } from "react-native-webview";
 import { COLORS } from "../constants/theme";
 import TextField from "../components/customText/TextField";
 import { Fonts } from "../../assets/fonts/fonts";
@@ -17,6 +18,17 @@ interface CustomFooterProps {
 }
 
 const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
+  // Check if the image URL is an SVG
+  const isSvg = (url?: string): boolean => {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    return (
+      lowerUrl.endsWith(".svg") ||
+      lowerUrl.includes(".svg?") ||
+      lowerUrl.includes("image/svg+xml")
+    );
+  };
+
   const handlePress = () => {
     if (eventLink) {
       Linking.openURL(eventLink).catch((err) => {
@@ -25,46 +37,47 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
     }
   };
 
+  const isSvgImage = isSvg(sponsorImg);
+
   return (
-    <View
-      style={{
-        backgroundColor: COLORS.light_green,
-        width: "100%",
-        alignItems: "center",
-        minHeight: 200,
-        height: 200,
-        justifyContent: "flex-start",
-      }}
-    >
+    <View style={styles.container}>
       <TextField
         textAlign="center"
         text={de.presented_by}
         color={COLORS.green}
         fontSize={16}
         fontFamily={Fonts.heading}
-        marginTop={8}
+        marginTop={10}
         uppercase={true}
         letterSpacing={1}
         fontWeight="bold"
       />
-      <View style={{ height: 8 }} />
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          justifyContent: "center",
-        }}
-      >
+      <View style={styles.imageWrapper}>
         <TouchableOpacity
           onPress={handlePress}
           activeOpacity={0.8}
           style={styles.imageContainer}
         >
-          <Image
-            source={{ uri: sponsorImg }}
-            resizeMode="contain"
-            style={styles.homeLogo}
-          />
+          {isSvgImage && sponsorImg ? (
+            <WebView
+              source={{ uri: sponsorImg }}
+              style={styles.webView}
+              scrollEnabled={false}
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              originWhitelist={["*"]}
+              scalesPageToFit={true}
+              startInLoadingState={true}
+              renderLoading={() => (
+                <View style={styles.loadingContainer}>
+                  <View style={styles.placeholder} />
+                </View>
+              )}
+            />
+          ) : sponsorImg ? (
+            <Image source={{ uri: sponsorImg }} style={styles.homeLogo} />
+          ) : null}
         </TouchableOpacity>
       </View>
     </View>
@@ -74,15 +87,51 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
 export default CustomFooter;
 
 const styles = StyleSheet.create({
-  imageContainer: {
+  container: {
+    backgroundColor: COLORS.light_green,
+    width: "100%",
+    alignItems: "center",
+    minHeight: 180,
+    height: 180,
+    justifyContent: "flex-start",
+    paddingBottom: 8,
+  },
+  imageWrapper: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
     flex: 1,
     paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 4,
+    height: 140,
+  },
+  imageContainer: {
+    width: 240,
+    height: 140,
     justifyContent: "center",
     alignItems: "center",
-    height: 120,
   },
   homeLogo: {
-    height: 140,
-    width: 140,
+    width: 240,
+    height: 130,
+    resizeMode: "contain",
+  },
+  webView: {
+    width: 240,
+    height: 130,
+    backgroundColor: "transparent",
+  },
+  loadingContainer: {
+    width: 220,
+    height: 130,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  placeholder: {
+    width: 220,
+    height: 130,
+    backgroundColor: "transparent",
   },
 });
