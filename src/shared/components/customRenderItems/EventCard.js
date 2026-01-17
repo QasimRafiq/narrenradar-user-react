@@ -19,15 +19,18 @@ const EventCard = ({ item, navigation }) => {
   return (
     <>
       <View style={styles.card}>
-        <TextField
-          textAlign="center"
-          text={item?.name}
-          color={COLORS.green}
-          fontSize={16}
-          fontFamily={Fonts.heading}
-          uppercase={true}
-          fontWeight="normal"
-        />
+        <View style={styles.titleContainer}>
+          <TextField
+            textAlign="center"
+            text={item?.name}
+            color={COLORS.green}
+            fontSize={16}
+            fontFamily={Fonts.heading}
+            uppercase={true}
+            fontWeight="normal"
+            numofLine={3}
+          />
+        </View>
         <View style={{ height: 16 }} />
         <TouchableOpacity
           onPress={() =>
@@ -47,24 +50,29 @@ const EventCard = ({ item, navigation }) => {
               headers: { Authorization: "someAuthToken" },
               priority: FastImage.priority.normal,
             }}
-            resizeMode={FastImage.resizeMode.contain}
+            resizeMode={FastImage.resizeMode.cover}
           />
         </TouchableOpacity>
         <View style={{ height: 16 }} />
-        <TextField
-          textAlign="center"
-          text={formatTimestamp(item?.eventDate)}
-          color={COLORS.green}
-          fontSize={16}
-          fontFamily={Fonts.comfortaaMedium}
-          fontWeight="500"
-        />
+        <View style={styles.dateContainer}>
+          <TextField
+            textAlign="center"
+            text={formatTimestamp(item?.eventDate)}
+            color={COLORS.green}
+            fontSize={16}
+            fontFamily={Fonts.comfortaaMedium}
+            fontWeight="500"
+            numofLine={1}
+          />
+        </View>
         <View style={{ height: 8 }} />
-        {item?.sponsorLogo && (
+        {item?.sponsorLogo ? (
           <CustomFooter
             sponsorImg={item?.sponsorLogo?.url}
             eventLink={item?.sponsorLink}
           />
+        ) : (
+          <View style={{ height: 200 }} />
         )}
       </View>
     </>
@@ -76,9 +84,20 @@ export default EventCard;
 const styles = StyleSheet.create({
   card: {
     width: width,
-    // paddingVertical: 20,
     alignItems: "center",
     borderRadius: 16,
+    minHeight: 574, // Fixed minimum height: title (~48) + spacing (16) + image (280) + spacing (16) + date (~24) + spacing (8) + footer (200)
+  },
+  titleContainer: {
+    width: "90%",
+    minHeight: 48, // Fixed height for title (3 lines max)
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dateContainer: {
+    minHeight: 24, // Fixed height for date
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
     height: 280,

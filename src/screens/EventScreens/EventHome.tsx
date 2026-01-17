@@ -150,7 +150,7 @@ const EventHome = () => {
       const eventDateStart = new Date(e.eventDate);
       eventDateStart.setHours(0, 0, 0, 0);
       const eventDateStartTime = eventDateStart.getTime();
-      
+
       const isWithin7DaysFromNow =
         eventDateStartTime >= startOfToday && eventDate <= sevenDaysFromNow;
       if (!isWithin7DaysFromNow) return false;
@@ -218,16 +218,20 @@ const EventHome = () => {
       const filtered: any[] = [];
       let currentHeader: any = null;
       const addedHeaders = new Set<string>(); // Track which headers have been added
-      
+
       for (let i = 0; i < flatGroupedEvents.length; i++) {
         const item = flatGroupedEvents[i];
-        
-        if (item.type === 'header') {
+
+        if (item.type === "header") {
           currentHeader = item;
-        } else if (item.type === 'event') {
+        } else if (item.type === "event") {
           if (!isEventInPast(item)) {
             // Add header only once per date if it hasn't been added yet
-            if (currentHeader && currentHeader.id && !addedHeaders.has(currentHeader.id)) {
+            if (
+              currentHeader &&
+              currentHeader.id &&
+              !addedHeaders.has(currentHeader.id)
+            ) {
               filtered.push(currentHeader);
               addedHeaders.add(currentHeader.id);
             }
@@ -235,7 +239,7 @@ const EventHome = () => {
           }
         }
       }
-      
+
       return filtered;
     }
 
@@ -313,14 +317,14 @@ const EventHome = () => {
                     key={refreshKey}
                     loop={sponsoredEvents?.length > 1}
                     width={width}
-                    height={500}
+                    height={550}
                     autoPlay={sponsoredEvents?.length > 1}
                     autoPlayInterval={4000}
                     data={sponsoredEvents || []}
                     scrollAnimationDuration={1000}
                     enabled={sponsoredEvents?.length > 1}
                     onConfigurePanGesture={(gesture) => {
-                      'worklet';
+                      "worklet";
                       gesture.activeOffsetX([-10, 10]);
                       gesture.failOffsetY([-5, 5]);
                     }}
@@ -336,8 +340,8 @@ const EventHome = () => {
                 text={"ALLE EVENTS"}
                 color={COLORS.green}
                 fontSize={22}
+                marginTop={10}
                 fontFamily={Fonts.heading}
-                marginTop={20}
                 marginBottom={6}
                 letterSpacing={1.5}
               />
@@ -357,7 +361,7 @@ const EventHome = () => {
         data={filteredEvents}
         keyExtractor={(item, index) => {
           // Ensure unique keys: headers use their id (should be unique per date), events use id
-          if (item.type === 'header') {
+          if (item.type === "header") {
             // Use header id (header-${date}) which should be unique, with index fallback for safety
             return item.id || `header-${item.date}-${index}`;
           }
@@ -365,7 +369,10 @@ const EventHome = () => {
           return item.id || `event-${index}`;
         }}
         renderItem={({ item }) => <RadiusEventBlock item={item} />}
-        contentContainerStyle={[styles.flatListContent, { paddingHorizontal: 20 }]}
+        contentContainerStyle={[
+          styles.flatListContent,
+          { paddingHorizontal: 20 },
+        ]}
         style={styles.radiusList}
       />
 

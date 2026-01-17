@@ -29,11 +29,11 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
     <View
       style={{
         backgroundColor: COLORS.light_green,
-        paddingTop: 8,
-        paddingBottom: 8,
         width: "100%",
         alignItems: "center",
-       
+        minHeight: 200,
+        height: 200,
+        justifyContent: "flex-start",
       }}
     >
       <TextField
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     height: 120,
   },
   homeLogo: {
-    height: 120,
-    width: "100%",
+    height: 140,
+    width: 140,
   },
 });
