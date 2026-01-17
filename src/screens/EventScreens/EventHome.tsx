@@ -142,11 +142,17 @@ const EventHome = () => {
         return false;
 
       const eventDate = new Date(e.eventDate).getTime();
+      // Calculate 7 days from current time for upper bound
       const sevenDaysFromNow = currentTime + 7 * 24 * 60 * 60 * 1000;
 
-      // Android: eventDate >= currentTime && eventDate <= sevenDaysFromNow
+      // Check if event is from today onwards up to 7 days in the future
+      // Compare event date start (midnight) with start of today to include all of today's events
+      const eventDateStart = new Date(e.eventDate);
+      eventDateStart.setHours(0, 0, 0, 0);
+      const eventDateStartTime = eventDateStart.getTime();
+      
       const isWithin7DaysFromNow =
-        eventDate >= currentTime && eventDate <= sevenDaysFromNow;
+        eventDateStartTime >= startOfToday && eventDate <= sevenDaysFromNow;
       if (!isWithin7DaysFromNow) return false;
 
       // Android: (currentLocation == null || isEventWithinRadius(...))
