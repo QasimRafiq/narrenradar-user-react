@@ -43,7 +43,7 @@ const EventDetailScreen = () => {
   const [checkPress, setCheckPress] = useState(false);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
 
-  const WEATHER_API_KEY = "d028bd113c2b4a1e86d105239252604"; // your key
+  const WEATHER_API_KEY = "edddaf7a3fd541f7a79102916261801"; // your key
 
   // Calculate image size matching Android's widthIn/heightIn with ContentScale.Fit
   useEffect(() => {
@@ -99,7 +99,7 @@ const EventDetailScreen = () => {
 
       // Use history.json API endpoint like Android
       const res = await fetch(
-        `https://api.weatherapi.com/v1/history.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&dt=${dateString}&lang=de`
+        `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&dt=${dateString}&lang=de`
       );
       const json = await res.json();
 
