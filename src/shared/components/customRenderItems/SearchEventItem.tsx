@@ -43,7 +43,7 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
           eventDetails: item,
         })
       }
-      style={{ marginBottom: 18 }}
+      style={{ marginBottom: 24 }}
     >
       <TextField
         text={`${formatTimestamp(item.eventDate)}- ${displayText}`}

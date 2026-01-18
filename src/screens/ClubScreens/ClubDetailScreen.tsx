@@ -82,12 +82,12 @@ const ClubDetailScreen = () => {
           width={'80%'}
           textAlign="center"
           alignSelf={'center'}
-          fontSize={14}
+          fontSize={16}
           text={regionData?.name}
           color={COLORS.green}
           fontFamily={Fonts.heading}
           marginBottom={10}
-          lineHeight={18}
+          marginTop={-10}
           uppercase={true}
         />
 

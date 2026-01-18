@@ -152,8 +152,8 @@ const SearchScreen = () => {
             <TextField
               textAlign="center"
               text={item}
-              fontSize={14}
-              fontFamily={Fonts.regular}
+              fontSize={16}
+              fontFamily={Fonts.comfortaaMedium}
               color={activeFilter === item ? "white" : COLORS.green}
             />
           </TouchableOpacity>
@@ -174,6 +174,7 @@ const SearchScreen = () => {
           style={styles.input}
           value={searchText}
           onChangeText={setSearchText}
+        
         />
         <Image
           source={IMAGES.search}
@@ -281,8 +282,8 @@ const styles = StyleSheet.create({
   filterBtn: {
     borderWidth: 1,
     borderColor: COLORS.green,
-    borderRadius: 16,
-    paddingVertical: 12,
+    borderRadius: 12,
+    paddingVertical: 14,
     marginHorizontal: 5,
     backgroundColor: "white",
     width: "30%",

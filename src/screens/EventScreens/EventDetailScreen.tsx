@@ -538,7 +538,7 @@ const EventDetailScreen = () => {
               <TextField
                 text={"LOCATIONS"}
                 color={COLORS.green}
-                fontSize={18}
+                fontSize={16}
                 fontFamily={Fonts.heading}
                 marginTop={20}
                 marginBottom={14}
@@ -557,13 +557,13 @@ const EventDetailScreen = () => {
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaBold}
                         marginBottom={4}
-                        fontWeight="700"
+                        // fontWeight="700"
                       />
                     </View>
 
                     <View style={{ paddingLeft: 24 }}>
                       <TextField
-                        fontSize={15}
+                        fontSize={16}
                         text={`${item.address}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaRegular}
@@ -571,7 +571,7 @@ const EventDetailScreen = () => {
                       />
                       {item.hin && (
                         <TextField
-                          fontSize={15}
+                          fontSize={16}
                           text={`Hinweis: ${item.hin}`}
                           color={COLORS.green}
                           fontFamily={Fonts.comfortaaRegular}
@@ -672,7 +672,7 @@ const EventDetailScreen = () => {
               <TextField
                 text={de.other_documents}
                 color={COLORS.green}
-                fontSize={18}
+                fontSize={16}
                 fontFamily={Fonts.heading}
                 marginTop={10}
                 marginBottom={10}
@@ -764,7 +764,7 @@ const EventDetailScreen = () => {
             uppercase={true}
             text={"Aktuelles Wetter"}
             color={COLORS.green}
-            fontSize={18}
+            fontSize={16}
             fontFamily={Fonts.heading}
             marginTop={10}
             marginBottom={10}

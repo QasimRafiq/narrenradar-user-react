@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   clubText: {
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.green,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.comfortaaBold,
     flex: 1,
     marginTop: 4,
   },

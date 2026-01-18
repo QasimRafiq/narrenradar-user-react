@@ -66,11 +66,11 @@ const CustomRegionGrid: React.FC<CustomRegionGridProps> = ({
       <TextField
         width={'90%'}
         textAlign="center"
-        fontSize={14}
+        fontSize={16}
         text={item?.[titleKey]}
         color={COLORS.green}
         fontFamily={Fonts.heading}
-        marginTop={6}
+        marginTop={10}
         lineHeight={18}
         uppercase
       />
@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_SIZE,
     alignItems: 'center',
+    
   },
   cardGradient: {
     alignItems: 'center',
@@ -109,6 +110,5 @@ const styles = StyleSheet.create({
   image: {
     width: 120,
     height: 120,
-    borderRadius: 20,
   },
 });
