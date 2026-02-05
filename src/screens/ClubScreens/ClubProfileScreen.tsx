@@ -74,7 +74,7 @@ const ClubProfileScreen = () => {
 
     const shareUrl = `https://go.narrenradar.de/vereine/club/profile?clubId=${clubData.id}`;
 
-    const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${clubData.foundingHistory || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
+    const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${clubData.foundingHistory || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
     try {
       const result = await Share.share({
@@ -104,39 +104,39 @@ const ClubProfileScreen = () => {
             />
             {isStringArray
               ? // Handle string arrays (Verbände) - matching Android: item.replace("-", "-\n")
-                value.map((item, index) => (
-                  <View key={index} style={{ marginBottom: 6 }}>
-                    <TextField
-                      text={item.replace(/-/g, "-\n")} // Match Android: replace "-" with "-\n"
-                      color={COLORS.green}
-                      fontFamily={Fonts.comfortaaMedium}
-                      fontSize={18}
-                    />
-                  </View>
-                ))
+              value.map((item, index) => (
+                <View key={index} style={{ marginBottom: 6 }}>
+                  <TextField
+                    text={item.replace(/-/g, "-\n")} // Match Android: replace "-" with "-\n"
+                    color={COLORS.green}
+                    fontFamily={Fonts.comfortaaMedium}
+                    fontSize={18}
+                  />
+                </View>
+              ))
               : // Handle object arrays (Narrenfiguren)
-                value.map((item, index) => (
-                  <View key={index} style={{ marginBottom: 6 }}>
+              value.map((item, index) => (
+                <View key={index} style={{ marginBottom: 6 }}>
+                  <TextField
+                    text={
+                      item.foundingYear
+                        ? `${item.title} (seit ${item.foundingYear})`
+                        : item.title
+                    }
+                    color={COLORS.green}
+                    fontFamily={Fonts.comfortaaMedium}
+                    fontSize={18}
+                  />
+                  {item.narrenruf ? (
                     <TextField
-                      text={
-                        item.foundingYear
-                          ? `${item.title} (seit ${item.foundingYear})`
-                          : item.title
-                      }
+                      text={`"${item.narrenruf}"`}
                       color={COLORS.green}
-                      fontFamily={Fonts.comfortaaMedium}
+                      fontFamily={Fonts.comfortaaRegular}
                       fontSize={18}
                     />
-                    {item.narrenruf ? (
-                      <TextField
-                        text={`"${item.narrenruf}"`}
-                        color={COLORS.green}
-                        fontFamily={Fonts.comfortaaRegular}
-                        fontSize={18}
-                      />
-                    ) : null}
-                  </View>
-                ))}
+                  ) : null}
+                </View>
+              ))}
           </View>
         ) : (
           <View>
@@ -164,7 +164,7 @@ const ClubProfileScreen = () => {
 
   const ItemCard = ({ item }) => {
     if (!item) return null;
-    
+
     return (
       <View style={styles.card}>
         {item.title && (
@@ -216,7 +216,7 @@ const ClubProfileScreen = () => {
             color={COLORS.green}
             fontFamily={Fonts.comfortaaMedium}
             marginTop={16}
-            
+
           />
         )}
         {item.description && (
@@ -273,8 +273,8 @@ const ClubProfileScreen = () => {
           const regionIds = Array.isArray(clubData.regionIds)
             ? clubData.regionIds
             : clubData.regionIds
-            ? Object.values(clubData.regionIds)
-            : [];
+              ? Object.values(clubData.regionIds)
+              : [];
 
           regionTitles = regionIds
             .map((regionId: any) => {
@@ -552,150 +552,150 @@ const ClubProfileScreen = () => {
           {/* FUNKTIONÄRE SECTION */}
           {(clubData?.vorstandMembers?.length > 0 ||
             clubData?.funktionaereMembers?.length > 0) && (
-            <>
-              <TextField
-                uppercase={true}
-                text={"FUNKTIONÄRE"}
-                color={COLORS.green}
-                fontSize={22}
-                fontFamily={Fonts.heading}
-                marginTop={10}
-                marginBottom={10}
-                letterSpacing={1.5}
-              />
+              <>
+                <TextField
+                  uppercase={true}
+                  text={"FUNKTIONÄRE"}
+                  color={COLORS.green}
+                  fontSize={22}
+                  fontFamily={Fonts.heading}
+                  marginTop={10}
+                  marginBottom={10}
+                  letterSpacing={1.5}
+                />
 
-              {/* Vorstand Members */}
-              {clubData?.vorstandMembers?.length > 0 && (
-                <>
-                  {clubData.vorstandMembers.map((member, index) => (
-                    <View
-                      key={`vorstand-${index}`}
-                      style={{ marginBottom: 20 }}
-                    >
-                      {/* 🔢 Index number */}
-                      <TextField
-                        text={`1. Vorstand`}
-                        color={COLORS.green}
-                        fontFamily={Fonts.comfortaaMedium}
-                        fontSize={18}
-                      />
+                {/* Vorstand Members */}
+                {clubData?.vorstandMembers?.length > 0 && (
+                  <>
+                    {clubData.vorstandMembers.map((member, index) => (
+                      <View
+                        key={`vorstand-${index}`}
+                        style={{ marginBottom: 20 }}
+                      >
+                        {/* 🔢 Index number */}
+                        <TextField
+                          text={`1. Vorstand`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaMedium}
+                          fontSize={18}
+                        />
 
-                      {member.imageUrl ? (
-                        <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
-                          <TouchableOpacity
-                            activeOpacity={0.9}
-                            onPress={() => {
-                              if (member.imageUrl) {
-                                navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
-                                  imgDocument: member.imageUrl,
-                                });
-                              }
-                            }}
-                          >
-                            <Image
-                              source={{ uri: member.imageUrl }}
-                              style={{
-                                height: 250,
-                                width: 250,
-                                borderRadius: 16,
+                        {member.imageUrl ? (
+                          <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
+                            <TouchableOpacity
+                              activeOpacity={0.9}
+                              onPress={() => {
+                                if (member.imageUrl) {
+                                  navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                    imgDocument: member.imageUrl,
+                                  });
+                                }
                               }}
-                              resizeMode="cover"
-                              onError={(e) =>
-                                console.log(
-                                  "Vorstand image load error:",
-                                  e.nativeEvent.error
-                                )
-                              }
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      ) : null}
+                            >
+                              <Image
+                                source={{ uri: member.imageUrl }}
+                                style={{
+                                  height: 250,
+                                  width: 250,
+                                  borderRadius: 16,
+                                }}
+                                resizeMode="cover"
+                                onError={(e) =>
+                                  console.log(
+                                    "Vorstand image load error:",
+                                    e.nativeEvent.error
+                                  )
+                                }
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        ) : null}
 
-                      {member.name ? (
-                        <TextField
-                          text={member.name}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null}
-                      {member.email ? (
-                        <TextField
-                          text={member.email}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null}
-                    </View>
-                  ))}
-                </>
-              )}
+                        {member.name ? (
+                          <TextField
+                            text={member.name}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
+                        {member.email ? (
+                          <TextField
+                            text={member.email}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
+                      </View>
+                    ))}
+                  </>
+                )}
 
-              {/* Funktionaere Members */}
-              {clubData?.funktionaereMembers?.length > 0 && (
-                <>
-                  {clubData.funktionaereMembers.map((member, index) => (
-                    <View
-                      key={`funktionaere-${index}`}
-                      style={{ marginBottom: 20 }}
-                    >
-                      {member.imageUrl ? (
-                        <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
-                          <TouchableOpacity
-                            activeOpacity={0.9}
-                            onPress={() => {
-                              if (member.imageUrl) {
-                                navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
-                                  imgDocument: member.imageUrl,
-                                });
-                              }
-                            }}
-                          >
-                            <Image
-                              source={{ uri: member.imageUrl }}
-                              style={{
-                                height: 250,
-                                width: 250,
-                                borderRadius: 16,
+                {/* Funktionaere Members */}
+                {clubData?.funktionaereMembers?.length > 0 && (
+                  <>
+                    {clubData.funktionaereMembers.map((member, index) => (
+                      <View
+                        key={`funktionaere-${index}`}
+                        style={{ marginBottom: 20 }}
+                      >
+                        {member.imageUrl ? (
+                          <View style={{ marginBottom: 16, alignSelf: 'flex-start' }}>
+                            <TouchableOpacity
+                              activeOpacity={0.9}
+                              onPress={() => {
+                                if (member.imageUrl) {
+                                  navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
+                                    imgDocument: member.imageUrl,
+                                  });
+                                }
                               }}
-                              resizeMode="cover"
-                              onError={(e) =>
-                                console.log(
-                                  "Funktionaere image load error:",
-                                  e.nativeEvent.error
-                                )
-                              }
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      ) : null}
-                      {member.functionInClub ? (
-                        <TextField
-                          text={member.functionInClub}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null}
+                            >
+                              <Image
+                                source={{ uri: member.imageUrl }}
+                                style={{
+                                  height: 250,
+                                  width: 250,
+                                  borderRadius: 16,
+                                }}
+                                resizeMode="cover"
+                                onError={(e) =>
+                                  console.log(
+                                    "Funktionaere image load error:",
+                                    e.nativeEvent.error
+                                  )
+                                }
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        ) : null}
+                        {member.functionInClub ? (
+                          <TextField
+                            text={member.functionInClub}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
 
-                      {member.name ? (
-                        <TextField
-                          text={member.name}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null}
-                      {member.email ? (
-                        <TextField
-                          text={member.email}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null}
-                      {/* {member.email ? (
+                        {member.name ? (
+                          <TextField
+                            text={member.name}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
+                        {member.email ? (
+                          <TextField
+                            text={member.email}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
+                        {/* {member.email ? (
                         <TextField
                           text={member.email}
                           color={COLORS.green}
@@ -703,12 +703,12 @@ const ClubProfileScreen = () => {
                           fontSize={18}
                         />
                       ) : null} */}
-                    </View>
-                  ))}
-                </>
-              )}
-            </>
-          )}
+                      </View>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
         </View>
       </ScrollView>
     </ImageBackground>

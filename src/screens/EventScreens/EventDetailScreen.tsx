@@ -53,18 +53,18 @@ const EventDetailScreen = () => {
         (width, height) => {
           const screenWidth = Dimensions.get("window").width;
           const availableWidth = screenWidth - 40; // Account for 20px padding on each side
-          
+
           // Android uses 400dp, but React Native's logical pixels are closer to iOS points
           // On a typical device, 400dp in Android ≈ 200-250 logical pixels
           // Adjust based on screen density to match Android visual size
           const MAX_SIZE = Math.min(250, availableWidth);
-          
+
           // Start with original dimensions
           let displayWidth = width;
           let displayHeight = height;
-          
+
           console.log('Original image size:', width, 'x', height);
-          
+
           // ContentScale.Fit: Only scale DOWN if image exceeds MAX_SIZE
           // Never scale up - this matches Android behavior
           if (displayWidth > MAX_SIZE || displayHeight > MAX_SIZE) {
@@ -72,9 +72,9 @@ const EventDetailScreen = () => {
             displayWidth = displayWidth * scale;
             displayHeight = displayHeight * scale;
           }
-          
+
           console.log('Display size:', Math.round(displayWidth), 'x', Math.round(displayHeight));
-          
+
           setImageSize({
             width: Math.round(displayWidth),
             height: Math.round(displayHeight),
@@ -158,9 +158,9 @@ const EventDetailScreen = () => {
 
   const formattedDate = currentWeather?.last_updated
     ? new Date(currentWeather?.last_updated).toLocaleDateString("en-US", {
-        month: "long",
-        day: "2-digit",
-      })
+      month: "long",
+      day: "2-digit",
+    })
     : "";
 
   const shareEvent = async () => {
@@ -176,7 +176,7 @@ const EventDetailScreen = () => {
 
     const shareUrl = `https://go.narrenradar.de/vereine/club/events/detail?clubId=${clubId}&eventId=${eventDetails.id}`;
 
-    const shareText = `Schau dir diese Veranstaltung an: ${eventDetails.name}\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
+    const shareText = `Schau dir diese Veranstaltung an: ${eventDetails.name}\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
     try {
       const result = await Share.share({
@@ -205,7 +205,7 @@ const EventDetailScreen = () => {
         // Use address if available, otherwise use coordinates
         // This ensures Google Maps shows the address instead of raw coordinates
         const destination = locationAddress ? encodeURIComponent(locationAddress) : `${lat},${lng}`;
-        
+
         // Open Google Maps with directions (works on both iOS and Android)
         const googleMapsUrl = `http://maps.google.com/maps?daddr=${destination}`;
         await Linking.openURL(googleMapsUrl);
@@ -370,7 +370,7 @@ const EventDetailScreen = () => {
 
           <View style={{ marginBottom: 10 }}>
             <TextField
-            
+
               fontSize={18}
               text={formatTimestamp(eventDetails?.eventDate)}
               color={COLORS.green}
@@ -390,7 +390,7 @@ const EventDetailScreen = () => {
             )}
             {eventDetails?.entryTime && (
               <TextField
-                
+
                 fontSize={18}
                 text={`Einlass: ${eventDetails?.entryTime} Uhr`}
                 color={COLORS.green}
@@ -400,7 +400,7 @@ const EventDetailScreen = () => {
             )}
             {eventDetails?.endTime && (
               <TextField
-                
+
                 fontSize={18}
                 text={`Endzeit: ${eventDetails?.endTime} Uhr`}
                 color={COLORS.green}
@@ -555,7 +555,7 @@ const EventDetailScreen = () => {
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaBold}
                         marginBottom={4}
-                        // fontWeight="700"
+                      // fontWeight="700"
                       />
                     </View>
 
@@ -792,12 +792,11 @@ const EventDetailScreen = () => {
 
               <TextField
                 textAlign="center"
-                text={`${
-                  currentWeather?.temp_c !== undefined &&
+                text={`${currentWeather?.temp_c !== undefined &&
                   currentWeather?.temp_c !== null
-                    ? Math.trunc(currentWeather.temp_c)
-                    : "--"
-                }°`}
+                  ? Math.trunc(currentWeather.temp_c)
+                  : "--"
+                  }°`}
                 color={COLORS.white}
                 fontSize={48}
                 fontFamily={Fonts.heading}
@@ -815,17 +814,15 @@ const EventDetailScreen = () => {
               {forecastDay && (
                 <TextField
                   textAlign="center"
-                  text={`Max: ${
-                    forecastDay.maxtemp_c !== undefined &&
+                  text={`Max: ${forecastDay.maxtemp_c !== undefined &&
                     forecastDay.maxtemp_c !== null
-                      ? Math.trunc(forecastDay.maxtemp_c)
-                      : "--"
-                  }°  Min: ${
-                    forecastDay.mintemp_c !== undefined &&
-                    forecastDay.mintemp_c !== null
+                    ? Math.trunc(forecastDay.maxtemp_c)
+                    : "--"
+                    }°  Min: ${forecastDay.mintemp_c !== undefined &&
+                      forecastDay.mintemp_c !== null
                       ? Math.trunc(forecastDay.mintemp_c)
                       : "--"
-                  }°`}
+                    }°`}
                   color={COLORS.white}
                   fontFamily={Fonts.comfortaaRegular}
                   marginBottom={10}

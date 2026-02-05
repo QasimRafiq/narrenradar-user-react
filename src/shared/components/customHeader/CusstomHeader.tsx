@@ -3,22 +3,37 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Icon from "react-native-vector-icons/Feather"; // Or any icon lib you use
 import { COLORS } from "../../constants/theme";
 import { Fonts } from "../../../assets/fonts/fonts";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation, useRoute } from "@react-navigation/native";
 import de from "../../../shared/constants/de.json";
 import { IMAGES } from "../../../assets/images";
 import ROUTE_NAMES from "../../../routes/routesName";
 
 const CustomHeader = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
+
+  const isWelcome = route.name === ROUTE_NAMES.WELCOME_SCREEN;
 
   return (
     <View style={styles.container}>
-      {/* Menu Icon */}
-      <TouchableOpacity
-        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-      >
-        <Icon name="menu" size={32} color={COLORS.green} />
-      </TouchableOpacity>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {/* Back Button - Show on all screens except Welcome */}
+        {!isWelcome && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ marginRight: 10 }}
+          >
+            <Icon name="chevron-left" size={32} color={COLORS.green} />
+          </TouchableOpacity>
+        )}
+
+        {/* Menu Icon */}
+        <TouchableOpacity
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <Icon name="menu" size={32} color={COLORS.green} />
+        </TouchableOpacity>
+      </View>
 
       {/* Title with Home Icon */}
       <TouchableOpacity

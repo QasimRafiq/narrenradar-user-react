@@ -7,16 +7,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomHeader from '../shared/components/customHeader/CusstomHeader';
-import {GlobalStyleSheet} from '../shared/constants/GlobalStyleSheet';
+import { GlobalStyleSheet } from '../shared/constants/GlobalStyleSheet';
 import RoundedButton from '../shared/components/customButton/RoundedButton';
-import {IMAGES} from '../assets/images';
-import {COLORS} from '../shared/constants/theme';
+import { IMAGES } from '../assets/images';
+import { COLORS } from '../shared/constants/theme';
 import TextField from '../shared/components/customText/TextField';
-import {Fonts} from '../assets/fonts/fonts';
+import { Fonts } from '../assets/fonts/fonts';
 import ROUTE_NAMES from '../routes/routesName';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import de from '../shared/constants/de.json';
 import database from '@react-native-firebase/database';
 
@@ -70,7 +70,7 @@ const Welcome = () => {
       style={GlobalStyleSheet.bgImage}>
       <CustomHeader />
 
-      <View style={{flex: 1, justifyContent: 'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center' }}>
         <RoundedButton
           title={de.event}
           onPress={() => navigation.navigate(ROUTE_NAMES.EVENT_HOME_SCREEN)}
@@ -162,7 +162,7 @@ const Welcome = () => {
                         if (rawUrl) {
                           const normalizedUrl =
                             rawUrl.startsWith('http://') ||
-                            rawUrl.startsWith('https://')
+                              rawUrl.startsWith('https://')
                               ? rawUrl
                               : `http://${rawUrl}`;
                           Linking.openURL(normalizedUrl).catch(err => {
@@ -174,7 +174,7 @@ const Welcome = () => {
                     disabled={!sponsor?.websiteUrl}
                     activeOpacity={0.7}>
                     <Image
-                      source={{uri: sponsor.imageUrl}}
+                      source={{ uri: sponsor.imageUrl }}
                       resizeMode="contain"
                       style={styles.homeLogo}
                     />
