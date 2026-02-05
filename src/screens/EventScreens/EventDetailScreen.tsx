@@ -370,7 +370,7 @@ const EventDetailScreen = () => {
 
           <View style={{ marginBottom: 10 }}>
             <TextField
-              lineHeight={22}
+            
               fontSize={18}
               text={formatTimestamp(eventDetails?.eventDate)}
               color={COLORS.green}
@@ -381,7 +381,6 @@ const EventDetailScreen = () => {
             {eventDetails?.startTime && (
               <TextField
                 textAlign="left"
-                lineHeight={22}
                 fontSize={18}
                 text={`Startzeit: ${eventDetails?.startTime} Uhr`}
                 color={COLORS.green}
@@ -391,7 +390,7 @@ const EventDetailScreen = () => {
             )}
             {eventDetails?.entryTime && (
               <TextField
-                lineHeight={22}
+                
                 fontSize={18}
                 text={`Einlass: ${eventDetails?.entryTime} Uhr`}
                 color={COLORS.green}
@@ -401,7 +400,7 @@ const EventDetailScreen = () => {
             )}
             {eventDetails?.endTime && (
               <TextField
-                lineHeight={22}
+                
                 fontSize={18}
                 text={`Endzeit: ${eventDetails?.endTime} Uhr`}
                 color={COLORS.green}
@@ -412,7 +411,6 @@ const EventDetailScreen = () => {
             {eventDetails?.description && (
               <TextField
                 textAlign="left"
-                lineHeight={22}
                 fontSize={18}
                 text={eventDetails?.description}
                 color={COLORS.green}

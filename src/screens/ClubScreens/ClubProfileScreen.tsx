@@ -207,7 +207,6 @@ const ClubProfileScreen = () => {
             color={COLORS.green}
             fontFamily={Fonts.comfortaaMedium}
             marginTop={16}
-            lineHeight={22}
           />
         )}
         {item.foundingYear && (
@@ -217,7 +216,7 @@ const ClubProfileScreen = () => {
             color={COLORS.green}
             fontFamily={Fonts.comfortaaMedium}
             marginTop={16}
-            lineHeight={22}
+            
           />
         )}
         {item.description && (
@@ -227,7 +226,6 @@ const ClubProfileScreen = () => {
             color={COLORS.green}
             fontFamily={Fonts.comfortaaMedium}
             marginTop={16}
-            lineHeight={22}
           />
         )}
       </View>
