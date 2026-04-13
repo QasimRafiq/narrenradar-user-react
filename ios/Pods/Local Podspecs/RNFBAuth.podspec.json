@@ -16,12 +16,8 @@
   },
   "source_files": "ios/**/*.{h,m}",
   "dependencies": {
-    "React-Core": [
-
-    ],
-    "RNFBApp": [
-
-    ],
+    "React-Core": [],
+    "RNFBApp": [],
     "Firebase/Auth": [
       "8.15.0"
     ]
