@@ -39,6 +39,16 @@ const ClubProfileScreen = () => {
   const routes = useRoute<any>();
   const { clubData, regionDetail } = routes?.params || {};
   const { regions } = useRegions();
+
+  const characters = Array.isArray(clubData?.characters)
+    ? clubData.characters
+    : clubData?.characters && typeof clubData.characters === "object"
+      ? Object.values(clubData.characters)
+      : [];
+
+  const hasCharacters = characters.some((c: any) =>
+    typeof c === "string" ? c.trim().length > 0 : c?.title || c?.narrenruf
+  );
   const handleWeb = async () => {
     await Linking.openURL(clubData?.websiteUrl);
   };
@@ -241,10 +251,14 @@ const ClubProfileScreen = () => {
       label: "Mitgliederzahl Stand (Datum)",
       value: formatTimestamp(clubData?.stand),
     },
-    {
-      label: "Narrenfiguren mit Narrenruf",
-      value: clubData?.characters, // array
-    },
+    ...(hasCharacters
+      ? [
+          {
+            label: "Narrenfiguren mit Narrenruf",
+            value: clubData.characters,
+          },
+        ]
+      : []),
     {
       label: "Verbände",
       value: (() => {
@@ -531,22 +545,26 @@ const ClubProfileScreen = () => {
             }}
           /> */}
 
-          <TextField
-            uppercase={true}
-            text={de.narrenfiguren}
-            color={COLORS.green}
-            fontSize={21}
-            fontFamily={Fonts.heading}
-            marginTop={10}
-            // marginBottom={10}
-            letterSpacing={1.5}
-          />
+          {hasCharacters && (
+            <>
+              <TextField
+                uppercase={true}
+                text={de.narrenfiguren}
+                color={COLORS.green}
+                fontSize={21}
+                fontFamily={Fonts.heading}
+                marginTop={10}
+                // marginBottom={10}
+                letterSpacing={1.5}
+              />
 
-          <FlatList
-            data={clubData?.characters || []}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => <ItemCard item={item} />}
-          />
+              <FlatList
+                data={characters}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => <ItemCard item={item} />}
+              />
+            </>
+          )}
 
           {/* FUNKTIONÄRE SECTION */}
           {/* FUNKTIONÄRE SECTION */}
