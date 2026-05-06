@@ -1,6 +1,6 @@
 {
   "app_name": "NARRENRADAR",
-  "our_partners": "Unsere Partner",
+  "our_partners": "PRÄSENTIERT VON",
   "event": "Veranstaltungen",
   "clubs": "Zünfte",
   "club_new_name": "Vereine",
@@ -19,7 +19,6 @@
   "contact": "Kontakt",
   "narrenfiguren": "Narrenfiguren",
   "route": "Standort Vereinsheim",
-
   "confirm": "BESTÄTIGEN",
   "select_location": "Standort auswählen",
   "search_location": "Standort suchen",
