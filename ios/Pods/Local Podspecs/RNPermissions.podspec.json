@@ -24,8 +24,6 @@
   ],
   "frameworks": "CoreLocation",
   "dependencies": {
-    "React-Core": [
-
-    ]
+    "React-Core": []
   }
 }

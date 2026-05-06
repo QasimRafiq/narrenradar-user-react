@@ -41,17 +41,11 @@
   },
   "requires_arc": true,
   "dependencies": {
-    "ReactCommon/turbomodule/core": [
-
-    ],
-    "React-Core": [
-
-    ],
+    "ReactCommon/turbomodule/core": [],
+    "React-Core": [],
     "RCT-Folly": [
       "2022.05.16.00"
     ],
-    "glog": [
-
-    ]
+    "glog": []
   }
 }

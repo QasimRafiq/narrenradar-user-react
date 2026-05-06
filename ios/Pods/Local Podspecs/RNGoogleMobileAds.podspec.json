@@ -19,15 +19,11 @@
   "weak_frameworks": "AppTrackingTransparency",
   "compiler_flags": "$(inherited) -DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -Wno-comma -Wno-shorten-64-to-32",
   "dependencies": {
-    "React-Core": [
-
-    ],
+    "React-Core": [],
     "RCT-Folly": [
       "2022.05.16.00"
     ],
-    "glog": [
-
-    ],
+    "glog": [],
     "GoogleUserMessagingPlatform": [
       "2.4.0"
     ],

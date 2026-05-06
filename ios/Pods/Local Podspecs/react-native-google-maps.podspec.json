@@ -21,9 +21,7 @@
     "FRAMEWORK_SEARCH_PATHS": "\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-maps\""
   },
   "dependencies": {
-    "React-Core": [
-
-    ],
+    "React-Core": [],
     "GoogleMaps": [
       "7.4.0"
     ],

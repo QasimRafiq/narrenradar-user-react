@@ -212,7 +212,7 @@
         userInfo[NSUnderlyingErrorKey] = fileReachabilityError;
       }
 
-      *outError = [NSError errorWithDomain:FIRStorageErrorDomainInternal
+      *outError = [NSError errorWithDomain:FIRStorageErrorDomain
                                       code:FIRStorageErrorCodeUnknown
                                   userInfo:userInfo];
     }
