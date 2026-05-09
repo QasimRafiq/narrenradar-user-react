@@ -181,6 +181,10 @@ const AwayDateScreen = () => {
       const data = snapshot.val();
 
       if (data) {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const sixMonthsAgoTimestamp = sixMonthsAgo.getTime();
+
         const events = Object.entries(data)
           .map(([key, value]: any) => {
             const raw = value || {};
@@ -243,7 +247,7 @@ const AwayDateScreen = () => {
               (ad.returnType === 'Shuttlebus' && ad.returnTime != null) ||
               (Array.isArray(ad.returnBusTimes) && ad.returnBusTimes.length > 0);
 
-            const matches =
+            const matchesTransport =
               hasDepartureInfo ||
               hasReturnInfo ||
               ad.departureType === 'Eigene Anreise' ||
@@ -251,7 +255,9 @@ const AwayDateScreen = () => {
               ad.departureType === 'Nicht angegeben' ||
               ad.returnType === 'Nicht angegeben';
 
-            return matches;
+            const isFutureOrRecent = (item.eventDate || 0) >= sixMonthsAgoTimestamp;
+
+            return matchesTransport && isFutureOrRecent;
           })
           .sort((a: any, b: any) => {
             // Sort ascending by eventDate first
@@ -277,6 +283,8 @@ const AwayDateScreen = () => {
 
     return () => eventRef.off('value', onValueChange);
   }, [clubId]);
+
+  const now = new Date().getTime();
 
   // Helper functions matching Android
   const hasDepartureInfo = (awayDates: any): boolean => {
@@ -312,6 +320,7 @@ const AwayDateScreen = () => {
     singleTime: string | null | undefined,
     times: string[] | null | undefined,
     isDeparture: boolean,
+    textColor: string,
   ) => {
     const labelBase = isDeparture ? 'Abfahrt' : 'Rückfahrt';
     const displayType = type || 'Transport';
@@ -323,7 +332,7 @@ const AwayDateScreen = () => {
           <View style={{flex: 1, flexShrink: 1}}>
             <TextField
               text={`${labelBase} ${displayType}: ${singleTime.trim()} Uhr`}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -345,7 +354,7 @@ const AwayDateScreen = () => {
           <View style={{flex: 1, flexShrink: 1}}>
             <TextField
               text={`${labelWithOptionalNumber(labelBase, displayType, indexForLabel)} ${time.trim()} Uhr`}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -358,6 +367,8 @@ const AwayDateScreen = () => {
 
   const renderEventItem = ({item}: any) => {
     const ad = item.awayDates || {};
+    const isPast = (item.eventDate || 0) < now;
+    const textColor = isPast ? COLORS.text : COLORS.green;
 
     return (
       <TouchableOpacity
@@ -381,7 +392,7 @@ const AwayDateScreen = () => {
                 ? `${formatTimestamp(item.eventDate)} - ${item.name || ''}`
                 : item.name || ''
             }
-            color={COLORS.green}
+            color={textColor}
             fontSize={16}
             fontFamily={Fonts.comfortaaBold}
           />
@@ -392,7 +403,7 @@ const AwayDateScreen = () => {
           <View style={styles.row}>
             <TextField
               text={`Anmerkung: ${ad.anmerkungen.trim()}`}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -407,6 +418,7 @@ const AwayDateScreen = () => {
             ad.departureTime,
             ad.departureBusTimes,
             true,
+            textColor,
           )}
 
         {/* RETURN */}
@@ -416,6 +428,7 @@ const AwayDateScreen = () => {
             ad.returnTime,
             ad.returnBusTimes,
             false,
+            textColor,
           )}
 
         {/* Eigene Anreise */}
@@ -423,7 +436,7 @@ const AwayDateScreen = () => {
           <View style={styles.detailRow}>
             <TextField
               text={ad.departureType}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -436,7 +449,7 @@ const AwayDateScreen = () => {
           <View style={styles.detailRow}>
             <TextField
               text={ad.returnType}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -449,7 +462,7 @@ const AwayDateScreen = () => {
           <View style={styles.detailRow}>
             <TextField
               text={ad.departureType}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}
@@ -462,7 +475,7 @@ const AwayDateScreen = () => {
           <View style={styles.detailRow}>
             <TextField
               text={ad.returnType}
-              color={COLORS.green}
+              color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
               lineHeight={20}

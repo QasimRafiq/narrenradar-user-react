@@ -36,6 +36,9 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
     ? `${item?.name || ""} - ${cityName}`
     : item?.name || "";
 
+  const isPast = (item.eventDate || 0) < Date.now();
+  const textColor = isPast ? COLORS.text : COLORS.green;
+
   return (
     <TouchableOpacity
       onPress={() =>
@@ -48,7 +51,7 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
       <TextField
         text={`${formatTimestamp(item.eventDate)}- ${displayText}`}
         fontSize={18}
-        color={COLORS.green}
+        color={textColor}
         fontFamily={Fonts.comfortaaSemiBold}
       />
     </TouchableOpacity>

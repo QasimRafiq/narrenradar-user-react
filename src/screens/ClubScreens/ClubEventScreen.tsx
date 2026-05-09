@@ -154,6 +154,10 @@ const ClubEventScreen = () => {
         }));
 
         // ✅ Updated filtering logic
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const sixMonthsAgoTimestamp = sixMonthsAgo.getTime();
+
         const filtered = formatted.filter(item => {
           const eventClubId =
             typeof item.clubId === 'object'
@@ -167,7 +171,10 @@ const ClubEventScreen = () => {
             item.awayDates &&
             Object.keys(item.awayDates || {}).includes(String(clubData.id));
 
-          return hasOwnEvent || hasAwayEvent;
+          const matchesClub = hasOwnEvent || hasAwayEvent;
+          const isFutureOrRecent = (item.eventDate || 0) >= sixMonthsAgoTimestamp;
+
+          return matchesClub && isFutureOrRecent;
         });
 
         // ✅ Sort ascending by event date
@@ -182,6 +189,8 @@ const ClubEventScreen = () => {
 
     return () => eventRef.off('value', onValueChange);
   }, [clubData?.id]);
+
+  const now = new Date().getTime();
 
   return (
     <ImageBackground
@@ -202,20 +211,17 @@ const ClubEventScreen = () => {
         letterSpacing={1.5}
       />
 
-
-
-
-            <TextField
-                text={
-                  "Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."
-                }
-                color={COLORS.green}
-                fontSize={14}
-                fontFamily={Fonts.comfortaaLight}
-                marginLeft={25}
-                marginRight={10}
-                textAlign="left"
-              />
+      <TextField
+        text={
+          "Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."
+        }
+        color={COLORS.green}
+        fontSize={14}
+        fontFamily={Fonts.comfortaaLight}
+        marginLeft={25}
+        marginRight={10}
+        textAlign="left"
+      />
 
       {loading ? (
         <ActivityIndicator
@@ -235,6 +241,9 @@ const ClubEventScreen = () => {
               const hasAwayDates = 
                 event?.awayDates &&
                 Object.keys(event.awayDates || {}).includes(String(clubData.id));
+
+              const isPast = (event.eventDate || 0) < now;
+              const textColor = isPast ? COLORS.text : COLORS.green;
 
               return (
                 <TouchableOpacity
@@ -257,7 +266,7 @@ const ClubEventScreen = () => {
                     <TextField
                       fontSize={16}
                       text={`${formatTimestamp(event?.eventDate)} - ${event?.name}`}
-                      color={COLORS.green}
+                      color={textColor}
                       fontFamily={Fonts.comfortaaBold}
                       marginBottom={10}
                     />
@@ -265,7 +274,7 @@ const ClubEventScreen = () => {
                     {hasAwayDates && anmerkungen && anmerkungen.trim() !== '' && (
                       <TextField
                         text={`Anmerkung: ${anmerkungen.trim()}`}
-                        color={COLORS.green}
+                        color={textColor}
                         fontSize={16}
                         fontFamily={Fonts.comfortaaMedium}
                         lineHeight={20}
@@ -276,6 +285,7 @@ const ClubEventScreen = () => {
                 </TouchableOpacity>
               );
             })
+
           ) : (
             <TextField
               text=""
