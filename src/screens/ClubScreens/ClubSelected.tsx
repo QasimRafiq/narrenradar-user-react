@@ -61,13 +61,13 @@ const ClubSelected = () => {
       />
       <RoundedButton
         title={'Narrenfahrplan'}
-        onPress={() => navigation.navigate(ROUTE_NAMES.CLUB_EVENT, {clubData})}
+        onPress={() => navigation.navigate(ROUTE_NAMES.CLUB_EVENT, {clubData, tab: 'fahrplan'})}
         opacity={0.7}
       />
 
       <RoundedButton
         title={de.away_dates_with_bus_times}
-        onPress={() => navigation.navigate(ROUTE_NAMES.AWAY_DATE, {clubData})}
+        onPress={() => navigation.navigate(ROUTE_NAMES.CLUB_EVENT, {clubData, tab: 'away'})}
         opacity={0.7}
       />
      

@@ -45,6 +45,7 @@ type componentProps = {
   rightTextIcon?: any;
   leftTextIcon?: any;
   fontFamily?: any;
+  fontStyle?: "normal" | "italic";
   key?: any;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip" | undefined;
   uppercase?: boolean; // <-- Added here
@@ -75,6 +76,7 @@ const TextField: FC<componentProps> = (props) => {
     textShadowOffset: props.textShadowOffset,
     textShadowRadius: props.textShadowRadius,
     fontFamily: props.fontFamily,
+    fontStyle: props.fontStyle,
   };
 
   const displayText = props.uppercase
