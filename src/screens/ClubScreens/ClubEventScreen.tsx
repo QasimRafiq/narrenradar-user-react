@@ -156,7 +156,7 @@ const ClubEventScreen = () => {
 
   const renderEventItem = (item: any, index: number, isAway: boolean) => {
     const isPast = (item.eventDate || 0) < now;
-    const cardBg = isPast ? '#f7fbf2' : COLORS.light_green;
+    const cardBg = isPast ? '#F1F8E9' : COLORS.light_green;
     const textColor = isPast ? COLORS.text : COLORS.green;
     
     // In 'away' tab, we use the parsed awayDates. In 'fahrplan' tab, we look up the raw awayDates for anmerkungen.
@@ -215,17 +215,17 @@ const ClubEventScreen = () => {
 
       <TextField uppercase textAlign="center" text="Narrenfahrplan" color={COLORS.green} fontSize={22} fontFamily={Fonts.heading} fontWeight="bold" fontStyle="italic" marginTop={10} marginBottom={10} letterSpacing={1.5} width="100%" />
 
-      <TextField text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."} color={COLORS.green} fontSize={14} fontFamily={Fonts.comfortaaLight} marginLeft={25} marginRight={25} textAlign="center" width="85%" alignSelf="center" />
-
       {/* Toggle Buttons */}
       <View style={styles.filterRow}>
         <TouchableOpacity style={[styles.filterBtn, activeTab === 'fahrplan' && styles.filterBtnActive]} onPress={() => setActiveTab('fahrplan')}>
-          <TextField textAlign="center" text="Fahrplan" fontSize={14} fontFamily={Fonts.heading} color={COLORS.green} fontStyle="italic" fontWeight="bold" />
+          <TextField textAlign="center" text="HEIMEVENT" fontSize={14} fontFamily={Fonts.heading} color={COLORS.green} fontStyle="italic" fontWeight="bold" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.filterBtn, activeTab === 'away' && styles.filterBtnActive]} onPress={() => setActiveTab('away')}>
-          <TextField textAlign="center" text="Buszeiten" fontSize={14} fontFamily={Fonts.heading} color={COLORS.green} fontStyle="italic" fontWeight="bold" />
+          <TextField textAlign="center" text="AUSWÄRTSEVENT" fontSize={14} fontFamily={Fonts.heading} color={COLORS.green} fontStyle="italic" fontWeight="bold" />
         </TouchableOpacity>
       </View>
+
+      <TextField text={"Hinweis: Mit Klick auf die Veranstaltung gelangst Du zu den Veranstaltungsdetails."} color={COLORS.green} fontSize={14} fontFamily={Fonts.comfortaaLight} marginLeft={25} marginRight={25} textAlign="center" width="85%" alignSelf="center" marginBottom={10} />
 
       {loading ? (
         <ActivityIndicator color={COLORS.green} size="large" style={{marginTop: 50}} />
@@ -294,3 +294,4 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 });
+
