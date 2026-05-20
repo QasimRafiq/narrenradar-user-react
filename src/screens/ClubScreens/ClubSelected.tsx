@@ -60,7 +60,7 @@ const ClubSelected = () => {
         opacity={0.7}
       />
       <RoundedButton
-        title={'Narrenfahrplan'}
+        title={'Narrenfahrplan mit Buszeiten'}
         onPress={() => navigation.navigate(ROUTE_NAMES.CLUB_EVENT, { clubData, tab: 'fahrplan' })}
         opacity={0.7}
       />
