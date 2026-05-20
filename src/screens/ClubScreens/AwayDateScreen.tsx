@@ -402,7 +402,7 @@ const AwayDateScreen = () => {
         {ad.anmerkungen && ad.anmerkungen.trim() !== '' && (
           <View style={styles.row}>
             <TextField
-              text={`Anmerkung: ${ad.anmerkungen.trim()}`}
+              text={`Anmerkung:\n${ad.anmerkungen.trim()}`}
               color={textColor}
               fontSize={16}
               fontFamily={Fonts.comfortaaMedium}
