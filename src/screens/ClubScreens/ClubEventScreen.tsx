@@ -57,20 +57,6 @@ const ClubEventScreen = () => {
         // Sort everything latest-first
         const sorted = [...formatted].sort((a, b) => (b.eventDate || 0) - (a.eventDate || 0));
 
-        // --- Heim events: events belonging to this club ---
-        const heim = sorted.filter(item => {
-          const eventClubId =
-            typeof item.clubId === 'object'
-              ? item.clubId?.id || item.clubId?.value
-              : item.clubId;
-          return (
-            String(eventClubId)?.trim() === String(clubId)?.trim() &&
-            (item.eventDate || 0) >= cutoff
-          );
-        });
-        setHeimEvents(heim);
-
-        // --- Away events: events where this club appears in awayDates ---
         // Parse the raw Firebase awayDates object into a flat, normalised structure.
         const normaliseAwayData = (clubAwayData: any): any => {
           if (!clubAwayData || typeof clubAwayData !== 'object') return {};
@@ -117,6 +103,39 @@ const ClubEventScreen = () => {
           return parsed;
         };
 
+        // --- Heim events: events belonging to this club, excluding any that are already away events ---
+        const heim = sorted.filter(item => {
+          const eventClubId =
+            typeof item.clubId === 'object'
+              ? item.clubId?.id || item.clubId?.value
+              : item.clubId;
+
+          const isBelongingToClub = String(eventClubId)?.trim() === String(clubId)?.trim();
+          if (!isBelongingToClub) return false;
+
+          // Check if this event is already registered as an away event with transport info for this club
+          const rawAway = item.awayDates;
+          let hasAwayTransport = false;
+          if (
+            rawAway &&
+            typeof rawAway === 'object' &&
+            !Array.isArray(rawAway) &&
+            Object.prototype.hasOwnProperty.call(rawAway, clubId)
+          ) {
+            const ad = normaliseAwayData(rawAway[clubId]);
+            hasAwayTransport = !!(
+              ad.departureType ||
+              ad.returnType ||
+              (ad.departureBusTimes && ad.departureBusTimes.length > 0) ||
+              (ad.returnBusTimes && ad.returnBusTimes.length > 0)
+            );
+          }
+
+          return !hasAwayTransport && (item.eventDate || 0) >= cutoff;
+        });
+        setHeimEvents(heim);
+
+        // --- Away events: events where this club appears in awayDates ---
         const away = sorted
           .map((item: any) => {
             const raw = item || {};
