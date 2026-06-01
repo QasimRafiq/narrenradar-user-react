@@ -410,12 +410,6 @@ const ClubEventScreen = () => {
     );
   })();
 
-  const tabs: { key: TabKey; label: string; bg: string }[] = [
-    { key: 'all', label: 'ALL', bg: TAB_BG.all },
-    { key: 'fahrplan', label: 'HEIMEVENT', bg: TAB_BG.fahrplan },
-    { key: 'away', label: 'AUSWÄRTS', bg: TAB_BG.away },
-  ];
-
   return (
     <ImageBackground
       source={IMAGES.backgroundImg}
@@ -438,16 +432,21 @@ const ClubEventScreen = () => {
         width="100%"
       />
 
-      <View style={styles.filterRow}>
-        {tabs.map(t => (
+      <View style={styles.tabsContainer}>
+        {/* Row 1: ALL */}
+        <View style={styles.rowAll}>
           <TouchableOpacity
-            key={t.key}
-            style={[styles.filterBtn, { backgroundColor: t.bg }]}
-            onPress={() => setActiveTab(t.key)}
-            activeOpacity={1}>
+            style={[
+              styles.filterBtn,
+              styles.btnAll,
+              { backgroundColor: TAB_BG.all },
+              activeTab === 'all' && styles.activeBtn,
+            ]}
+            onPress={() => setActiveTab('all')}
+            activeOpacity={0.9}>
             <TextField
               textAlign="center"
-              text={t.label}
+              text="ALLE EVENTS"
               fontSize={12}
               fontFamily={Fonts.heading}
               color={COLORS.green}
@@ -455,7 +454,48 @@ const ClubEventScreen = () => {
               fontWeight="bold"
             />
           </TouchableOpacity>
-        ))}
+        </View>
+
+        {/* Row 2: HEIMEVENT & AUSWÄRTS */}
+        <View style={styles.rowSub}>
+          <TouchableOpacity
+            style={[
+              styles.filterBtn,
+              { backgroundColor: TAB_BG.fahrplan },
+              activeTab === 'fahrplan' && styles.activeBtn,
+            ]}
+            onPress={() => setActiveTab('fahrplan')}
+            activeOpacity={0.9}>
+            <TextField
+              textAlign="center"
+              text="HEIMEVENTS"
+              fontSize={12}
+              fontFamily={Fonts.heading}
+              color={COLORS.green}
+              fontStyle="italic"
+              fontWeight="bold"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterBtn,
+              { backgroundColor: TAB_BG.away },
+              activeTab === 'away' && styles.activeBtn,
+            ]}
+            onPress={() => setActiveTab('away')}
+            activeOpacity={0.9}>
+            <TextField
+              textAlign="center"
+              text="AUSWÄRTSEVENTS"
+              fontSize={12}
+              fontFamily={Fonts.heading}
+              color={COLORS.green}
+              fontStyle="italic"
+              fontWeight="bold"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <TextField
@@ -540,12 +580,19 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingTop: 10,
   },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  tabsContainer: {
     marginTop: 16,
     marginBottom: 16,
     paddingHorizontal: 12,
+  },
+  rowAll: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  rowSub: {
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   filterBtn: {
     borderRadius: 12,
@@ -554,6 +601,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  btnAll: {
+    alignSelf: 'stretch',
+    flex: 1,
+  },
+  activeBtn: {
+    borderColor: COLORS.green,
   },
   card: {
     borderRadius: 16,
