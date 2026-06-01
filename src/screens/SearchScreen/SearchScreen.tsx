@@ -69,7 +69,7 @@ const SearchScreen = () => {
             const nameB = b.name?.toLowerCase() || "";
             return nameA.localeCompare(nameB);
           }
-          return dateA - dateB;
+          return dateB - dateA;
         })
     : (events || [])
         .filter((e: any) => e.type !== "header")
@@ -82,7 +82,7 @@ const SearchScreen = () => {
             const nameB = b.name?.toLowerCase() || "";
             return nameA.localeCompare(nameB);
           }
-          return dateA - dateB;
+          return dateB - dateA;
         }); // Filter out any header items and sort
 
   // Filter regions matching Android behavior: search by name (title)

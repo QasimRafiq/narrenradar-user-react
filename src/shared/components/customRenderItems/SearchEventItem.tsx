@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, StyleSheet, View } from "react-native";
 import TextField from "../customText/TextField";
 import { COLORS } from "../../constants/theme";
 import { Fonts } from "../../../assets/fonts/fonts";
@@ -37,26 +37,57 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
     : item?.name || "";
 
   const isPast = (item.eventDate || 0) < Date.now();
-  const textColor = isPast ? COLORS.text : COLORS.green;
+  const textColor = isPast ? "#999999" : COLORS.green;
 
   return (
     <TouchableOpacity
-      onPress={() =>
-        navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
-          eventDetails: item,
-        })
-      }
-      style={{ marginBottom: 24 }}
+      activeOpacity={0.8}
+      onPress={() => {
+        const screen =
+          item?.sponsorPackage === "Plus"
+            ? ROUTE_NAMES.EVENT_DETAIL_SCREEN
+            : ROUTE_NAMES.Is_Publish_Event_Details;
+        navigation.navigate(screen, { eventDetails: item });
+      }}
+      style={styles.card}
     >
       <TextField
-        text={`${formatTimestamp(item.eventDate)}- ${displayText}`}
-        fontSize={18}
+        fontSize={16}
+        text={formatTimestamp(item?.eventDate)}
         color={textColor}
-        fontFamily={Fonts.comfortaaSemiBold}
+        fontFamily={Fonts.comfortaaBold}
+        textAlign="center"
+        marginBottom={5}
+        width="100%"
+      />
+      <TextField
+        fontSize={16}
+        text={displayText}
+        color={textColor}
+        fontFamily={Fonts.comfortaaBold}
+        textAlign="center"
+        width="100%"
       />
     </TouchableOpacity>
   );
 };
 
 export default SearchEventItem;
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    minHeight: 100,
+    backgroundColor: "#CFE8BE", // same background color as heimevents
+  },
+});
 
