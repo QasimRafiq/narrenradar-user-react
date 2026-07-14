@@ -46,13 +46,7 @@ const IsPublishEventDetails = () => {
       return;
     }
 
-    // Extract clubId if it's an object
-    const clubId =
-      typeof eventDetails.clubId === "object"
-        ? eventDetails.clubId?.id || eventDetails.clubId?.value
-        : eventDetails.clubId;
-
-    const shareUrl = `https://go.narrenradar.de/vereine/club/events/detail?clubId=${clubId}&eventId=${eventDetails.id}`;
+    const shareUrl = `https://go.narrenradar.de/share/event/${eventDetails.id}/`;
 
     const shareText = `Schau dir diese Veranstaltung an: ${eventDetails.name}\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
