@@ -83,6 +83,7 @@ const CustomRegionGrid: React.FC<CustomRegionGridProps> = ({
       renderItem={({item}) => <GridItem item={item} />}
       keyExtractor={(item, index) => index.toString()}
       numColumns={numColumns}
+      contentContainerStyle={{ paddingBottom: 50 }}
       columnWrapperStyle={{
         justifyContent: 'space-between',
         marginBottom: columnGap,

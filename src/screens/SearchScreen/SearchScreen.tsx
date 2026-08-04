@@ -49,67 +49,67 @@ const SearchScreen = () => {
   // Filter events matching Android behavior: search by name, eventLocation, and description
   const filteredEvents = searchText
     ? (events || [])
-        .filter((e: any) => {
-          // Skip header items if any (shouldn't be in flat events list)
-          if (e.type === "header") return false;
+      .filter((e: any) => {
+        // Skip header items if any (shouldn't be in flat events list)
+        if (e.type === "header") return false;
 
-          const searchLower = searchText.toLowerCase();
-          return (
-            e.name?.toLowerCase().includes(searchLower) ||
-            e.eventLocation?.toLowerCase().includes(searchLower) ||
-            e.description?.toLowerCase().includes(searchLower)
-          );
-        })
-        .sort((a: any, b: any) => {
-          const dateA = a.eventDate || 0;
-          const dateB = b.eventDate || 0;
-          // If dates are the same, sort alphabetically by name
-          if (dateA === dateB) {
-            const nameA = a.name?.toLowerCase() || "";
-            const nameB = b.name?.toLowerCase() || "";
-            return nameA.localeCompare(nameB);
-          }
-          return dateB - dateA;
-        })
+        const searchLower = searchText.toLowerCase();
+        return (
+          e.name?.toLowerCase().includes(searchLower) ||
+          e.eventLocation?.toLowerCase().includes(searchLower) ||
+          e.description?.toLowerCase().includes(searchLower)
+        );
+      })
+      .sort((a: any, b: any) => {
+        const dateA = a.eventDate || 0;
+        const dateB = b.eventDate || 0;
+        // If dates are the same, sort alphabetically by name
+        if (dateA === dateB) {
+          const nameA = a.name?.toLowerCase() || "";
+          const nameB = b.name?.toLowerCase() || "";
+          return nameA.localeCompare(nameB);
+        }
+        return dateB - dateA;
+      })
     : (events || [])
-        .filter((e: any) => e.type !== "header")
-        .sort((a: any, b: any) => {
-          const dateA = a.eventDate || 0;
-          const dateB = b.eventDate || 0;
-          // If dates are the same, sort alphabetically by name
-          if (dateA === dateB) {
-            const nameA = a.name?.toLowerCase() || "";
-            const nameB = b.name?.toLowerCase() || "";
-            return nameA.localeCompare(nameB);
-          }
-          return dateB - dateA;
-        }); // Filter out any header items and sort
+      .filter((e: any) => e.type !== "header")
+      .sort((a: any, b: any) => {
+        const dateA = a.eventDate || 0;
+        const dateB = b.eventDate || 0;
+        // If dates are the same, sort alphabetically by name
+        if (dateA === dateB) {
+          const nameA = a.name?.toLowerCase() || "";
+          const nameB = b.name?.toLowerCase() || "";
+          return nameA.localeCompare(nameB);
+        }
+        return dateB - dateA;
+      }); // Filter out any header items and sort
 
   // Filter regions matching Android behavior: search by name (title)
   const filteredRegion = searchText
     ? (regions || []).filter((e: any) =>
-        e?.name?.toLowerCase().includes(searchText.toLowerCase())
-      )
+      e?.name?.toLowerCase().includes(searchText.toLowerCase())
+    )
     : regions || [];
 
   // Filter club users matching Android behavior: search by clubName, regionTitles, and ort
   const filteredClubUsers = searchText
     ? (clubUsers || []).filter((e: any) => {
-        const searchLower = searchText.toLowerCase();
-        const clubNameMatch =
-          e?.clubName?.toLowerCase().includes(searchLower) || false;
-        // Handle regionTitles - could be array or object
-        const regionTitles = Array.isArray(e?.regionTitles)
-          ? e.regionTitles
-          : e?.regionTitles
+      const searchLower = searchText.toLowerCase();
+      const clubNameMatch =
+        e?.clubName?.toLowerCase().includes(searchLower) || false;
+      // Handle regionTitles - could be array or object
+      const regionTitles = Array.isArray(e?.regionTitles)
+        ? e.regionTitles
+        : e?.regionTitles
           ? Object.values(e.regionTitles)
           : [];
-        const regionMatch = regionTitles.some((region: string) =>
-          region?.toLowerCase().includes(searchLower)
-        );
-        const ortMatch = e?.ort?.toLowerCase().includes(searchLower) || false;
-        return clubNameMatch || regionMatch || ortMatch;
-      })
+      const regionMatch = regionTitles.some((region: string) =>
+        region?.toLowerCase().includes(searchLower)
+      );
+      const ortMatch = e?.ort?.toLowerCase().includes(searchLower) || false;
+      return clubNameMatch || regionMatch || ortMatch;
+    })
     : clubUsers || [];
   return (
     <ImageBackground
@@ -127,8 +127,8 @@ const SearchScreen = () => {
           activeFilter === "Veranstaltung"
             ? "Veranstaltung"
             : activeFilter === "Verband"
-            ? "Verband"
-            : "Verein"
+              ? "Verband"
+              : "Verein"
         }
         color={COLORS.green}
         fontSize={22}
@@ -167,14 +167,14 @@ const SearchScreen = () => {
             activeFilter === "Veranstaltung"
               ? "Veranstaltung suchen"
               : activeFilter === "Verband"
-              ? "Verband suchen"
-              : "Verein suchen"
+                ? "Verband suchen"
+                : "Verein suchen"
           }
           placeholderTextColor={COLORS.title}
           style={styles.input}
           value={searchText}
           onChangeText={setSearchText}
-        
+
         />
         <Image
           source={IMAGES.search}
@@ -192,7 +192,7 @@ const SearchScreen = () => {
             <FlatList
               data={filteredEvents}
               keyExtractor={(item, index) => item?.id || index?.toString()}
-              contentContainerStyle={{ padding: 15 }}
+              // contentContainerStyle={{ padding: 15, paddingBottom: 40 }}
               renderItem={({ item }) => {
                 // Skip rendering header items
                 if (item.type === "header") return null;
@@ -248,7 +248,7 @@ const SearchScreen = () => {
 
       {/* Club Users List */}
       {activeFilter === "Verein" && (
-        <View style={{ paddingHorizontal: 15 }}>
+        <View style={{ paddingHorizontal: 15, flex: 1 }}>
           {loading ? (
             <CustomLoader message="DATEN ABRUFEN..." />
           ) : filteredClubUsers && filteredClubUsers.length > 0 ? (
