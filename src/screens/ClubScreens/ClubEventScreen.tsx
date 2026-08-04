@@ -262,11 +262,7 @@ const ClubEventScreen = () => {
         style={[styles.card, { backgroundColor: cardBg }]}
         activeOpacity={0.8}
         onPress={() => {
-          const screen =
-            item?.sponsorPackage === 'Plus'
-              ? ROUTE_NAMES.EVENT_DETAIL_SCREEN
-              : ROUTE_NAMES.Is_Publish_Event_Details;
-          navigation.navigate(screen, { eventDetails: item });
+          navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, { eventDetails: item });
         }}>
         <TextField
           fontSize={16}

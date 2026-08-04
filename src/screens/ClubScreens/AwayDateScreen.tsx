@@ -374,15 +374,9 @@ const AwayDateScreen = () => {
       <TouchableOpacity
         style={styles.itemWrapper}
         onPress={() => {
-          if (item?.sponsorPackage === 'Plus') {
-            navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
-              eventDetails: item,
-            });
-          } else {
-            navigation.navigate(ROUTE_NAMES.Is_Publish_Event_Details, {
-              eventDetails: item,
-            });
-          }
+          navigation.navigate(ROUTE_NAMES.EVENT_DETAIL_SCREEN, {
+            eventDetails: item,
+          });
         }}>
         {/* Event row (no bullet) */}
         <View style={styles.row}>
