@@ -1,7 +1,7 @@
 // hooks/firebaseHooks.ts
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import database from '@react-native-firebase/database';
-import {groupAndFlattenEvents} from './groupedUtils';
+import { groupAndFlattenEvents } from './groupedUtils';
 // hooks/useCurrentLocation.ts
 import Geolocation from '@react-native-community/geolocation';
 import MapView from 'react-native-maps';
@@ -45,7 +45,7 @@ export const useEvents = () => {
             const createdAtB = b.createdAt || 0;
             return createdAtB - createdAtA; // Descending order (newest first)
           });
-        
+
         setEvents(formatted);
         setFlatGroupedEvents(groupAndFlattenEvents(formatted));
       } else {
@@ -58,7 +58,7 @@ export const useEvents = () => {
     return () => eventsRef.off('value', onValueChange);
   }, []);
 
-  return {events, flatGroupedEvents, loading};
+  return { events, flatGroupedEvents, loading };
 };
 
 // 🔹 Hook for fetching regions
@@ -85,7 +85,7 @@ export const useRegions = () => {
     return () => regionRef.off('value', onValueChange);
   }, []);
 
-  return {regions, loading};
+  return { regions, loading };
 };
 
 // 🔹 Hook for fetching club users (optionally filtered by region)
@@ -122,7 +122,7 @@ export const useClubUsers = (regionId?: string) => {
     fetchUsers();
   }, [regionId]);
 
-  return {clubUsers, loading};
+  return { clubUsers, loading };
 };
 
 export const useCurrentLocation = (
@@ -134,7 +134,7 @@ export const useCurrentLocation = (
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       position => {
-        const {latitude, longitude} = position.coords;
+        const { latitude, longitude } = position.coords;
         const newRegion = {
           latitude,
           longitude,
@@ -154,7 +154,7 @@ export const useCurrentLocation = (
         // );
         console.log(error);
       },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
     );
   };
 
@@ -162,5 +162,5 @@ export const useCurrentLocation = (
     getCurrentLocation();
   }, []);
 
-  return {region, setRegion, mapRef, getCurrentLocation};
+  return { region, setRegion, mapRef, getCurrentLocation };
 };

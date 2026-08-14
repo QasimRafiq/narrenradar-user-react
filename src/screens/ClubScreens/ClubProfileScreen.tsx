@@ -253,11 +253,11 @@ const ClubProfileScreen = () => {
     },
     ...(hasCharacters
       ? [
-          {
-            label: "Narrenfiguren mit Narrenruf",
-            value: clubData.characters,
-          },
-        ]
+        {
+          label: "Narrenfiguren mit Narrenruf",
+          value: clubData.characters,
+        },
+      ]
       : []),
     {
       label: "Verbände",
@@ -645,6 +645,14 @@ const ClubProfileScreen = () => {
                             fontSize={18}
                           />
                         ) : null}
+                        {member.phone ? (
+                          <TextField
+                            text={member.phone}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
                       </View>
                     ))}
                   </>
@@ -713,14 +721,14 @@ const ClubProfileScreen = () => {
                             fontSize={18}
                           />
                         ) : null}
-                        {/* {member.email ? (
-                        <TextField
-                          text={member.email}
-                          color={COLORS.green}
-                          fontFamily={Fonts.comfortaaMedium}
-                          fontSize={18}
-                        />
-                      ) : null} */}
+                        {member.phone ? (
+                          <TextField
+                            text={member.phone}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaMedium}
+                            fontSize={18}
+                          />
+                        ) : null}
                       </View>
                     ))}
                   </>
