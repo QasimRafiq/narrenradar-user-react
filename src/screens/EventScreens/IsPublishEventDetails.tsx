@@ -36,6 +36,18 @@ const IsPublishEventDetails = () => {
   const routes = useRoute<any>();
   const { eventDetails } = routes?.params || {};
 
+  const locations = Array.isArray(eventDetails?.locations)
+    ? eventDetails.locations
+    : eventDetails?.locations && typeof eventDetails.locations === "object"
+      ? Object.values(eventDetails.locations)
+      : [];
+
+  const toilets = Array.isArray(eventDetails?.toilets)
+    ? eventDetails.toilets
+    : eventDetails?.toilets && typeof eventDetails.toilets === "object"
+      ? Object.values(eventDetails.toilets)
+      : [];
+
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [currentWeather, setCurrentWeather] = useState<any>(null);
   const [forecastDay, setForecastDay] = useState<any>(null);
@@ -386,7 +398,7 @@ const IsPublishEventDetails = () => {
             </>
           )}
 
-          {eventDetails?.locations && (
+          {locations.length > 0 && (
             <>
               <TextField
                 textAlign="center"
@@ -400,14 +412,14 @@ const IsPublishEventDetails = () => {
               />
 
               <FlatList
-                data={eventDetails.locations}
+                data={locations}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
                   <View style={{ marginBottom: 10 }}>
                     <View style={{ flexDirection: "row" }}>
                       <TextField
                         fontSize={16}
-                        text={`${item?.name}`}
+                        text={`${item?.name || item?.art || ""}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaBold}
                         marginBottom={4}
@@ -516,6 +528,165 @@ const IsPublishEventDetails = () => {
                   />
                 </View>
               )}
+            </>
+          )}
+
+          {toilets.length > 0 && (
+            <>
+              <TextField
+                textAlign="center"
+                text={"TOILETTEN"}
+                color={COLORS.green}
+                fontSize={22}
+                fontFamily={Fonts.heading}
+                marginTop={10}
+                marginBottom={14}
+                letterSpacing={1.5}
+              />
+
+              <FlatList
+                data={toilets}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => {
+                  const fileUrl =
+                    typeof item?.file === "string"
+                      ? item.file
+                      : item?.file?.url || item?.flyer?.url;
+                  const fileType =
+                    typeof item?.file === "object"
+                      ? item?.file?.type || item?.flyer?.type
+                      : undefined;
+
+                  return (
+                    <View style={{ marginBottom: 10 }}>
+                      <View style={{ flexDirection: "row" }}>
+                        <TextField
+                          fontSize={16}
+                          text={`${item?.art || item?.name || ""}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaBold}
+                          marginBottom={4}
+                          fontWeight="700"
+                        />
+                      </View>
+
+                      <View style={{ flexDirection: "row", paddingLeft: 24 }}>
+                        {item.address ? (
+                          <TextField
+                            fontSize={15}
+                            text={`${item.address}`}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaRegular}
+                            marginBottom={10}
+                            width={"90%"}
+                          />
+                        ) : null}
+                      </View>
+                      {item.hin ? (
+                        <View style={{ flexDirection: "row", paddingLeft: 24 }}>
+                          <TextField
+                            fontSize={15}
+                            text={`Hinweis: ${item.hin}`}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaRegular}
+                            marginBottom={10}
+                            width={"90%"}
+                          />
+                        </View>
+                      ) : null}
+                      {/* ICONS */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          marginLeft: 10,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingVertical: 10,
+                        }}
+                      >
+                        {item.link ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              if (item.link) {
+                                Linking.openURL(item.link);
+                              }
+                            }}
+                          >
+                            <Image
+                              source={IMAGES.location_icon}
+                              style={{
+                                width: 32,
+                                height: 32,
+                                marginRight: fileUrl ? 20 : 0,
+                              }}
+                              tintColor={COLORS.green}
+                              resizeMode="contain"
+                            />
+                          </TouchableOpacity>
+                        ) : null}
+
+                        {fileUrl ? (
+                          <TouchableOpacity
+                            onPress={async () => {
+                              if (!fileUrl) {
+                                return;
+                              }
+
+                              // Detect file type using comprehensive detection
+                              const detectedType = await detectFileType(
+                                fileUrl,
+                                fileType
+                              );
+
+                              // Determine if it's PDF or image
+                              const isPDF =
+                                detectedType === FileType.PDF ||
+                                (detectedType === FileType.UNKNOWN &&
+                                  fileType === "pdf");
+
+                              const isImage =
+                                (detectedType === FileType.IMAGE ||
+                                  (detectedType === FileType.UNKNOWN &&
+                                    fileType !== "pdf")) &&
+                                !isPDF;
+
+                              if (isPDF) {
+                                navigation.navigate(
+                                  ROUTE_NAMES.PDF_VIEWER_SCREEN,
+                                  {
+                                    pdfDocument: fileUrl,
+                                  }
+                                );
+                              } else if (isImage) {
+                                navigation.navigate(
+                                  ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                  {
+                                    imgDocument: fileUrl,
+                                  }
+                                );
+                              } else {
+                                navigation.navigate(
+                                  ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                  {
+                                    imgDocument: fileUrl,
+                                  }
+                                );
+                              }
+                            }}
+                          >
+                            <Image
+                              source={IMAGES.flyer_icon}
+                              style={{ width: 32, height: 32 }}
+                              tintColor={COLORS.green}
+                              resizeMode="contain"
+                            />
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
+                    </View>
+                  );
+                }}
+              />
             </>
           )}
 

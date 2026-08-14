@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
+import database from "@react-native-firebase/database";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
@@ -36,7 +37,39 @@ import { detectFileType, FileType } from "../../shared/utils/fileTypeDetection";
 const EventDetailScreen = () => {
   const navigation = useNavigation<any>();
   const routes = useRoute<any>();
-  const { eventDetails } = routes?.params || {};
+  const { eventDetails: initialEventDetails } = routes?.params || {};
+  const [eventDetails, setEventDetails] = useState<any>(initialEventDetails || {});
+
+  useEffect(() => {
+    const eventId = initialEventDetails?.id;
+    if (!eventId) {
+      if (initialEventDetails) setEventDetails(initialEventDetails);
+      return;
+    }
+
+    const eventRef = database().ref(`/events/${eventId}`);
+    const onValueChange = eventRef.on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setEventDetails({ id: eventId, ...data });
+      }
+    });
+
+    return () => eventRef.off("value", onValueChange);
+  }, [initialEventDetails?.id]);
+
+  const locations = Array.isArray(eventDetails?.locations)
+    ? eventDetails.locations
+    : eventDetails?.locations && typeof eventDetails.locations === "object"
+      ? Object.values(eventDetails.locations)
+      : [];
+
+  const toilets = Array.isArray(eventDetails?.toilets)
+    ? eventDetails.toilets
+    : eventDetails?.toilets && typeof eventDetails.toilets === "object"
+      ? Object.values(eventDetails.toilets)
+      : [];
+
   const [weatherData, setWeatherData] = useState<any[]>([]);
   const [currentWeather, setCurrentWeather] = useState<any>(null);
   const [forecastDay, setForecastDay] = useState<any>(null);
@@ -525,7 +558,7 @@ const EventDetailScreen = () => {
             </>
           )}
 
-          {eventDetails?.locations && (
+          {locations.length > 0 && (
             <>
               <TextField
                 text={"LOCATIONS"}
@@ -538,14 +571,14 @@ const EventDetailScreen = () => {
               />
 
               <FlatList
-                data={eventDetails.locations}
+                data={locations}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
                   <View style={{ marginBottom: 10, paddingHorizontal: 10 }}>
                     <View style={{ flexDirection: "row" }}>
                       <TextField
                         fontSize={16}
-                        text={`${item?.name}`}
+                        text={`${item?.name || item?.art || ""}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaBold}
                         marginBottom={4}
@@ -655,6 +688,157 @@ const EventDetailScreen = () => {
                     </View>
                   </View>
                 )}
+              />
+            </>
+          )}
+
+          {toilets.length > 0 && (
+            <>
+              <TextField
+                text={"TOILETTEN"}
+                color={COLORS.green}
+                fontSize={16}
+                fontFamily={Fonts.heading}
+                marginTop={20}
+                marginBottom={14}
+                letterSpacing={1.5}
+              />
+
+              <FlatList
+                data={toilets}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => {
+                  const fileUrl =
+                    typeof item?.file === "string"
+                      ? item.file
+                      : item?.file?.url || item?.flyer?.url;
+                  const fileType =
+                    typeof item?.file === "object"
+                      ? item?.file?.type || item?.flyer?.type
+                      : undefined;
+
+                  return (
+                    <View style={{ marginBottom: 10, paddingHorizontal: 10 }}>
+                      <View style={{ flexDirection: "row" }}>
+                        <TextField
+                          fontSize={16}
+                          text={`${item?.art || item?.name || ""}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaBold}
+                          marginBottom={4}
+                        />
+                      </View>
+
+                      <View style={{ paddingLeft: 24 }}>
+                        {item.address ? (
+                          <TextField
+                            fontSize={16}
+                            text={`${item.address}`}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaRegular}
+                            width={"80%"}
+                          />
+                        ) : null}
+                        {item.hin ? (
+                          <TextField
+                            fontSize={16}
+                            text={`Hinweis: ${item.hin}`}
+                            color={COLORS.green}
+                            fontFamily={Fonts.comfortaaRegular}
+                            width={"80%"}
+                          />
+                        ) : null}
+                      </View>
+                      {/* ICONS */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          marginLeft: 10,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingVertical: 10,
+                        }}
+                      >
+                        {item.link ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              handleLocationClick(item.link, item.address);
+                            }}
+                          >
+                            <Image
+                              source={IMAGES.location_icon}
+                              style={{
+                                width: 32,
+                                height: 32,
+                                marginRight: fileUrl ? 20 : 0,
+                              }}
+                              tintColor={COLORS.green}
+                              resizeMode="contain"
+                            />
+                          </TouchableOpacity>
+                        ) : null}
+
+                        {fileUrl ? (
+                          <TouchableOpacity
+                            onPress={async () => {
+                              if (!fileUrl) {
+                                return;
+                              }
+
+                              // Detect file type using comprehensive detection
+                              const detectedType = await detectFileType(
+                                fileUrl,
+                                fileType
+                              );
+
+                              // Determine if it's PDF or image
+                              const isPDF =
+                                detectedType === FileType.PDF ||
+                                (detectedType === FileType.UNKNOWN &&
+                                  fileType === "pdf");
+
+                              const isImage =
+                                (detectedType === FileType.IMAGE ||
+                                  (detectedType === FileType.UNKNOWN &&
+                                    fileType !== "pdf")) &&
+                                !isPDF;
+
+                              if (isPDF) {
+                                navigation.navigate(
+                                  ROUTE_NAMES.PDF_VIEWER_SCREEN,
+                                  {
+                                    pdfDocument: fileUrl,
+                                  }
+                                );
+                              } else if (isImage) {
+                                navigation.navigate(
+                                  ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                  {
+                                    imgDocument: fileUrl,
+                                  }
+                                );
+                              } else {
+                                navigation.navigate(
+                                  ROUTE_NAMES.Ground_VIEWER_SCREEN,
+                                  {
+                                    imgDocument: fileUrl,
+                                  }
+                                );
+                              }
+                            }}
+                          >
+                            <Image
+                              source={IMAGES.flyer_icon}
+                              style={{ width: 32, height: 32 }}
+                              tintColor={COLORS.green}
+                              resizeMode="contain"
+                            />
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
+                    </View>
+                  );
+                }}
               />
             </>
           )}
