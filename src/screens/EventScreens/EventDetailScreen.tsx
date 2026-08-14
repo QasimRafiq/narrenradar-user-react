@@ -603,6 +603,15 @@ const EventDetailScreen = () => {
                           width={"80%"}
                         />
                       )}
+                      {item.kuenstler && (
+                        <TextField
+                          fontSize={16}
+                          text={`Künstler: ${item.kuenstler}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaRegular}
+                          width={"80%"}
+                        />
+                      )}
                     </View>
                     {/* ICONS */}
                     <View

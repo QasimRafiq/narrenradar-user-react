@@ -433,10 +433,34 @@ const IsPublishEventDetails = () => {
                         text={`${item.address}`}
                         color={COLORS.green}
                         fontFamily={Fonts.comfortaaRegular}
-                        marginBottom={10}
+                        marginBottom={item.hin || item.kuenstler ? 4 : 10}
                         width={"90%"}
                       />
                     </View>
+                    {item.hin && (
+                      <View style={{ flexDirection: "row", paddingLeft: 24 }}>
+                        <TextField
+                          fontSize={15}
+                          text={`Hinweis: ${item.hin}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaRegular}
+                          marginBottom={item.kuenstler ? 4 : 10}
+                          width={"90%"}
+                        />
+                      </View>
+                    )}
+                    {item.kuenstler && (
+                      <View style={{ flexDirection: "row", paddingLeft: 24 }}>
+                        <TextField
+                          fontSize={15}
+                          text={`Künstler: ${item.kuenstler}`}
+                          color={COLORS.green}
+                          fontFamily={Fonts.comfortaaRegular}
+                          marginBottom={10}
+                          width={"90%"}
+                        />
+                      </View>
+                    )}
                     {/* ICONS */}
                     <View
                       style={{
