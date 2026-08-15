@@ -2,12 +2,12 @@
 import React from "react";
 import {
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import FastImage from "react-native-fast-image";
 import Bullet from "../../../shared/components/customText/Bullet";
 import { COLORS } from "../../../shared/constants/theme";
 import { Fonts } from "../../../assets/fonts/fonts";
@@ -47,10 +47,14 @@ const ClubUserList: React.FC<ClubUserListProps> = ({ data, regionDetail }) => {
           {`${item?.clubName}`}
         </Text>
         {item?.clubImageUrl ? (
-          <Image
-            source={{ uri: item?.clubImageUrl }}
+          <FastImage
+            source={{
+              uri: item?.clubImageUrl,
+              priority: FastImage.priority.normal,
+              cache: FastImage.cacheControl.immutable,
+            }}
             style={styles.clubLogo}
-            resizeMode="contain"
+            resizeMode={FastImage.resizeMode.contain}
           />
         ) : null}
       </View>

@@ -30,9 +30,9 @@ const ClubSelected = () => {
           width: '100%',
         }}
         source={{
-          uri: clubData.clubCoverUrl,
-          headers: { Authorization: 'someAuthToken' },
+          uri: clubData?.clubCoverUrl,
           priority: FastImage.priority.normal,
+          cache: FastImage.cacheControl.immutable,
         }}
         resizeMode={FastImage.resizeMode.cover}
       />

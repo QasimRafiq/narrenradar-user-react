@@ -33,6 +33,8 @@ import {
 import de from "../../shared/constants/de.json";
 import Bullet from "../../shared/components/customText/Bullet";
 import { detectFileType, FileType } from "../../shared/utils/fileTypeDetection";
+import { getStoredEvents } from "../../shared/utils/offlineStorage";
+import FastImage from "react-native-fast-image";
 
 const EventDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -41,21 +43,43 @@ const EventDetailScreen = () => {
   const [eventDetails, setEventDetails] = useState<any>(initialEventDetails || {});
 
   useEffect(() => {
+    let isMounted = true;
     const eventId = initialEventDetails?.id;
     if (!eventId) {
       if (initialEventDetails) setEventDetails(initialEventDetails);
       return;
     }
 
-    const eventRef = database().ref(`/events/${eventId}`);
-    const onValueChange = eventRef.on("value", (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setEventDetails({ id: eventId, ...data });
-      }
-    });
+    // 1. Check local offline cache if needed
+    if (!initialEventDetails || !initialEventDetails.name) {
+      getStoredEvents().then(cached => {
+        if (isMounted && cached) {
+          const found = cached.find((e: any) => e.id === eventId);
+          if (found) setEventDetails(found);
+        }
+      });
+    }
 
-    return () => eventRef.off("value", onValueChange);
+    // 2. Real-time Firebase listener
+    const eventRef = database().ref(`/events/${eventId}`);
+    const onValueChange = eventRef.on(
+      "value",
+      (snapshot) => {
+        if (!isMounted) return;
+        const data = snapshot.val();
+        if (data) {
+          setEventDetails({ id: eventId, ...data });
+        }
+      },
+      (error) => {
+        console.log("Firebase event detail error (offline or unreachable):", error);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      eventRef.off("value", onValueChange);
+    };
   }, [initialEventDetails?.id]);
 
   const locations = Array.isArray(eventDetails?.locations)
@@ -384,13 +408,17 @@ const EventDetailScreen = () => {
                 height: imageSize.height,
               }}
             >
-              <Image
-                source={{ uri: eventDetails?.eventImage?.url }}
+              <FastImage
+                source={{
+                  uri: eventDetails?.eventImage?.url,
+                  priority: FastImage.priority.normal,
+                  cache: FastImage.cacheControl.immutable,
+                }}
                 style={{
                   width: imageSize.width,
                   height: imageSize.height,
                 }}
-                resizeMode="contain"
+                resizeMode={FastImage.resizeMode.contain}
               />
             </TouchableOpacity>
           )}

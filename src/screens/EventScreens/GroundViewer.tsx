@@ -11,6 +11,7 @@ import {
   LayoutChangeEvent,
 } from "react-native";
 import { COLORS } from "../../shared/constants/theme"; 
+import FastImage from "react-native-fast-image"; 
 import {
   PinchGestureHandler,
   TapGestureHandler,
@@ -448,12 +449,19 @@ const GroundViewer = () => {
                           ],
                         }}
                       >
-                        <Image
-                          source={{ uri: imgDocument }}
-                          resizeMode="contain"
+                        <FastImage
+                          source={{
+                            uri: imgDocument,
+                            priority: FastImage.priority.high,
+                            cache: FastImage.cacheControl.immutable,
+                          }}
+                          resizeMode={FastImage.resizeMode.contain}
                           style={{ width: "100%", height: "100%" }}
-                          onLoad={(e) => {
-                            const { width, height } = e.nativeEvent.source;
+                          onLoad={(e: any) => {
+                            const width = e.nativeEvent?.width || e.nativeEvent?.source?.width;
+                            const height = e.nativeEvent?.height || e.nativeEvent?.source?.height;
+                            if (!width || !height) return;
+
                             const imageAspectRatio = width / height;
                             const containerAspectRatio =
                               containerSize.width / containerSize.height;

@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
   Dimensions,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 import TextField from '../customText/TextField';
 import {COLORS} from '../../constants/theme';
@@ -56,10 +56,14 @@ const CustomRegionGrid: React.FC<CustomRegionGridProps> = ({
         end={{x: 1, y: 1}}
         style={styles.cardGradient}>
         {item?.[imageKey] && (
-          <Image
-            source={{uri: item?.[imageKey]}}
+          <FastImage
+            source={{
+              uri: item?.[imageKey],
+              priority: FastImage.priority.normal,
+              cache: FastImage.cacheControl.immutable,
+            }}
             style={styles.image}
-            resizeMode="contain"
+            resizeMode={FastImage.resizeMode.contain}
           />
         )}
       </LinearGradient>

@@ -156,6 +156,7 @@ import database from '@react-native-firebase/database';
 import {formatTimestamp} from '../../shared/constants/dummyData';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ROUTE_NAMES from '../../routes/routesName';
+import {getStoredEvents, saveStoredEvents} from '../../shared/utils/offlineStorage';
 
 const AwayDateScreen = () => {
   const navigation = useNavigation<any>();
@@ -173,115 +174,166 @@ const AwayDateScreen = () => {
       setLoading(false);
       return;
     }
+    let isMounted = true;
 
-    // Fetch ALL events (like Android), then filter in code
-    const eventRef = database().ref('/events');
+    const processAwayDatesList = (eventsList: any[]) => {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const sixMonthsAgoTimestamp = sixMonthsAgo.getTime();
 
-    const onValueChange = eventRef.on('value', snapshot => {
-      const data = snapshot.val();
+      const events = eventsList
+        .map((item: any) => {
+          const raw = item || {};
 
-      if (data) {
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-        const sixMonthsAgoTimestamp = sixMonthsAgo.getTime();
+          // Parse awayDates for this specific clubId (matching Android parseAwayData)
+          let parsedAwayDates: any = {};
+          const rawAway = raw.awayDates;
 
-        const events = Object.entries(data)
-          .map(([key, value]: any) => {
-            const raw = value || {};
-            
-            // Parse awayDates for this specific clubId (matching Android parseAwayData)
-            // Android: awayDatesSnapshot.child(clubId)
-            let parsedAwayDates: any = {};
-            const rawAway = raw.awayDates;
+          if (rawAway && typeof rawAway === 'object' && !Array.isArray(rawAway)) {
+            // Check if awayDates has a key matching clubId
+            if (Object.prototype.hasOwnProperty.call(rawAway, clubId)) {
+              const clubAwayData = rawAway[clubId];
 
-            if (rawAway && typeof rawAway === 'object' && !Array.isArray(rawAway)) {
-              // Check if awayDates has a key matching clubId
-              if (Object.prototype.hasOwnProperty.call(rawAway, clubId)) {
-                const clubAwayData = rawAway[clubId];
-                
-                // Parse the awayDates structure for this club
-                if (typeof clubAwayData === 'object' && clubAwayData !== null) {
-                  parsedAwayDates = {
-                    departureType: clubAwayData.departureType || 'Not specified',
-                    departureTime: clubAwayData.departureTime || null,
-                    departureBusTimes: clubAwayData.departureBusTimes || null,
-                    returnType: clubAwayData.returnType || 'Not specified',
-                    returnTime: clubAwayData.returnTime || null,
-                    returnBusTimes: clubAwayData.returnBusTimes || null,
-                    postcode: clubAwayData.postcode || '',
-                    description: clubAwayData.description || '',
-                    anmerkungen: clubAwayData.anmerkungen || null,
-                    isPublish: clubAwayData.isPublish || false,
-                    createdAt: clubAwayData.createdAt || 0,
-                  };
-                  
-                  // Handle departureBusTimes - convert object to array if needed
-                  if (parsedAwayDates.departureBusTimes && typeof parsedAwayDates.departureBusTimes === 'object' && !Array.isArray(parsedAwayDates.departureBusTimes)) {
-                    parsedAwayDates.departureBusTimes = Object.values(parsedAwayDates.departureBusTimes).filter((t: any) => t);
-                  }
-                  
-                  // Handle returnBusTimes - convert object to array if needed
-                  if (parsedAwayDates.returnBusTimes && typeof parsedAwayDates.returnBusTimes === 'object' && !Array.isArray(parsedAwayDates.returnBusTimes)) {
-                    parsedAwayDates.returnBusTimes = Object.values(parsedAwayDates.returnBusTimes).filter((t: any) => t);
-                  }
+              // Parse the awayDates structure for this club
+              if (typeof clubAwayData === 'object' && clubAwayData !== null) {
+                parsedAwayDates = {
+                  departureType: clubAwayData.departureType || 'Not specified',
+                  departureTime: clubAwayData.departureTime || null,
+                  departureBusTimes: clubAwayData.departureBusTimes || null,
+                  returnType: clubAwayData.returnType || 'Not specified',
+                  returnTime: clubAwayData.returnTime || null,
+                  returnBusTimes: clubAwayData.returnBusTimes || null,
+                  postcode: clubAwayData.postcode || '',
+                  description: clubAwayData.description || '',
+                  anmerkungen: clubAwayData.anmerkungen || null,
+                  isPublish: clubAwayData.isPublish || false,
+                  createdAt: clubAwayData.createdAt || 0,
+                };
+
+                // Handle departureBusTimes - convert object to array if needed
+                if (
+                  parsedAwayDates.departureBusTimes &&
+                  typeof parsedAwayDates.departureBusTimes === 'object' &&
+                  !Array.isArray(parsedAwayDates.departureBusTimes)
+                ) {
+                  parsedAwayDates.departureBusTimes = Object.values(
+                    parsedAwayDates.departureBusTimes,
+                  ).filter((t: any) => t);
+                }
+
+                // Handle returnBusTimes - convert object to array if needed
+                if (
+                  parsedAwayDates.returnBusTimes &&
+                  typeof parsedAwayDates.returnBusTimes === 'object' &&
+                  !Array.isArray(parsedAwayDates.returnBusTimes)
+                ) {
+                  parsedAwayDates.returnBusTimes = Object.values(
+                    parsedAwayDates.returnBusTimes,
+                  ).filter((t: any) => t);
                 }
               }
             }
+          }
 
-            // Return event with parsed awayDates
-            return {
-              id: key,
-              ...raw,
-              awayDates: parsedAwayDates,
-            };
-          })
-          .filter((item: any) => {
-            // Filter logic matching Android exactly
-            const ad = item.awayDates || {};
+          // Return event with parsed awayDates
+          return {
+            id: raw.id,
+            ...raw,
+            awayDates: parsedAwayDates,
+          };
+        })
+        .filter((item: any) => {
+          // Filter logic matching Android exactly
+          const ad = item.awayDates || {};
 
-            const hasDepartureInfo =
-              (ad.departureType === 'Shuttlebus' && ad.departureTime != null) ||
-              (Array.isArray(ad.departureBusTimes) && ad.departureBusTimes.length > 0);
+          const hasDepartureInfo =
+            (ad.departureType === 'Shuttlebus' && ad.departureTime != null) ||
+            (Array.isArray(ad.departureBusTimes) && ad.departureBusTimes.length > 0);
 
-            const hasReturnInfo =
-              (ad.returnType === 'Shuttlebus' && ad.returnTime != null) ||
-              (Array.isArray(ad.returnBusTimes) && ad.returnBusTimes.length > 0);
+          const hasReturnInfo =
+            (ad.returnType === 'Shuttlebus' && ad.returnTime != null) ||
+            (Array.isArray(ad.returnBusTimes) && ad.returnBusTimes.length > 0);
 
-            const matchesTransport =
-              hasDepartureInfo ||
-              hasReturnInfo ||
-              ad.departureType === 'Eigene Anreise' ||
-              ad.returnType === 'Eigene Anreise' ||
-              ad.departureType === 'Nicht angegeben' ||
-              ad.returnType === 'Nicht angegeben';
+          const matchesTransport =
+            hasDepartureInfo ||
+            hasReturnInfo ||
+            ad.departureType === 'Eigene Anreise' ||
+            ad.returnType === 'Eigene Anreise' ||
+            ad.departureType === 'Nicht angegeben' ||
+            ad.returnType === 'Nicht angegeben';
 
-            const isFutureOrRecent = (item.eventDate || 0) >= sixMonthsAgoTimestamp;
+          const isFutureOrRecent = (item.eventDate || 0) >= sixMonthsAgoTimestamp;
 
-            return matchesTransport && isFutureOrRecent;
-          })
-          .sort((a: any, b: any) => {
-            // Sort ascending by eventDate first
-            const da = a.eventDate ? (typeof a.eventDate === 'string' ? parseInt(a.eventDate, 10) : a.eventDate) : Number.MAX_SAFE_INTEGER;
-            const db = b.eventDate ? (typeof b.eventDate === 'string' ? parseInt(b.eventDate, 10) : b.eventDate) : Number.MAX_SAFE_INTEGER;
-            
-            // If dates are the same, sort alphabetically by name
-            if (da === db) {
-              const nameA = (a.name || '').toLowerCase();
-              const nameB = (b.name || '').toLowerCase();
-              return nameA.localeCompare(nameB);
-            }
-            
-            return da - db;
-          });
+          return matchesTransport && isFutureOrRecent;
+        })
+        .sort((a: any, b: any) => {
+          // Sort ascending by eventDate first
+          const da = a.eventDate
+            ? typeof a.eventDate === 'string'
+              ? parseInt(a.eventDate, 10)
+              : a.eventDate
+            : Number.MAX_SAFE_INTEGER;
+          const db = b.eventDate
+            ? typeof b.eventDate === 'string'
+              ? parseInt(b.eventDate, 10)
+              : b.eventDate
+            : Number.MAX_SAFE_INTEGER;
 
-        setAwayDates(events);
-      } else {
-        setAwayDates([]);
-      }
+          // If dates are the same, sort alphabetically by name
+          if (da === db) {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+          }
+
+          return da - db;
+        });
+
+      setAwayDates(events);
       setLoading(false);
+    };
+
+    // 1. Instant offline hydration from local storage
+    getStoredEvents().then(cached => {
+      if (isMounted && cached && cached.length > 0) {
+        processAwayDatesList(cached);
+      }
     });
 
-    return () => eventRef.off('value', onValueChange);
+    // 2. Fetch ALL events (like Android), then filter in code
+    const eventRef = database().ref('/events');
+
+    const onValueChange = eventRef.on(
+      'value',
+      snapshot => {
+        if (!isMounted) return;
+        const data = snapshot.val();
+
+        if (data) {
+          const formatted = Object.entries(data).map(([key, value]: any) => ({
+            id: key,
+            ...value,
+          }));
+
+          processAwayDatesList(formatted);
+          saveStoredEvents(formatted);
+        } else {
+          setAwayDates([]);
+          setLoading(false);
+        }
+      },
+      error => {
+        console.log('Firebase away dates listener error (offline or unreachable):', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      eventRef.off('value', onValueChange);
+    };
   }, [clubId]);
 
   const now = new Date().getTime();

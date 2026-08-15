@@ -6,11 +6,10 @@ import { Fonts } from "../../../assets/fonts/fonts";
 import { formatTimestamp } from "../../constants/dummyData";
 import { useNavigation } from "@react-navigation/native";
 import ROUTE_NAMES from "../../../routes/routesName";
-import { getCityName } from "../../utils/geocodingUtils";
+import { getCityName, getCachedCityName, extractCityFromEvent } from "../../utils/geocodingUtils";
 
 const RadiusEventBlock = ({ item }) => {
   const navigation = useNavigation();
-  const [cityName, setCityName] = useState("");
 
   // Handle header items (date headers) - date is already formatted as dd.MM.yyyy
   if (item.type === "header") {
@@ -35,8 +34,15 @@ const RadiusEventBlock = ({ item }) => {
     item?.eventLongitude ||
     (Array.isArray(item.locations) && item.locations[0]?.longitude);
 
+  const initialCity =
+    (eventLat && eventLng ? getCachedCityName(eventLat, eventLng) : "") ||
+    extractCityFromEvent(item);
+
+  const [cityName, setCityName] = useState(initialCity);
+
   // Fetch city name when component mounts or when coordinates change (matching Android LaunchedEffect)
   useEffect(() => {
+    let isMounted = true;
     if (
       eventLat &&
       eventLng &&
@@ -45,25 +51,35 @@ const RadiusEventBlock = ({ item }) => {
       !isNaN(eventLat) &&
       !isNaN(eventLng)
     ) {
+      const cached = getCachedCityName(eventLat, eventLng);
+      if (cached) {
+        setCityName(cached);
+      } else {
+        const fallback = extractCityFromEvent(item);
+        if (fallback) setCityName(fallback);
+      }
+
       getCityName(eventLat, eventLng)
         .then((city) => {
-          setCityName(city || "");
+          if (isMounted && city) {
+            setCityName(city);
+          }
         })
-        .catch(() => {
-          // Error fetching city name - handled silently
-          setCityName("");
-        });
+        .catch(() => {});
     } else {
-      // Reset city name if coordinates are invalid
-      setCityName("");
+      const fallback = extractCityFromEvent(item);
+      if (fallback) setCityName(fallback);
     }
-  }, [eventLat, eventLng]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [eventLat, eventLng, item]);
 
   // Format event name with city (matching Android: event.name +" - "+cityName)
-  // Show "..." if city name is empty (matching Android: cityName.ifEmpty { "..." })
   const displayText =
     cityName && cityName.trim()
-      ? `${item?.name} - ${cityName}`
+      ? `${item?.name} - ${cityName.trim()}`
       : item?.name || "";
 
   // Handle event items

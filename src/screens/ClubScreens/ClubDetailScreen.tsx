@@ -3,13 +3,13 @@ import {
   ImageBackground,
   View,
   Text,
-  Image,
   TouchableOpacity,
   FlatList,
   Linking,
   Alert,
   Dimensions,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {IMAGES} from '../../assets/images';
 import {GlobalStyleSheet} from '../../shared/constants/GlobalStyleSheet';
 import CustomHeader from '../../shared/components/customHeader/CusstomHeader';
@@ -27,10 +27,10 @@ const screenWidth = Dimensions.get('window').width;
 const ClubDetailScreen = () => {
   const routes = useRoute<any>();
   const {regionData} = routes?.params;
-  const {clubUsers, loading} = useClubUsers(regionData.id);
+  const {clubUsers, loading} = useClubUsers(regionData?.id);
 
   // --- Function to open sponsor website ---
-  const openSponsorLink = async url => {
+  const openSponsorLink = async (url: string) => {
     if (!url) return Alert.alert('Fehler', 'Keine Website-URL angegeben');
     const validUrl = url.startsWith('http') ? url : `https://${url}`;
     try {
@@ -47,7 +47,7 @@ const ClubDetailScreen = () => {
   };
 
   // --- Render each sponsor in grid ---
-  const renderSponsor = ({item}) => (
+  const renderSponsor = ({item}: {item: any}) => (
     <TouchableOpacity
       style={{
         width: (screenWidth - 80) / 3, // 3 per row
@@ -56,14 +56,18 @@ const ClubDetailScreen = () => {
       }}
       activeOpacity={0.8}
       onPress={() => openSponsorLink(item.websiteUrl)}>
-      <Image
-        source={{uri: item.imageUrl}}
+      <FastImage
+        source={{
+          uri: item.imageUrl,
+          priority: FastImage.priority.normal,
+          cache: FastImage.cacheControl.immutable,
+        }}
         style={{
           width: 100,
           height: 70,
           borderRadius: 12,
-          resizeMode: 'contain',
         }}
+        resizeMode={FastImage.resizeMode.contain}
       />
     </TouchableOpacity>
   );

@@ -19,6 +19,9 @@ import ROUTE_NAMES from '../routes/routesName';
 import { useNavigation } from '@react-navigation/native';
 import de from '../shared/constants/de.json';
 import database from '@react-native-firebase/database';
+import { getStoredSponsors, saveStoredSponsors } from '../shared/utils/offlineStorage';
+
+import FastImage from 'react-native-fast-image';
 
 const Welcome = () => {
   const navigation = useNavigation<any>();
@@ -27,10 +30,22 @@ const Welcome = () => {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    // 1. Instant offline hydration from local storage
+    getStoredSponsors().then(cached => {
+      if (isMounted && cached && cached.length > 0) {
+        setSponsors(cached);
+        setIsLoading(false);
+      }
+    });
+
+    // 2. Real-time Firebase listener
     const sponsorRef = database().ref('footersponsor');
-    sponsorRef
-      .once('value')
-      .then(snapshot => {
+    const onValueChange = sponsorRef.on(
+      'value',
+      snapshot => {
+        if (!isMounted) return;
         try {
           const data = snapshot.val();
           const sponsorsList: any[] = [];
@@ -44,23 +59,29 @@ const Welcome = () => {
           }
 
           setSponsors(sponsorsList);
+          saveStoredSponsors(sponsorsList);
           setIsLoading(false);
           setHasError(false);
         } catch (error) {
-          console.error('Error loading footer sponsors:', error);
-          // Initialize with 3 empty sponsors to maintain structure
-          setSponsors([{}, {}, {}]);
-          setIsLoading(false);
-          setHasError(true);
+          console.error('Error parsing footer sponsors:', error);
+          if (isMounted) {
+            setIsLoading(false);
+            setHasError(true);
+          }
         }
-      })
-      .catch(error => {
-        console.error('Error loading footer sponsors:', error);
-        // Initialize with 3 empty sponsors to maintain structure
-        setSponsors([{}, {}, {}]);
-        setIsLoading(false);
-        setHasError(true);
-      });
+      },
+      error => {
+        console.log('Firebase footer sponsors error (offline or unreachable):', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      sponsorRef.off('value', onValueChange);
+    };
   }, []);
 
   return (
@@ -173,9 +194,13 @@ const Welcome = () => {
                     }}
                     disabled={!sponsor?.websiteUrl}
                     activeOpacity={0.7}>
-                    <Image
-                      source={{ uri: sponsor.imageUrl }}
-                      resizeMode="contain"
+                    <FastImage
+                      source={{
+                        uri: sponsor.imageUrl,
+                        priority: FastImage.priority.normal,
+                        cache: FastImage.cacheControl.immutable,
+                      }}
+                      resizeMode={FastImage.resizeMode.contain}
                       style={styles.homeLogo}
                     />
                   </TouchableOpacity>

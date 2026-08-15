@@ -47,8 +47,8 @@ const EventCard = ({ item, navigation }) => {
             }}
             source={{
               uri: item?.eventImage?.url,
-              headers: { Authorization: "someAuthToken" },
               priority: FastImage.priority.normal,
+              cache: FastImage.cacheControl.immutable,
             }}
             resizeMode={FastImage.resizeMode.contain}
           />

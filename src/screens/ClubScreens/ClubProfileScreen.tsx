@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import React from "react";
+import FastImage from "react-native-fast-image";
 import LinearGradient from "react-native-linear-gradient";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
@@ -198,9 +199,13 @@ const ClubProfileScreen = () => {
                 }
               }}
             >
-              <Image
-                source={{ uri: item.imageUrl }}
-                resizeMode="cover"
+              <FastImage
+                source={{
+                  uri: item.imageUrl,
+                  priority: FastImage.priority.normal,
+                  cache: FastImage.cacheControl.immutable,
+                }}
+                resizeMode={FastImage.resizeMode.cover}
                 style={{
                   height: 250,
                   width: 250,
@@ -349,9 +354,13 @@ const ClubProfileScreen = () => {
             }
           }}
         >
-          <Image
-            resizeMode="cover"
-            source={{ uri: clubData?.clubCoverUrl }}
+          <FastImage
+            resizeMode={FastImage.resizeMode.cover}
+            source={{
+              uri: clubData?.clubCoverUrl,
+              priority: FastImage.priority.normal,
+              cache: FastImage.cacheControl.immutable,
+            }}
             style={styles.image}
           />
         </TouchableOpacity>
@@ -373,9 +382,13 @@ const ClubProfileScreen = () => {
                 }
               }}
             >
-              <Image
-                resizeMode="contain"
-                source={{ uri: clubData?.clubImageUrl }}
+              <FastImage
+                resizeMode={FastImage.resizeMode.contain}
+                source={{
+                  uri: clubData?.clubImageUrl,
+                  priority: FastImage.priority.normal,
+                  cache: FastImage.cacheControl.immutable,
+                }}
                 style={{ height: 120, width: 120 }}
               />
             </TouchableOpacity>
@@ -610,19 +623,20 @@ const ClubProfileScreen = () => {
                                 }
                               }}
                             >
-                              <Image
-                                source={{ uri: member.imageUrl }}
+                              <FastImage
+                                source={{
+                                  uri: member.imageUrl,
+                                  priority: FastImage.priority.normal,
+                                  cache: FastImage.cacheControl.immutable,
+                                }}
                                 style={{
                                   height: 250,
                                   width: 250,
                                   borderRadius: 16,
                                 }}
-                                resizeMode="cover"
-                                onError={(e) =>
-                                  console.log(
-                                    "Vorstand image load error:",
-                                    e.nativeEvent.error
-                                  )
+                                resizeMode={FastImage.resizeMode.cover}
+                                onError={() =>
+                                  console.log("Vorstand image load error")
                                 }
                               />
                             </TouchableOpacity>
@@ -678,19 +692,20 @@ const ClubProfileScreen = () => {
                                 }
                               }}
                             >
-                              <Image
-                                source={{ uri: member.imageUrl }}
+                              <FastImage
+                                source={{
+                                  uri: member.imageUrl,
+                                  priority: FastImage.priority.normal,
+                                  cache: FastImage.cacheControl.immutable,
+                                }}
                                 style={{
                                   height: 250,
                                   width: 250,
                                   borderRadius: 16,
                                 }}
-                                resizeMode="cover"
-                                onError={(e) =>
-                                  console.log(
-                                    "Funktionaere image load error:",
-                                    e.nativeEvent.error
-                                  )
+                                resizeMode={FastImage.resizeMode.cover}
+                                onError={() =>
+                                  console.log("Funktionaere image load error")
                                 }
                               />
                             </TouchableOpacity>

@@ -30,6 +30,7 @@ import {
 import de from "../../shared/constants/de.json";
 import Bullet from "../../shared/components/customText/Bullet";
 import { detectFileType, FileType } from "../../shared/utils/fileTypeDetection";
+import FastImage from "react-native-fast-image";
 
 const IsPublishEventDetails = () => {
   const navigation = useNavigation<any>();
@@ -137,8 +138,12 @@ const IsPublishEventDetails = () => {
             letterSpacing={1.5}
           />
           {eventDetails?.eventImage?.url && (
-            <Image
-              source={{ uri: eventDetails?.eventImage?.url }}
+            <FastImage
+              source={{
+                uri: eventDetails?.eventImage?.url,
+                priority: FastImage.priority.normal,
+                cache: FastImage.cacheControl.immutable,
+              }}
               style={{
                 width: "90%",
                 height: 280,
@@ -146,7 +151,7 @@ const IsPublishEventDetails = () => {
                 marginBottom: 10,
                 borderRadius: 24,
               }}
-              resizeMode="cover"
+              resizeMode={FastImage.resizeMode.cover}
             />
           )}
 

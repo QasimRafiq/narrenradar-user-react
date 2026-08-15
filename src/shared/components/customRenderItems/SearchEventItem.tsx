@@ -6,7 +6,7 @@ import { Fonts } from "../../../assets/fonts/fonts";
 import { formatTimestamp } from "../../constants/dummyData";
 import { useNavigation } from "@react-navigation/native";
 import ROUTE_NAMES from "../../../routes/routesName";
-import { getCityName } from "../../utils/geocodingUtils";
+import { getCityName, getCachedCityName, extractCityFromEvent } from "../../utils/geocodingUtils";
 
 interface SearchEventItemProps {
   item: any;
@@ -14,7 +14,6 @@ interface SearchEventItemProps {
 
 const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
   const navigation = useNavigation<any>();
-  const [cityName, setCityName] = useState<string | null>(null);
 
   // Get latitude and longitude from event
   const eventLat =
@@ -24,16 +23,44 @@ const SearchEventItem: React.FC<SearchEventItemProps> = ({ item }) => {
     item?.eventLongitude ||
     (Array.isArray(item.locations) && item.locations[0]?.longitude);
 
-  // Fetch city name when component mounts or when coordinates change
+  // Synchronous offline city lookup from persistent cache or event metadata
+  const initialCity =
+    (eventLat && eventLng ? getCachedCityName(eventLat, eventLng) : "") ||
+    extractCityFromEvent(item);
+
+  const [cityName, setCityName] = useState<string>(initialCity);
+
+  // Fetch or resolve city name (works online and offline)
   useEffect(() => {
+    let isMounted = true;
+
     if (eventLat && eventLng) {
-      getCityName(eventLat, eventLng).then(setCityName);
+      const cached = getCachedCityName(eventLat, eventLng);
+      if (cached) {
+        setCityName(cached);
+      } else {
+        const fallback = extractCityFromEvent(item);
+        if (fallback) setCityName(fallback);
+      }
+
+      getCityName(eventLat, eventLng).then(city => {
+        if (isMounted && city) {
+          setCityName(city);
+        }
+      });
+    } else {
+      const fallback = extractCityFromEvent(item);
+      if (fallback) setCityName(fallback);
     }
-  }, [eventLat, eventLng]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [eventLat, eventLng, item]);
 
   // Format event name with city
-  const displayText = cityName
-    ? `${item?.name || ""} - ${cityName}`
+  const displayText = cityName && cityName.trim()
+    ? `${item?.name || ""} - ${cityName.trim()}`
     : item?.name || "";
 
   const isPast = (item.eventDate || 0) < Date.now();

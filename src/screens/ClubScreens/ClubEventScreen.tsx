@@ -17,6 +17,7 @@ import { formatTimestamp } from '../../shared/constants/dummyData';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ROUTE_NAMES from '../../routes/routesName';
 import database from '@react-native-firebase/database';
+import { getStoredEvents, saveStoredEvents } from '../../shared/utils/offlineStorage';
 
 // Fixed tab & card background colors
 const TAB_BG = {
@@ -40,137 +41,168 @@ const ClubEventScreen = () => {
 
   useEffect(() => {
     if (!clubId) return;
+    let isMounted = true;
 
-    const eventRef = database().ref('/events');
-    const onValueChange = eventRef.on('value', snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        const formatted: any[] = Object.entries(data).map(([key, value]: any) => ({
-          id: key,
-          ...value,
-        }));
+    // Normalise away data
+    const normaliseAwayData = (clubAwayData: any): any => {
+      if (!clubAwayData || typeof clubAwayData !== 'object') return {};
+      const parsed: any = { ...clubAwayData };
 
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-        const cutoff = sixMonthsAgo.getTime();
+      // Firebase can store bus-time arrays as keyed objects {"0":"08:00","1":"09:00"}
+      // Normalise both departure and return bus times to real arrays.
+      if (parsed.departureBusTimes !== null && parsed.departureBusTimes !== undefined) {
+        if (!Array.isArray(parsed.departureBusTimes)) {
+          parsed.departureBusTimes = Object.values(parsed.departureBusTimes).filter(
+            (t: any) => t && String(t).trim() !== '',
+          );
+        } else {
+          parsed.departureBusTimes = parsed.departureBusTimes.filter(
+            (t: any) => t && String(t).trim() !== '',
+          );
+        }
+      } else {
+        parsed.departureBusTimes = [];
+      }
 
-        // Sort everything latest-first
-        const sorted = [...formatted].sort((a, b) => (b.eventDate || 0) - (a.eventDate || 0));
+      if (parsed.returnBusTimes !== null && parsed.returnBusTimes !== undefined) {
+        if (!Array.isArray(parsed.returnBusTimes)) {
+          parsed.returnBusTimes = Object.values(parsed.returnBusTimes).filter(
+            (t: any) => t && String(t).trim() !== '',
+          );
+        } else {
+          parsed.returnBusTimes = parsed.returnBusTimes.filter(
+            (t: any) => t && String(t).trim() !== '',
+          );
+        }
+      } else {
+        parsed.returnBusTimes = [];
+      }
 
-        // Parse the raw Firebase awayDates object into a flat, normalised structure.
-        const normaliseAwayData = (clubAwayData: any): any => {
-          if (!clubAwayData || typeof clubAwayData !== 'object') return {};
-          const parsed: any = { ...clubAwayData };
+      // Normalise single-time strings
+      parsed.departureTime = parsed.departureTime
+        ? String(parsed.departureTime).trim()
+        : null;
+      parsed.returnTime = parsed.returnTime
+        ? String(parsed.returnTime).trim()
+        : null;
 
-          // Firebase can store bus-time arrays as keyed objects {"0":"08:00","1":"09:00"}
-          // Normalise both departure and return bus times to real arrays.
-          if (parsed.departureBusTimes !== null && parsed.departureBusTimes !== undefined) {
-            if (!Array.isArray(parsed.departureBusTimes)) {
-              parsed.departureBusTimes = Object.values(parsed.departureBusTimes).filter(
-                (t: any) => t && String(t).trim() !== '',
-              );
-            } else {
-              parsed.departureBusTimes = parsed.departureBusTimes.filter(
-                (t: any) => t && String(t).trim() !== '',
-              );
-            }
-          } else {
-            parsed.departureBusTimes = [];
-          }
+      return parsed;
+    };
 
-          if (parsed.returnBusTimes !== null && parsed.returnBusTimes !== undefined) {
-            if (!Array.isArray(parsed.returnBusTimes)) {
-              parsed.returnBusTimes = Object.values(parsed.returnBusTimes).filter(
-                (t: any) => t && String(t).trim() !== '',
-              );
-            } else {
-              parsed.returnBusTimes = parsed.returnBusTimes.filter(
-                (t: any) => t && String(t).trim() !== '',
-              );
-            }
-          } else {
-            parsed.returnBusTimes = [];
-          }
+    const processEventsList = (eventsList: any[]) => {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const cutoff = sixMonthsAgo.getTime();
 
-          // Normalise single-time strings
-          parsed.departureTime = parsed.departureTime
-            ? String(parsed.departureTime).trim()
-            : null;
-          parsed.returnTime = parsed.returnTime
-            ? String(parsed.returnTime).trim()
-            : null;
+      // Sort everything latest-first
+      const sorted = [...eventsList].sort((a, b) => (b.eventDate || 0) - (a.eventDate || 0));
 
-          return parsed;
-        };
+      // --- Heim events: events belonging to this club, excluding any that are already away events ---
+      const heim = sorted.filter(item => {
+        const eventClubId =
+          typeof item.clubId === 'object'
+            ? item.clubId?.id || item.clubId?.value
+            : item.clubId;
 
-        // --- Heim events: events belonging to this club, excluding any that are already away events ---
-        const heim = sorted.filter(item => {
-          const eventClubId =
-            typeof item.clubId === 'object'
-              ? item.clubId?.id || item.clubId?.value
-              : item.clubId;
+        const isBelongingToClub = String(eventClubId)?.trim() === String(clubId)?.trim();
+        if (!isBelongingToClub) return false;
 
-          const isBelongingToClub = String(eventClubId)?.trim() === String(clubId)?.trim();
-          if (!isBelongingToClub) return false;
+        // Check if this event is already registered as an away event with transport info for this club
+        const rawAway = item.awayDates;
+        let hasAwayTransport = false;
+        if (
+          rawAway &&
+          typeof rawAway === 'object' &&
+          !Array.isArray(rawAway) &&
+          Object.prototype.hasOwnProperty.call(rawAway, clubId)
+        ) {
+          const ad = normaliseAwayData(rawAway[clubId]);
+          hasAwayTransport = !!(
+            ad.departureType ||
+            ad.returnType ||
+            (ad.departureBusTimes && ad.departureBusTimes.length > 0) ||
+            (ad.returnBusTimes && ad.returnBusTimes.length > 0)
+          );
+        }
 
-          // Check if this event is already registered as an away event with transport info for this club
-          const rawAway = item.awayDates;
-          let hasAwayTransport = false;
+        return !hasAwayTransport && (item.eventDate || 0) >= cutoff;
+      });
+      setHeimEvents(heim);
+
+      // --- Away events: events where this club appears in awayDates ---
+      const away = sorted
+        .map((item: any) => {
+          const raw = item || {};
+          const rawAway = raw.awayDates;
+          let parsedAwayDates: any = {};
+
           if (
             rawAway &&
             typeof rawAway === 'object' &&
             !Array.isArray(rawAway) &&
             Object.prototype.hasOwnProperty.call(rawAway, clubId)
           ) {
-            const ad = normaliseAwayData(rawAway[clubId]);
-            hasAwayTransport = !!(
-              ad.departureType ||
-              ad.returnType ||
-              (ad.departureBusTimes && ad.departureBusTimes.length > 0) ||
-              (ad.returnBusTimes && ad.returnBusTimes.length > 0)
-            );
+            parsedAwayDates = normaliseAwayData(rawAway[clubId]);
           }
 
-          return !hasAwayTransport && (item.eventDate || 0) >= cutoff;
+          // Store the parsed object under a separate key so the raw awayDates
+          // (needed for heim-event anmerkungen lookup) is not overwritten.
+          return { ...raw, _parsedAway: parsedAwayDates };
+        })
+        .filter((item: any) => {
+          const ad = item._parsedAway || {};
+          // Include if any transport info exists for this club
+          const hasTransport =
+            ad.departureType ||
+            ad.returnType ||
+            (ad.departureBusTimes && ad.departureBusTimes.length > 0) ||
+            (ad.returnBusTimes && ad.returnBusTimes.length > 0);
+          return !!hasTransport && (item.eventDate || 0) >= cutoff;
         });
-        setHeimEvents(heim);
-
-        // --- Away events: events where this club appears in awayDates ---
-        const away = sorted
-          .map((item: any) => {
-            const raw = item || {};
-            const rawAway = raw.awayDates;
-            let parsedAwayDates: any = {};
-
-            if (
-              rawAway &&
-              typeof rawAway === 'object' &&
-              !Array.isArray(rawAway) &&
-              Object.prototype.hasOwnProperty.call(rawAway, clubId)
-            ) {
-              parsedAwayDates = normaliseAwayData(rawAway[clubId]);
-            }
-
-            // Store the parsed object under a separate key so the raw awayDates
-            // (needed for heim-event anmerkungen lookup) is not overwritten.
-            return { ...raw, _parsedAway: parsedAwayDates };
-          })
-          .filter((item: any) => {
-            const ad = item._parsedAway || {};
-            // Include if any transport info exists for this club
-            const hasTransport =
-              ad.departureType ||
-              ad.returnType ||
-              (ad.departureBusTimes && ad.departureBusTimes.length > 0) ||
-              (ad.returnBusTimes && ad.returnBusTimes.length > 0);
-            return !!hasTransport && (item.eventDate || 0) >= cutoff;
-          });
-        setAwayEvents(away);
-      }
+      setAwayEvents(away);
       setLoading(false);
+    };
+
+    // 1. Instant offline hydration from local storage
+    getStoredEvents().then(cached => {
+      if (isMounted && cached && cached.length > 0) {
+        processEventsList(cached);
+      }
     });
 
-    return () => eventRef.off('value', onValueChange);
+    // 2. Real-time Firebase listener
+    const eventRef = database().ref('/events');
+    const onValueChange = eventRef.on(
+      'value',
+      snapshot => {
+        if (!isMounted) return;
+        const data = snapshot.val();
+        if (data) {
+          const formatted: any[] = Object.entries(data).map(([key, value]: any) => ({
+            id: key,
+            ...value,
+          }));
+
+          processEventsList(formatted);
+          saveStoredEvents(formatted);
+        } else {
+          setHeimEvents([]);
+          setAwayEvents([]);
+          setLoading(false);
+        }
+      },
+      error => {
+        console.log('Firebase club events listener error (offline or unreachable):', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      eventRef.off('value', onValueChange);
+    };
   }, [clubId]);
 
   const now = new Date().getTime();

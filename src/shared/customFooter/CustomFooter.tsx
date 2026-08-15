@@ -1,11 +1,11 @@
 import {
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
   Linking,
 } from "react-native";
 import React from "react";
+import FastImage from "react-native-fast-image";
 import { WebView } from "react-native-webview";
 import { COLORS } from "../constants/theme";
 import TextField from "../components/customText/TextField";
@@ -76,7 +76,15 @@ const CustomFooter = ({ sponsorImg, eventLink }: CustomFooterProps) => {
               )}
             />
           ) : sponsorImg ? (
-            <Image source={{ uri: sponsorImg }} style={styles.homeLogo} />
+            <FastImage
+              source={{
+                uri: sponsorImg,
+                priority: FastImage.priority.normal,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              style={styles.homeLogo}
+              resizeMode={FastImage.resizeMode.contain}
+            />
           ) : null}
         </TouchableOpacity>
       </View>
