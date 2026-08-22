@@ -83,7 +83,7 @@ const ClubProfileScreen = () => {
       return;
     }
 
-    const shareUrl = `https://go.narrenradar.de/share/club/${clubData.id}/`;
+    const shareUrl = `https://us-central1-narrenradar1.cloudfunctions.net/share/club/${clubData.id}`;
 
     const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${clubData.foundingHistory || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
