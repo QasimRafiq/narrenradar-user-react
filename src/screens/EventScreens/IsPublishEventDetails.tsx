@@ -4,13 +4,13 @@ import {
   ImageBackground,
   Linking,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
+import { shareContent } from "../../shared/utils/shareUtils";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
@@ -63,14 +63,11 @@ const IsPublishEventDetails = () => {
 
     const shareText = `Schau dir diese Veranstaltung an: ${eventDetails.name}\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
-    try {
-      const result = await Share.share({
-        message: shareText,
-        title: eventDetails.name,
-      });
-    } catch (error) {
-      console.log("Error sharing event:", error);
-    }
+    await shareContent({
+      message: shareText,
+      title: eventDetails.name,
+      imageUrl: eventDetails.eventImage?.url,
+    });
   };
 
   return (

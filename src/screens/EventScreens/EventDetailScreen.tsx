@@ -5,7 +5,6 @@ import {
   ImageBackground,
   Linking,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import database from "@react-native-firebase/database";
+import { shareContent } from "../../shared/utils/shareUtils";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
@@ -229,14 +229,11 @@ const EventDetailScreen = () => {
 
     const shareText = `Schau dir diese Veranstaltung an: ${eventDetails.name}\n\n${eventDetails.description || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
-    try {
-      const result = await Share.share({
-        message: shareText,
-        title: eventDetails.name,
-      });
-    } catch (error) {
-      // Error sharing event - handled silently
-    }
+    await shareContent({
+      message: shareText,
+      title: eventDetails.name,
+      imageUrl: eventDetails.eventImage?.url,
+    });
   };
 
   const handleLocationClick = async (locationLink: string | null, locationAddress?: string) => {

@@ -6,13 +6,13 @@ import {
   ImageBackground,
   Linking,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import React from "react";
+import { shareContent } from "../../shared/utils/shareUtils";
 import FastImage from "react-native-fast-image";
 import LinearGradient from "react-native-linear-gradient";
 import { IMAGES } from "../../assets/images";
@@ -87,14 +87,11 @@ const ClubProfileScreen = () => {
 
     const shareText = `Schau dir dieses Profil an: ${clubData.clubName}\n\n${clubData.foundingHistory || ""}\n\n${shareUrl}\n\n📱 App herunterladen:\nAndroid:\nhttps://play.google.com/store/apps/details?id=com.holderied.narrenradar\n\niOS:\nhttps://apps.apple.com/us/app/narrenradar/id6755254172`;
 
-    try {
-      const result = await Share.share({
-        message: shareText,
-        title: clubData.clubName,
-      });
-    } catch (error) {
-      console.log("Error sharing club:", error);
-    }
+    await shareContent({
+      message: shareText,
+      title: clubData.clubName,
+      imageUrl: clubData.clubCoverUrl || clubData.clubImageUrl,
+    });
   };
   const InfoItemRow = ({ label, value }) => {
     const isArray = Array.isArray(value);
