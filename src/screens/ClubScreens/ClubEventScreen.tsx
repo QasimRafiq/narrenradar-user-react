@@ -94,8 +94,15 @@ const ClubEventScreen = () => {
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       const cutoff = sixMonthsAgo.getTime();
 
-      // Sort everything latest-first
-      const sorted = [...eventsList].sort((a, b) => (b.eventDate || 0) - (a.eventDate || 0));
+      // Show the next upcoming event first (soonest-to-latest), followed by
+      // past events (most-recently-passed first) — a plain reverse of a
+      // latest-first sort would put long-past events at the very top.
+      const nowForSort = Date.now();
+      const notPast = eventsList.filter(item => (item.eventDate || 0) >= nowForSort);
+      const past = eventsList.filter(item => (item.eventDate || 0) < nowForSort);
+      notPast.sort((a, b) => (a.eventDate || 0) - (b.eventDate || 0));
+      past.sort((a, b) => (b.eventDate || 0) - (a.eventDate || 0));
+      const sorted = [...notPast, ...past];
 
       // --- Heim events: events belonging to this club, excluding any that are already away events ---
       const heim = sorted.filter(item => {
@@ -433,9 +440,13 @@ const ClubEventScreen = () => {
     for (const item of awayEvents) {
       map.set(item.id, { item, isAway: true });
     }
-    return Array.from(map.values()).sort(
-      (a, b) => (b.item.eventDate || 0) - (a.item.eventDate || 0),
-    );
+    const merged = Array.from(map.values());
+    const nowForSort = Date.now();
+    const notPast = merged.filter(entry => (entry.item.eventDate || 0) >= nowForSort);
+    const past = merged.filter(entry => (entry.item.eventDate || 0) < nowForSort);
+    notPast.sort((a, b) => (a.item.eventDate || 0) - (b.item.eventDate || 0));
+    past.sort((a, b) => (b.item.eventDate || 0) - (a.item.eventDate || 0));
+    return [...notPast, ...past];
   })();
 
   return (
