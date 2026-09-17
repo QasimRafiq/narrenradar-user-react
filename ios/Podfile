@@ -12,7 +12,7 @@
  node_require('react-native/scripts/react_native_pods.rb')
  node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '13.4'
+platform :ios, '15.0'
 prepare_react_native_project!
 
 
@@ -84,5 +84,17 @@ target 'Narrenradar' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+
+    # Newer Xcode versions drop support for deployment targets below 15.0;
+    # several pods still hardcode older targets in their own podspecs, so
+    # force every pod target up to the project's minimum here.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if deployment_target && deployment_target.to_f < 15.0
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        end
+      end
+    end
   end
 end
