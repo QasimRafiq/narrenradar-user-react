@@ -508,11 +508,14 @@ const ClubEventScreen = () => {
             <TextField
               textAlign="center"
               text="HEIMEVENTS"
-              fontSize={12}
+              fontSize={11}
               fontFamily={Fonts.heading}
               color={COLORS.green}
               fontStyle="italic"
               fontWeight="bold"
+              numofLine={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
             />
           </TouchableOpacity>
 
@@ -527,11 +530,14 @@ const ClubEventScreen = () => {
             <TextField
               textAlign="center"
               text="AUSWÄRTSEVENTS"
-              fontSize={12}
+              fontSize={11}
               fontFamily={Fonts.heading}
               color={COLORS.green}
               fontStyle="italic"
               fontWeight="bold"
+              numofLine={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
             />
           </TouchableOpacity>
         </View>

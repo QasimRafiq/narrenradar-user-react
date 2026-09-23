@@ -49,6 +49,8 @@ type componentProps = {
   key?: any;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip" | undefined;
   uppercase?: boolean; // <-- Added here
+  adjustsFontSizeToFit?: boolean;
+  minimumFontScale?: number;
 };
 
 const TextField: FC<componentProps> = (props) => {
@@ -90,6 +92,8 @@ const TextField: FC<componentProps> = (props) => {
       ellipsizeMode={props.ellipsizeMode}
       numberOfLines={props.numofLine}
       allowFontScaling={false}
+      adjustsFontSizeToFit={props.adjustsFontSizeToFit}
+      minimumFontScale={props.minimumFontScale}
     >
       {props.leftTextIcon}
       {displayText}
