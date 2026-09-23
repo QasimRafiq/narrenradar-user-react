@@ -42,33 +42,70 @@ export const preloadImageUrls = (urls: (string | null | undefined)[]): void => {
 // DocumentDir (persistent — only cleared by the app itself or an uninstall)
 // and hand PdfViewer.tsx a local file:// URI directly when we have one,
 // bypassing react-native-pdf's network/cache logic entirely for that case.
-const DOCUMENT_CACHE_DIR = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/narrenradar_documents`;
+// Renamed from narrenradar_documents: earlier builds downloaded straight to
+// the final path with no atomic move, so an interrupted download could
+// leave a truncated file cached forever. Using a new directory name makes
+// devices that already installed that build start clean under the fixed
+// download logic below, instead of trusting whatever was left on disk.
+const DOCUMENT_CACHE_DIR = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/narrenradar_documents_v2`;
 
 const documentCachePathFor = (url: string): string =>
   `${DOCUMENT_CACHE_DIR}/${SHA1(url).toString()}.pdf`;
 
+// A build before the temp-file-then-move fix below could leave a
+// truncated file at the final cache path if a download was interrupted.
+// Treat an empty file as not cached so it gets deleted and re-fetched
+// instead of being served forever as if it were complete.
+const isValidCachedFile = async (path: string): Promise<boolean> => {
+  const exists = await ReactNativeBlobUtil.fs.exists(path);
+  if (!exists) return false;
+  const stat = await ReactNativeBlobUtil.fs.stat(path);
+  return !!stat && Number(stat.size) > 0;
+};
+
 export const getCachedDocumentPath = async (url: string): Promise<string | null> => {
   try {
     const path = documentCachePathFor(url);
-    const exists = await ReactNativeBlobUtil.fs.exists(path);
-    return exists ? path : null;
+    if (await isValidCachedFile(path)) return path;
+    await ReactNativeBlobUtil.fs.unlink(path).catch(() => {});
+    return null;
   } catch (error) {
     return null;
   }
 };
 
 export const cacheDocumentUrl = async (url: string): Promise<void> => {
+  const path = documentCachePathFor(url);
+  const tempPath = `${path}.tmp`;
   try {
-    const path = documentCachePathFor(url);
-    const alreadyCached = await ReactNativeBlobUtil.fs.exists(path);
-    if (alreadyCached) return;
+    if (await isValidCachedFile(path)) return;
+    await ReactNativeBlobUtil.fs.unlink(path).catch(() => {});
 
     await ReactNativeBlobUtil.fs.mkdir(DOCUMENT_CACHE_DIR).catch(() => {});
-    await ReactNativeBlobUtil.config({ path }).fetch('GET', url);
+    // Download to a temp file first and only move it into place once
+    // fully downloaded — writing straight to `path` would leave a
+    // truncated file there (and getCachedDocumentPath would trust it as
+    // complete forever) if the download is interrupted, e.g. the network
+    // dropping mid-transfer or the app being backgrounded.
+    await ReactNativeBlobUtil.fs.unlink(tempPath).catch(() => {});
+    const res = await ReactNativeBlobUtil.config({ path: tempPath }).fetch(
+      'GET',
+      url,
+    );
+    const status = res.info().status;
+    if (status < 200 || status >= 300) {
+      throw new Error(`Unexpected status ${status} downloading ${url}`);
+    }
+    const stat = await ReactNativeBlobUtil.fs.stat(tempPath);
+    if (!stat || Number(stat.size) <= 0) {
+      throw new Error(`Downloaded file is empty for ${url}`);
+    }
+    await ReactNativeBlobUtil.fs.mv(tempPath, path);
   } catch (error) {
     // Best-effort — a failure here just means the document will be
     // fetched live the next time it's opened.
     console.log('Error caching document for offline use:', error);
+    await ReactNativeBlobUtil.fs.unlink(tempPath).catch(() => {});
   }
 };
 
