@@ -9,7 +9,9 @@
 {
   [FIRApp configure];
   self.moduleName = @"Narrenradar";
-  [GMSServices provideAPIKey:@"AIzaSyBFpoeg3jxxEmRaOG94i3ENokVKnkZVRX8"]; // add this line using the api key obtained from Google Console
+  // Reuse the key from GoogleService-Info.plist instead of hardcoding a
+  // separate one.
+  [GMSServices provideAPIKey:[FIRApp defaultApp].options.APIKey];
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
