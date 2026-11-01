@@ -363,6 +363,7 @@ const EventDetailScreen = () => {
                 if (eventDetails?.eventImage?.url) {
                   navigation.navigate(ROUTE_NAMES.IMAGE_PREVIEW, {
                     imgDocument: eventDetails.eventImage.url,
+                    fileName: eventDetails?.name,
                   });
                 }
               }}
@@ -486,15 +487,18 @@ const EventDetailScreen = () => {
                   if (isPDF) {
                     navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                       pdfDocument: eventDetails.lineUp.url,
+                      fileName: "Aufstellung",
                     });
                   } else if (isImage) {
                     navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
                       imgDocument: eventDetails.lineUp.url,
+                      fileName: "Aufstellung",
                     });
                   } else {
                     // Fallback: try as PDF first
                     navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                       pdfDocument: eventDetails.lineUp.url,
+                      fileName: "Aufstellung",
                     });
                   }
                 }}
@@ -542,15 +546,18 @@ const EventDetailScreen = () => {
                   if (isPDF) {
                     navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                       pdfDocument: eventDetails.groundPlan.url,
+                      fileName: "Geländeplan",
                     });
                   } else if (isImage) {
                     navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
                       imgDocument: eventDetails.groundPlan.url,
+                      fileName: "Geländeplan",
                     });
                   } else {
                     // Fallback: try as image first (since it's ground plan)
                     navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
                       imgDocument: eventDetails.groundPlan.url,
+                      fileName: "Geländeplan",
                     });
                   }
                 }}
@@ -894,16 +901,19 @@ const EventDetailScreen = () => {
                       if (isPDF) {
                         navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                           pdfDocument: doc.url,
+                          fileName: doc.name,
                         });
                       } else if (isImage) {
                         navigation.navigate(ROUTE_NAMES.Ground_VIEWER_SCREEN, {
                           imgDocument: doc.url,
+                          fileName: doc.name,
                         });
                       } else {
                         // Fallback: try as PDF first, then image
                         // This handles cases where detection fails
                         navigation.navigate(ROUTE_NAMES.PDF_VIEWER_SCREEN, {
                           pdfDocument: doc.url,
+                          fileName: doc.name,
                         });
                       }
                     }}

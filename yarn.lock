@@ -1621,6 +1621,11 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-camera-roll/camera-roll@7.8.4":
+  version "7.8.4"
+  resolved "https://registry.npmjs.org/@react-native-camera-roll/camera-roll/-/camera-roll-7.8.4.tgz"
+  integrity sha512-CraoJLSOpiPnPsuzbJoydKrtCJY6rPAqHn7fzN/4uCOqoah4IlauMcNVSvr4N9qbemIztPrHBnDgLJtYDlgo+A==
+
 "@react-native-community/cli-clean@12.3.6":
   version "12.3.6"
   resolved "https://registry.npmjs.org/@react-native-community/cli-clean/-/cli-clean-12.3.6.tgz"

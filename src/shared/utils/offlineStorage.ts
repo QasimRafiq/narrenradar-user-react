@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import SHA1 from 'crypto-js/sha1';
@@ -221,7 +222,29 @@ export const preloadImageUrls = (
 // leave a truncated file cached forever. Using a new directory name makes
 // devices that already installed that build start clean under the fixed
 // download logic below, instead of trusting whatever was left on disk.
-const DOCUMENT_CACHE_DIR = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/narrenradar_documents_v2`;
+//
+// Lives in Library (private), not Documents: Documents is shown in the Files
+// app (downloads are saved there), and the cache must not appear there.
+const { DocumentDir, LibraryDir } = ReactNativeBlobUtil.fs.dirs;
+const DOCUMENT_CACHE_DIR = `${Platform.OS === 'ios' && LibraryDir ? LibraryDir : DocumentDir}/narrenradar_documents_v2`;
+
+// One-time move of the cache from its old place in Documents, and removal of
+// the unused first cache folder (narrenradar_documents) so neither shows up
+// in the Files app.
+const cacheDirReady: Promise<void> = (async () => {
+  try {
+    const fs = ReactNativeBlobUtil.fs;
+    const oldDir = `${DocumentDir}/narrenradar_documents_v2`;
+    if (oldDir !== DOCUMENT_CACHE_DIR && (await fs.exists(oldDir))) {
+      if (await fs.exists(DOCUMENT_CACHE_DIR)) await fs.unlink(oldDir);
+      else await fs.mv(oldDir, DOCUMENT_CACHE_DIR);
+    }
+    const firstCacheDir = `${DocumentDir}/narrenradar_documents`;
+    if (await fs.exists(firstCacheDir)) await fs.unlink(firstCacheDir);
+  } catch (error) {
+    console.log('Document cache move skipped:', error);
+  }
+})();
 
 const documentCachePathFor = (url: string): string =>
   `${DOCUMENT_CACHE_DIR}/${SHA1(url).toString()}.pdf`;
@@ -238,6 +261,7 @@ const isValidCachedFile = async (path: string): Promise<boolean> => {
 };
 
 export const getCachedDocumentPath = async (url: string): Promise<string | null> => {
+  await cacheDirReady;
   try {
     const path = documentCachePathFor(url);
     if (await isValidCachedFile(path)) return path;
@@ -249,6 +273,7 @@ export const getCachedDocumentPath = async (url: string): Promise<string | null>
 };
 
 export const cacheDocumentUrl = async (url: string): Promise<boolean> => {
+  await cacheDirReady;
   const path = documentCachePathFor(url);
   const tempPath = `${path}.tmp`;
   try {
@@ -322,15 +347,16 @@ const enqueueFile = (file: any, priority: number) => {
   enqueue(typeof file === 'string' ? file : file.url, false, priority);
 };
 
-// Detail files (line-up, ground plan, flyers, documents): save them for the
-// viewer that opens them offline. PDF-viewer files also keep working if they
-// turn out to be images (PdfViewer falls back to showing the saved file).
+// Detail files (line-up, ground plan, flyers, documents): always keep a file
+// copy (PDF viewer + download button use it, also offline), and for files that
+// open in the image viewer also fill the FastImage cache.
 const enqueueDetailFile = (file: any, priority: number) => {
   if (!file) return;
   const url = typeof file === 'string' ? file : file.url;
   const type = typeof file === 'string' ? undefined : file.type;
   if (!cleanUrl(url)) return;
-  enqueue(url, opensAsPdfOffline(url, type), priority);
+  enqueue(url, true, priority);
+  if (!opensAsPdfOffline(url, type)) enqueue(url, false, priority);
 };
 
 // --- Events ---

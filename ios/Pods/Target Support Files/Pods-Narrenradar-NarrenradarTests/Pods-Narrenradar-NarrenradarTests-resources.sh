@@ -128,6 +128,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/leveldb-library/leveldb_Privacy.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/react-native-blob-util/ReactNativeBlobUtilPrivacyInfo.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/react-native-cameraroll/RNCameraRollPrivacyInfo.bundle"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/Google-Mobile-Ads-SDK/GoogleMobileAdsResources.bundle"
@@ -161,6 +162,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/leveldb-library/leveldb_Privacy.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/react-native-blob-util/ReactNativeBlobUtilPrivacyInfo.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/react-native-cameraroll/RNCameraRollPrivacyInfo.bundle"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"

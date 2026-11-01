@@ -7,6 +7,7 @@ import {
   Platform,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
 import FastImage from 'react-native-fast-image';
@@ -17,12 +18,22 @@ import CustomLoader from '../../shared/components/CustomLoader';
 import {COLORS} from '../../shared/constants/theme';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {downloadWithFeedback} from '../../shared/utils/downloadFile';
 import {cacheDocumentUrl, getCachedDocumentPath} from '../../shared/utils/offlineStorage';
 
 const PdfViewer = () => {
   const routes = useRoute<any>();
   const navigation = useNavigation<any>();
-  const {pdfDocument} = routes?.params;
+  const {pdfDocument, fileName} = routes?.params;
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!pdfDocument || downloading) return;
+    setDownloading(true);
+    await downloadWithFeedback(pdfDocument, fileName);
+    setDownloading(false);
+  };
+
   const [source, setSource] = useState<{uri: string} | null>(null);
   // Some legacy documents are tagged as PDFs in the backend but are
   // actually images (bad upload metadata), so the PDF renderer fails to
@@ -68,6 +79,19 @@ const PdfViewer = () => {
       {/* Document area — the close button sits inside it, below the header,
           so it doesn't cover the header's search icon. */}
       <View style={styles.content}>
+        {/* Download Button — left of the close button */}
+        <TouchableOpacity
+          style={styles.downloadButton}
+          onPress={handleDownload}
+          disabled={downloading}
+          activeOpacity={0.7}
+        >
+          {downloading ? (
+            <ActivityIndicator size="small" color={COLORS.white} />
+          ) : (
+            <AntDesign name="download" size={16} color={COLORS.white} />
+          )}
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.closeButton}
           onPress={() => navigation.goBack()}
@@ -137,6 +161,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  downloadButton: {
+    position: 'absolute',
+    top: 12,
+    right: 52,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
   closeButton: {
     position: 'absolute',

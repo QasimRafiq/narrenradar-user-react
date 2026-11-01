@@ -9,6 +9,7 @@ import {
   Animated,
   Platform,
   LayoutChangeEvent,
+  ActivityIndicator,
 } from "react-native";
 import { COLORS } from "../../shared/constants/theme"; 
 import FastImage from "react-native-fast-image"; 
@@ -22,6 +23,7 @@ import {
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { downloadWithFeedback } from "../../shared/utils/downloadFile";
 import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import TextField from "../../shared/components/customText/TextField";
@@ -36,7 +38,16 @@ const DOUBLE_TAP_SCALE = 2.5;
 const GroundViewer = () => {
   const routes = useRoute<any>();
   const navigation = useNavigation<any>();
-  const { imgDocument } = routes?.params;
+  const { imgDocument, fileName } = routes?.params;
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!imgDocument || downloading) return;
+    setDownloading(true);
+    await downloadWithFeedback(imgDocument, fileName);
+    setDownloading(false);
+  };
+
 
   const [baseScale, setBaseScale] = useState(1);
   const [baseTranslateX, setBaseTranslateX] = useState(0);
@@ -386,6 +397,19 @@ const GroundViewer = () => {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container} onLayout={onContainerLayout}>
           {/* Close Button - Always visible */}
+          {/* Download Button — left of the close button */}
+          <TouchableOpacity
+            style={styles.downloadButton}
+            onPress={handleDownload}
+            disabled={downloading}
+            activeOpacity={0.7}
+          >
+            {downloading ? (
+              <ActivityIndicator size="small" color={COLORS.white} />
+            ) : (
+              <AntDesign name="download" size={16} color={COLORS.white} />
+            )}
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => navigation.goBack()}
@@ -629,6 +653,18 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
     backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  downloadButton: {
+    position: "absolute",
+    top: 15,
+    right: 52,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
   },
   closeButton: {
     position: "absolute",
