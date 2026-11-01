@@ -18,6 +18,7 @@ import {
   setTermsAccepted,
   checkAndRequestLocationPermission,
 } from "./src/shared/utils/permissionService";
+import { startOfflineSync } from "./src/shared/utils/offlineSync";
 
 LogBox.ignoreAllLogs();
 
@@ -27,6 +28,8 @@ const App = () => {
 
   useEffect(() => {
     checkTermsAndPermissions();
+    // Save all data, images and PDFs locally so the app works offline.
+    startOfflineSync();
   }, []);
 
   const checkTermsAndPermissions = async () => {
