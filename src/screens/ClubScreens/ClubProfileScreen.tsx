@@ -90,7 +90,6 @@ const ClubProfileScreen = () => {
     await shareContent({
       message: shareText,
       title: clubData.clubName,
-      imageUrl: clubData.clubCoverUrl || clubData.clubImageUrl,
     });
   };
   const InfoItemRow = ({ label, value }) => {

@@ -203,7 +203,6 @@ const EventDetailScreen = () => {
     await shareContent({
       message: shareText,
       title: eventDetails.name,
-      imageUrl: eventDetails.eventImage?.url,
     });
   };
 
