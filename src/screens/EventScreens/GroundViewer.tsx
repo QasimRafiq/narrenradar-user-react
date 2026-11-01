@@ -26,6 +26,7 @@ import { IMAGES } from "../../assets/images";
 import { GlobalStyleSheet } from "../../shared/constants/GlobalStyleSheet";
 import TextField from "../../shared/components/customText/TextField";
 import { Fonts } from "../../assets/fonts/fonts";
+import CustomHeader from "../../shared/components/customHeader/CusstomHeader";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MIN_SCALE = 1;
@@ -380,6 +381,8 @@ const GroundViewer = () => {
       resizeMode="cover"
       style={GlobalStyleSheet.bgImage}
     >
+      {/* Same header as the PDF viewer, so the toolbar is always visible */}
+      <CustomHeader />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container} onLayout={onContainerLayout}>
           {/* Close Button - Always visible */}

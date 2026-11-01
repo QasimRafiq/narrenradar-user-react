@@ -65,50 +65,53 @@ const PdfViewer = () => {
       resizeMode="cover"
       style={GlobalStyleSheet.bgImage}>
       <CustomHeader />
-      {/* Close Button - Always visible */}
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.7}
-      >
-        <AntDesign name="close" size={18} color={COLORS.white} />
-      </TouchableOpacity>
-      {source ? (
-        loadError ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>
-              Dokument konnte nicht geladen werden
-            </Text>
-          </View>
-        ) : renderAsImage ? (
-          <FastImage
-            source={{uri: source.uri}}
-            style={styles.pdf}
-            resizeMode={FastImage.resizeMode.contain}
-            onError={() => setLoadError(true)}
-          />
+      {/* Document area — the close button sits inside it, below the header,
+          so it doesn't cover the header's search icon. */}
+      <View style={styles.content}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <AntDesign name="close" size={18} color={COLORS.white} />
+        </TouchableOpacity>
+        {source ? (
+          loadError ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>
+                Dokument konnte nicht geladen werden
+              </Text>
+            </View>
+          ) : renderAsImage ? (
+            <FastImage
+              source={{uri: source.uri}}
+              style={styles.pdf}
+              resizeMode={FastImage.resizeMode.contain}
+              onError={() => setLoadError(true)}
+            />
+          ) : (
+            <Pdf
+              source={source}
+              onLoadComplete={numberOfPages => {
+                console.log(`PDF loaded with ${numberOfPages} pages`);
+              }}
+              onPageChanged={page => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.error(error);
+                setRenderAsImage(true);
+              }}
+              style={styles.pdf}
+              enablePaging={false}
+              spacing={0}
+              fitPolicy={0}
+            />
+          )
         ) : (
-          <Pdf
-            source={source}
-            onLoadComplete={numberOfPages => {
-              console.log(`PDF loaded with ${numberOfPages} pages`);
-            }}
-            onPageChanged={page => {
-              console.log(`Current page: ${page}`);
-            }}
-            onError={error => {
-              console.error(error);
-              setRenderAsImage(true);
-            }}
-            style={styles.pdf}
-            enablePaging={false}
-            spacing={0}
-            fitPolicy={0}
-          />
-        )
-      ) : (
-        <CustomLoader message="Dokument wird geladen..." />
-      )}
+          <CustomLoader message="Dokument wird geladen..." />
+        )}
+      </View>
     </ImageBackground>
   );
 };
@@ -132,9 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  content: {
+    flex: 1,
+  },
   closeButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 15 : 15,
+    top: 12,
     right: 16,
     width: 24,
     height: 24,

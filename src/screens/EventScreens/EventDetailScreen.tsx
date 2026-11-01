@@ -102,48 +102,19 @@ const EventDetailScreen = () => {
 
   const WEATHER_API_KEY = "edddaf7a3fd541f7a79102916261801"; // your key
 
-  // Calculate image size matching Android's widthIn/heightIn with ContentScale.Fit
+  // Display size matching Android's widthIn/heightIn with ContentScale.Fit.
+  // Android 400dp ≈ 250 logical pixels here; never scale up, only down.
+  const MAX_IMAGE_SIZE = Math.min(250, Dimensions.get("window").width - 40);
+  const fitImageSize = (width: number, height: number) => {
+    if (!width || !height) return { width: 200, height: 200 };
+    const scale = Math.min(1, MAX_IMAGE_SIZE / width, MAX_IMAGE_SIZE / height);
+    return { width: Math.round(width * scale), height: Math.round(height * scale) };
+  };
+
+  // The size comes from FastImage's onLoad (below), which reads the saved
+  // copy — Image.getSize used to download the whole image again first.
   useEffect(() => {
-    if (eventDetails?.eventImage?.url) {
-      Image.getSize(
-        eventDetails.eventImage.url,
-        (width, height) => {
-          const screenWidth = Dimensions.get("window").width;
-          const availableWidth = screenWidth - 40; // Account for 20px padding on each side
-
-          // Android uses 400dp, but React Native's logical pixels are closer to iOS points
-          // On a typical device, 400dp in Android ≈ 200-250 logical pixels
-          // Adjust based on screen density to match Android visual size
-          const MAX_SIZE = Math.min(250, availableWidth);
-
-          // Start with original dimensions
-          let displayWidth = width;
-          let displayHeight = height;
-
-          console.log('Original image size:', width, 'x', height);
-
-          // ContentScale.Fit: Only scale DOWN if image exceeds MAX_SIZE
-          // Never scale up - this matches Android behavior
-          if (displayWidth > MAX_SIZE || displayHeight > MAX_SIZE) {
-            const scale = Math.min(MAX_SIZE / displayWidth, MAX_SIZE / displayHeight);
-            displayWidth = displayWidth * scale;
-            displayHeight = displayHeight * scale;
-          }
-
-          console.log('Display size:', Math.round(displayWidth), 'x', Math.round(displayHeight));
-
-          setImageSize({
-            width: Math.round(displayWidth),
-            height: Math.round(displayHeight),
-          });
-        },
-        (error) => {
-          console.log("Error getting image size:", error);
-          // Fallback to a reasonable default
-          setImageSize({ width: 200, height: 200 });
-        }
-      );
-    }
+    setImageSize(null);
   }, [eventDetails?.eventImage?.url]);
 
   const fetchWeather = async (lat: number, lon: number) => {
@@ -386,7 +357,7 @@ const EventDetailScreen = () => {
             uppercase={true}
             letterSpacing={1.5}
           />
-          {eventDetails?.eventImage?.url && imageSize && (
+          {eventDetails?.eventImage?.url && (
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => {
@@ -401,8 +372,9 @@ const EventDetailScreen = () => {
                 overflow: "hidden",
                 borderRadius: 24,
                 alignSelf: "flex-start",
-                width: imageSize.width,
-                height: imageSize.height,
+                opacity: imageSize ? 1 : 0, // hidden until its real size is known
+                width: imageSize?.width ?? MAX_IMAGE_SIZE,
+                height: imageSize?.height ?? MAX_IMAGE_SIZE,
               }}
             >
               <FastImage
@@ -412,10 +384,14 @@ const EventDetailScreen = () => {
                   cache: FastImage.cacheControl.immutable,
                 }}
                 style={{
-                  width: imageSize.width,
-                  height: imageSize.height,
+                  width: imageSize?.width ?? MAX_IMAGE_SIZE,
+                  height: imageSize?.height ?? MAX_IMAGE_SIZE,
                 }}
                 resizeMode={FastImage.resizeMode.contain}
+                onLoad={(e) =>
+                  setImageSize(fitImageSize(e.nativeEvent.width, e.nativeEvent.height))
+                }
+                onError={() => setImageSize({ width: 200, height: 200 })}
               />
             </TouchableOpacity>
           )}

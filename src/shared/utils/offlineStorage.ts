@@ -3,6 +3,7 @@ import FastImage from 'react-native-fast-image';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import SHA1 from 'crypto-js/sha1';
 import { getCityName } from './geocodingUtils';
+import { detectFileTypeFromUrl, FileType } from './fileTypeDetection';
 
 export const STORAGE_KEYS = {
   EVENTS: '@narrenradar_events',
@@ -54,9 +55,17 @@ const cleanUrl = (u: unknown): string | null =>
 
 const keyOf = (url: string, isPdf: boolean) => `${isPdf ? 'pdf' : 'img'}:${url}`;
 
-const enqueue = (rawUrl: unknown, isPdf: boolean, priority: number) => {
+export const isSvgUrl = (url?: string | null): boolean => {
+  const lower = (url || '').toLowerCase();
+  return lower.endsWith('.svg') || lower.includes('.svg?') || lower.includes('image/svg+xml');
+};
+
+const enqueue = (rawUrl: unknown, isPdfInput: boolean, priority: number) => {
   const url = cleanUrl(rawUrl);
   if (!url) return;
+  // FastImage can't store SVGs, so they are saved as files like PDFs
+  // (CustomFooter shows the saved copy offline).
+  const isPdf = isPdfInput || isSvgUrl(url);
   const key = keyOf(url, isPdf);
   const last = queuedAt.get(key);
   if (last && Date.now() - last < REQUEUE_AFTER_MS) return;
@@ -297,8 +306,15 @@ const eventPriority = (event: any, startOfToday: number) => {
   };
 };
 
-const isClearlyPdf = (file: any) =>
-  file?.type === 'pdf' || /\.pdf(\?|$)/i.test(String(file?.url || ''));
+// Which viewer EventDetailScreen opens offline: the link's extension decides,
+// otherwise the stored type ("pdf" → PDF viewer, anything else → image viewer).
+// Its HEAD request fails offline, so this matches what the user sees.
+const opensAsPdfOffline = (url: string, type?: string) => {
+  const fromUrl = detectFileTypeFromUrl(url);
+  if (fromUrl === FileType.PDF) return true;
+  if (fromUrl === FileType.IMAGE) return false;
+  return (type || '').toLowerCase() === 'pdf';
+};
 
 // List images (event image, sponsor logo): FastImage cache only.
 const enqueueFile = (file: any, priority: number) => {
@@ -306,14 +322,15 @@ const enqueueFile = (file: any, priority: number) => {
   enqueue(typeof file === 'string' ? file : file.url, false, priority);
 };
 
-// Detail files can open in either the PDF viewer or the image viewer
-// (EventDetailScreen guesses the type), so save them for both unless
-// they are clearly PDFs.
+// Detail files (line-up, ground plan, flyers, documents): save them for the
+// viewer that opens them offline. PDF-viewer files also keep working if they
+// turn out to be images (PdfViewer falls back to showing the saved file).
 const enqueueDetailFile = (file: any, priority: number) => {
   if (!file) return;
   const url = typeof file === 'string' ? file : file.url;
-  enqueue(url, true, priority);
-  if (!isClearlyPdf(file)) enqueue(url, false, priority);
+  const type = typeof file === 'string' ? undefined : file.type;
+  if (!cleanUrl(url)) return;
+  enqueue(url, opensAsPdfOffline(url, type), priority);
 };
 
 // --- Events ---
@@ -341,10 +358,13 @@ export const saveStoredEvents = async (events: any[]): Promise<void> => {
         const p = eventPriority(event, startOfToday);
         enqueueFile(event?.eventImage, p.main);
         enqueueFile(event?.sponsorLogo, p.main);
+        // Some sponsor logos are SVGs without ".svg" in the link. Keep a file
+        // copy too, so CustomFooter can show them offline.
+        enqueue(event?.sponsorLogo?.url, true, p.main);
         enqueueDetailFile(event?.lineUp, p.details);
         enqueueDetailFile(event?.groundPlan, p.details);
         if (Array.isArray(event?.documents)) {
-          event.documents.forEach((doc: any) => enqueue(doc?.url, true, p.details));
+          event.documents.forEach((doc: any) => enqueueDetailFile(doc, p.details));
         }
         if (Array.isArray(event?.locations)) {
           event.locations.forEach((loc: any) => enqueueDetailFile(loc?.flyer, p.details));
