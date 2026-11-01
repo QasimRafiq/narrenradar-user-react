@@ -100,6 +100,12 @@ const Welcome = () => {
           title={de.club_new_name}
           onPress={() => navigation.navigate(ROUTE_NAMES.CLUB_HOME)}
         />
+        <RoundedButton
+          title={de.about_narrenradar}
+          onPress={() =>
+            Linking.openURL('https://heyzine.com/flip-book/7599bf6732.html')
+          }
+        />
 
         {/* Text with link */}
         <Text
